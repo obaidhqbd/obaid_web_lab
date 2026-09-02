@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A practical HTML Forms lesson with a complete responsive form example.">
+  <title>HTML Forms — Contact Form Practice</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="page">
+    <header class="lesson-header">
+      <p class="lesson-kicker">CLASS 07 · HTML FUNDAMENTALS</p>
+      <h1>HTML Forms</h1>
+      <p class="intro">
+        Forms are how a webpage listens to people. In this lesson, we will build a practical
+        contact form and learn why each HTML element is there, not just how to make it look good.
+      </p>
+    </header>
+
+    <section class="lesson-section">
+      <div class="section-title">
+        <span>01</span>
+        <div>
+          <h2>What a form actually does</h2>
+          <p>A form groups controls that collect information from a user.</p>
+        </div>
+      </div>
+
+      <p>
+        The <code>&lt;form&gt;</code> element is the container. Inside it, we use controls such as
+        <code>&lt;input&gt;</code>, <code>&lt;select&gt;</code>, <code>&lt;textarea&gt;</code>, and
+        <code>&lt;button&gt;</code>. A good form starts with a clear label for every field.
+      </p>
+
+      <div class="note">
+        <strong>Mentor tip:</strong> Do not choose an input because it looks nice. Choose it because
+        it describes the kind of information you are asking the user to provide.
+      </div>
+    </section>
+
+    <section class="lesson-section">
+      <div class="section-title">
+        <span>02</span>
+        <div>
+          <h2>Common form controls</h2>
+          <p>These are the controls you will use again and again.</p>
+        </div>
+      </div>
+
+      <div class="control-grid">
+        <article class="control-card">
+          <code>text</code>
+          <h3>Short text</h3>
+          <p>Names, cities, usernames and other brief answers.</p>
+        </article>
+        <article class="control-card">
+          <code>email</code>
+          <h3>Email</h3>
+          <p>Use the semantic input type so browsers can provide useful validation and keyboards.</p>
+        </article>
+        <article class="control-card">
+          <code>password</code>
+          <h3>Password</h3>
+          <p>For secret values that should not be displayed as normal text.</p>
+        </article>
+        <article class="control-card">
+          <code>radio</code>
+          <h3>One choice</h3>
+          <p>Use a radio group when the user should select one option from several.</p>
+        </article>
+        <article class="control-card">
+          <code>checkbox</code>
+          <h3>Multiple choices</h3>
+          <p>Use checkboxes when more than one option can be selected.</p>
+        </article>
+        <article class="control-card">
+          <code>select</code>
+          <h3>Dropdown</h3>
+          <p>Useful when there are several known options but you want to keep the form compact.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="lesson-section form-section">
+      <div class="section-title">
+        <span>03</span>
+        <div>
+          <h2>Build a practical contact form</h2>
+          <p>Try changing the HTML and CSS in the editor. Then see your changes in the preview.</p>
+        </div>
+      </div>
+
+      <form class="contact-form" action="#" method="post">
+        <div class="form-grid">
+          <div class="field">
+            <label for="full-name">Full name</label>
+            <input id="full-name" name="fullName" type="text" placeholder="Mohammed Obaidul Hoque" autocomplete="name" required>
+          </div>
+
+          <div class="field">
+            <label for="email">Email address</label>
+            <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" placeholder="Create a password" autocomplete="new-password" minlength="8">
+          </div>
+
+          <div class="field">
+            <label for="birth-date">Preferred date</label>
+            <input id="birth-date" name="date" type="date">
+          </div>
+
+          <div class="field field-full">
+            <label for="topic">What do you want to learn?</label>
+            <select id="topic" name="topic">
+              <option value="">Choose a topic</option>
+              <option>HTML</option>
+              <option>CSS</option>
+              <option>JavaScript</option>
+              <option>Responsive Design</option>
+              <option>Frontend Projects</option>
+            </select>
+          </div>
+        </div>
+
+        <fieldset>
+          <legend>Preferred learning style</legend>
+          <div class="option-row">
+            <label class="option"><input type="radio" name="style" value="practice" checked> Practice first</label>
+            <label class="option"><input type="radio" name="style" value="reading"> Read first</label>
+            <label class="option"><input type="radio" name="style" value="video"> Short demos</label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Topics you want more of</legend>
+          <div class="option-row">
+            <label class="option"><input type="checkbox" name="topics" value="html"> HTML</label>
+            <label class="option"><input type="checkbox" name="topics" value="css"> CSS</label>
+            <label class="option"><input type="checkbox" name="topics" value="js"> JavaScript</label>
+          </div>
+        </fieldset>
+
+        <div class="field field-full">
+          <label for="message">Your question</label>
+          <textarea id="message" name="message" rows="6" placeholder="Write your question here..."></textarea>
+        </div>
+
+        <label class="consent">
+          <input type="checkbox" name="consent" required>
+          I understand that this demo form does not send data to a server.
+        </label>
+
+        <div class="form-actions">
+          <button type="reset" class="button secondary">Clear</button>
+          <button type="submit" class="button primary">Submit form</button>
+        </div>
+
+        <p id="form-message" class="form-message" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+
+    <section class="lesson-section">
+      <div class="section-title">
+        <span>04</span>
+        <div>
+          <h2>Small details that make a form better</h2>
+          <p>Good forms are quiet. They guide the user without getting in the way.</p>
+        </div>
+      </div>
+
+      <ul class="check-list">
+        <li>Connect every <code>&lt;label&gt;</code> to its control with matching <code>for</code> and <code>id</code> values.</li>
+        <li>Use the most specific input type you can, such as <code>email</code> instead of generic <code>text</code>.</li>
+        <li>Give required fields a real <code>required</code> attribute instead of relying only on visual decoration.</li>
+        <li>Keep touch targets comfortable on mobile screens.</li>
+        <li>Use HTML validation first; add JavaScript when the experience genuinely needs it.</li>
+      </ul>
+    </section>
+
+    <section class="lesson-section challenge-section">
+      <div class="section-title">
+        <span>05</span>
+        <div>
+          <h2>Practice challenge</h2>
+          <p>Do not copy this form forever. Change it until you understand it.</p>
+        </div>
+      </div>
+
+      <ol class="challenge-list">
+        <li>Add a phone number field using <code>type="tel"</code>.</li>
+        <li>Add a city field and make it required.</li>
+        <li>Add one more radio option.</li>
+        <li>Change the colors and spacing in CSS without breaking the mobile layout.</li>
+        <li>Create a second version of the form for a student registration page.</li>
+      </ol>
+    </section>
+  </main>
+
+  <script>
+    const form = document.querySelector('.contact-form');
+    const message = document.querySelector('#form-message');
+
+    form?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+      message.textContent = 'Form looks good. In a real project, this data would now be sent to your server.';
+    });
+
+    form?.addEventListener('reset', () => {
+      window.setTimeout(() => {
+        message.textContent = '';
+      }, 0);
+    });
+  </script>
+</body>
+</html>
