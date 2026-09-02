@@ -1,0 +1,13 @@
+{
+  "name": "mentor-obaidul-web-lab",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "dev": "python3 -m http.server 4173 -d dist"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
