@@ -107,12 +107,7 @@ for (const entry of fs.readdirSync(classesDir, { withFileTypes: true })) {
   classesData.push(info);
   fs.cpSync(classDir, path.join(distClassesDir, entry.name), { recursive: true });
   const rootFiles = [
-  'favicon.ico',
-  'favicon-16x16.png',
-  'favicon-32x32.png',
-  'apple-touch-icon.png',
-  'android-chrome-192x192.png',
-  'android-chrome-512x512.png'
+  'favicon.ico'
 ];
 
 for (const file of rootFiles) {
