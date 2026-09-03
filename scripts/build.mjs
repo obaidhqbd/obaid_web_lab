@@ -106,6 +106,22 @@ for (const entry of fs.readdirSync(classesDir, { withFileTypes: true })) {
   const info = readClassMetadata(entry.name, files);
   classesData.push(info);
   fs.cpSync(classDir, path.join(distClassesDir, entry.name), { recursive: true });
+  const rootFiles = [
+  'favicon.ico',
+  'favicon-16x16.png',
+  'favicon-32x32.png',
+  'apple-touch-icon.png',
+  'android-chrome-192x192.png',
+  'android-chrome-512x512.png'
+];
+
+for (const file of rootFiles) {
+  const source = path.join(rootDir, file);
+
+  if (fs.existsSync(source)) {
+    fs.copyFileSync(source, path.join(distDir, file));
+  }
+}
 }
 
 classesData.sort((a, b) => {
