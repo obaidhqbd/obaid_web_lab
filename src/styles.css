@@ -1,4 +1,3 @@
-
 :root {
   color-scheme: dark;
   --bg: #050914;
@@ -37,7 +36,18 @@ body {
     linear-gradient(150deg, #040711 0%, #06101e 50%, #060b17 100%);
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 9999;
+  transform: translateY(-150%);
+  transition: transform 180ms ease;
+}
 
+.skip-link:focus {
+  transform: translateY(0);
+}
 a { color: inherit; text-decoration: none; }
 button, input { font: inherit; }
 button { color: inherit; }
