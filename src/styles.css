@@ -223,7 +223,8 @@ main,.footer,.topbar{position:relative;z-index:1}
 @keyframes hudFloat{0%,100%{transform:translate3d(0,0,0)}50%{transform:translate3d(0,-6px,0)}}
 @keyframes cardSweep{from{transform:translate3d(-120%,0,0)}to{transform:translate3d(160%,0,0)}}
 @keyframes buttonSweep{from{transform:translate3d(-160%,0,0) rotate(18deg)}to{transform:translate3d(620%,0,0) rotate(18deg)}}
-
+.footer-portfolio { color: var(--cyan); text-decoration: none; transition: color .18s ease, transform .18s ease; }
+.footer-portfolio:hover, .footer-portfolio:focus-visible { color: var(--text); transform: translateY(-1px); }
 @media (max-width: 720px){
   body::after{background:radial-gradient(260px 180px at var(--pointer-x,50%) var(--pointer-y,35%),rgba(98,244,255,.045),transparent 72%)}
   .fx::before,.fx::after{width:60vw;height:60vw;opacity:.1;filter:blur(14px)}
