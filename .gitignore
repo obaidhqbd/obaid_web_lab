@@ -1,6 +1,10 @@
-dist/
 node_modules/
 .DS_Store
+Thumbs.db
+*.log
 .env
 .env.*
-*.log
+!.env.example
+dist/data/*.enc.json
+dist/data/classes/*.enc.json
+dist/data/blogs/*.enc.json
