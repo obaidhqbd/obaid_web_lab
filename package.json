@@ -1,14 +1,14 @@
 {
   "name": "obaidul-mentor-lab",
-  "version": "2.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "Student-first HTML and CSS learning lab.",
+  "description": "Static GitHub Pages premium student support lab for HTML and CSS classes.",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "verify": "node scripts/verify-build.mjs",
-    "clean": "node scripts/clean.mjs"
+    "clean": "node scripts/clean.mjs",
+    "verify": "node scripts/verify-build.mjs"
   },
   "engines": {
-    "node": ">=22"
+    "node": ">=20"
   }
 }
