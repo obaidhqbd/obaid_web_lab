@@ -1,6 +1,19 @@
-import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import os from 'node:os';import {execFileSync} from 'node:child_process';
-const dist=path.join(process.cwd(),'dist'),password=process.env.CLASS_ACCESS_PASSWORD;if(!password)throw new Error('CLASS_ACCESS_PASSWORD is required');
-const required=['index.html','styles.css','app.js','sw.js','site.webmanifest','editor.html','data/catalog.json','data/site.json','data/build-info.json','sitemap.xml'];for(const f of required)if(!fs.existsSync(path.join(dist,f)))throw new Error('Missing '+f);
-const cat=JSON.parse(dec(JSON.parse(fs.readFileSync(path.join(dist,'data/catalog.enc.json'),'utf8'))).toString('utf8'));if(!Array.isArray(cat.classes)||!Array.isArray(cat.blogs))throw new Error('Invalid catalog');
-for(const [kind,list] of [['classes',cat.classes],['blogs',cat.blogs]])for(const item of list){const p=path.join(dist,item.resource.slice(2));if(!fs.existsSync(p))throw new Error('Missing '+item.resource);const tmp=path.join(os.tmpdir(),crypto.randomUUID()+'.zip');fs.writeFileSync(tmp,dec(JSON.parse(fs.readFileSync(p,'utf8'))));execFileSync('unzip',['-tq',tmp]);fs.unlinkSync(tmp)}
-const info=JSON.parse(fs.readFileSync(path.join(dist,'data/build-info.json'),'utf8'));if(info.classes!==cat.classes.length||info.blogs!==cat.blogs.length)throw new Error('Build info mismatch');console.log('Build verification passed: '+cat.classes.length+' classes, '+cat.blogs.length+' blogs.');
+import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import crypto from 'node:crypto';import {execFileSync} from 'node:child_process';
+const dist=path.join(process.cwd(),'dist');
+const required=['index.html','styles.css','app.js','sw.js','site.webmanifest','editor.html','data/catalog.json','data/site.json','data/build-info.json','sitemap.xml'];
+for(const file of required){if(!fs.existsSync(path.join(dist,file)))throw new Error('Missing '+file)}
+const catalog=JSON.parse(fs.readFileSync(path.join(dist,'data/catalog.json'),'utf8'));
+if(!Array.isArray(catalog.classes)||!Array.isArray(catalog.blogs))throw new Error('Invalid catalog collections');
+for(const list of [catalog.classes,catalog.blogs]){
+  for(const item of list){
+    const p=path.join(dist,item.resource.replace(/^\.\//,''));
+    if(!fs.existsSync(p))throw new Error('Missing '+item.resource);
+    const tmp=path.join(os.tmpdir(),crypto.randomUUID()+'.zip');
+    fs.copyFileSync(p,tmp);
+    execFileSync('unzip',['-tq',tmp]);
+    fs.unlinkSync(tmp);
+  }
+}
+const info=JSON.parse(fs.readFileSync(path.join(dist,'data/build-info.json'),'utf8'));
+if(info.classes!==catalog.classes.length||info.blogs!==catalog.blogs.length)throw new Error('Build info mismatch');
+console.log('Build verification passed: '+catalog.classes.length+' classes, '+catalog.blogs.length+' blogs.');
