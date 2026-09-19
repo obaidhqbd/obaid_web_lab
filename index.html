@@ -2,287 +2,53 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07111f">
-<meta name="description" content="Obaid Web Lab — an automated student workspace for study, coding, analytics, marketing and projects.">
-<link rel="manifest" href="manifest.webmanifest">
-<title>Obaid Web Lab — Student OS</title>
-<link rel="stylesheet" href="styles.css">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#070b14">
+<meta name="description" content="Obaidul Mentor Lab — student-first HTML and CSS learning workspace.">
+<link rel="manifest" href="./site.webmanifest">
+<link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="./styles.css">
+<title>Obaidul Mentor Lab</title>
 </head>
 <body>
-<div id="app" class="app">
-  <aside class="sidebar" id="sidebar">
-    <div class="brand">
-      <div class="brand-mark">OWL</div>
-      <div><strong>Obaid Web Lab</strong><span>Student OS</span></div>
-    </div>
-    <button class="mobile-close" id="closeSidebar" aria-label="Close navigation">×</button>
-    <nav class="nav">
-      <div class="nav-caption">CORE</div>
-      <button class="nav-item active" data-view="home"><span>⌂</span> Command Center</button>
-      <button class="nav-item" data-view="study"><span>◷</span> Study System</button>
-      <button class="nav-item" data-view="lab"><span>&lt;/&gt;</span> Web Lab</button>
-      <button class="nav-item" data-view="assignments"><span>✓</span> Assignments</button>
-      <button class="nav-item" data-view="analytics"><span>◫</span> Analytics</button>
-      <button class="nav-item" data-view="notes"><span>✎</span> Notes &amp; Knowledge</button>\n      <button class="nav-item" data-view="classes"><span>▣</span> Class Files</button>
-      <div class="nav-caption">PERSONAL BRAND</div>\n      <button class="nav-item" data-view="portfolio"><span>◉</span> My Portfolio</button>\n      <div class="nav-caption">BUILD</div>
-      <button class="nav-item" data-view="projects"><span>◆</span> Projects</button>
-      <button class="nav-item" data-view="marketing"><span>◈</span> Marketing</button>
-      <button class="nav-item" data-view="resources"><span>↗</span> Resources</button>
-      <button class="nav-item" data-view="automation"><span>⚡</span> Automation Center</button>
-    </nav>
-    <div class="sidebar-bottom">
-      <div class="mini-health"><span class="green-dot"></span><div><b id="systemState">System ready</b><small>Local-first · offline capable</small></div></div>
-      <button class="settings-link" id="settingsBtn">⚙ Settings</button>
-    </div>
-  </aside>
-  <div id="sidebarOverlay" class="overlay"></div>
-
-  <main class="main">
-    <header class="topbar">
-      <div class="topbar-left">
-        <button class="icon-btn mobile-menu" id="openSidebar" aria-label="Open navigation">☰</button>
-        <button class="crumb" id="crumb">Command Center</button>
-      </div>
-      <div class="topbar-actions">
-        <button class="capture-btn" id="captureBtn">＋ Quick capture</button>
-        <button class="icon-btn" id="commandBtn" aria-label="Command palette">⌘</button>
-        <button class="icon-btn" id="themeBtn" aria-label="Toggle theme">☾</button>
-        <button class="avatar" id="profileBtn">MO</button>
-      </div>
-    </header>
-
-    <section class="view active" id="view-home">
-      <div class="welcome">
-        <div>
-          <div class="eyebrow"><span class="green-dot"></span> Personal workspace online</div>
-          <h1>Make your day <em>run itself.</em></h1>
-          <p>One place for HSC study, web development, data analytics, digital marketing, projects and the automations connecting them.</p>
-          <div class="welcome-actions">
-            <button class="btn primary" id="autoPlanBtn">⚡ Auto-plan my day</button>
-            <button class="btn ghost" data-view-jump="study">Start focus session</button>
-          </div>
-        </div>
-        <div class="daily-ring">
-          <div class="ring"><div><span id="dayPercent">0%</span><small>day complete</small></div></div>
-        </div>
-      </div>
-
-      <div class="stat-grid">
-        <article class="stat"><span class="stat-icon">✓</span><div><small>Open tasks</small><b id="openTasksStat">0</b></div><em id="taskStatNote">No pending items</em></article>
-        <article class="stat"><span class="stat-icon">◷</span><div><small>Study minutes</small><b id="studyMinutesStat">0</b></div><em>tracked automatically</em></article>
-        <article class="stat"><span class="stat-icon">⚡</span><div><small>Automation runs</small><b id="automationStat">0</b></div><em id="automationStatNote">Ready</em></article>
-        <article class="stat"><span class="stat-icon">&lt;/&gt;</span><div><small>Lab sessions</small><b id="labStat">0</b></div><em>source-first workflow</em></article>
-      </div>
-
-      <div class="two-col">
-        <section class="panel">
-          <div class="panel-head"><div><span class="eyebrow">Right now</span><h2>Today's execution queue</h2></div><button class="text-btn" data-view-jump="assignments">Manage →</button></div>
-          <div id="todayQueue" class="queue"></div>
-        </section>
-        <section class="panel">
-          <div class="panel-head"><div><span class="eyebrow">Upcoming</span><h2>Deadlines</h2></div><button class="icon-btn small" id="addDeadlineBtn">+</button></div>
-          <div id="deadlineList" class="deadline-list"></div>
-        </section>
-      </div>
-
-      <section class="panel automation-strip">
-        <div><span class="eyebrow">Automation feed</span><h2>What the system just did</h2></div>
-        <div id="automationFeed" class="feed"></div>
-      </section>
-
-      <div class="quick-grid">
-        <button class="quick-card" data-view-jump="lab"><span>&lt;/&gt;</span><b>Build a web project</b><small>Open the real file workspace</small></button>
-        <button class="quick-card" data-view-jump="study"><span>◷</span><b>Start a focused session</b><small>Timer logs progress automatically</small></button>
-        <button class="quick-card" data-view-jump="notes"><span>✎</span><b>Capture an idea</b><small>Turn thoughts into searchable notes</small></button>
-        <button class="quick-card" data-view-jump="automation"><span>⚡</span><b>Automate a workflow</b><small>Set rules once, reuse every day</small></button>
-      </div>
-    </section>
-
-    <section class="view" id="view-study">
-      <div class="page-title"><div><span class="eyebrow">STUDENT SYSTEM</span><h1>Study System</h1><p>Give the system your subjects, priorities and deadlines. It handles the repetitive planning.</p></div><button class="btn primary" id="studyAutoPlan">⚡ Generate study plan</button></div>
-      <div class="study-layout">
-        <section class="panel focus-panel">
-          <div class="panel-head"><div><span class="eyebrow">Focus engine</span><h2 id="focusTitle">25-minute focus</h2></div><span class="pill green" id="focusStatus">READY</span></div>
-          <div class="timer" id="timer">25:00</div>
-          <div class="timer-progress"><i id="timerBar"></i></div>
-          <div class="timer-controls"><button class="btn primary" id="timerToggle">Start</button><button class="btn ghost" id="timerReset">Reset</button></div>
-          <div class="focus-select-row"><select id="focusSubject"></select><select id="focusMode"><option value="25">25 min deep work</option><option value="50">50 min deep work</option><option value="15">15 min sprint</option></select></div>
-          <small class="muted">Completed sessions are logged, counted toward your streak, and reflected in analytics.</small>
-        </section>
-        <section class="panel">
-          <div class="panel-head"><div><span class="eyebrow">Subjects</span><h2>Your learning map</h2></div><button class="icon-btn small" id="addSubjectBtn">+</button></div>
-          <div id="subjectList" class="subject-list"></div>
-        </section>
-      </div>
-      <div class="two-col">
-        <section class="panel"><div class="panel-head"><div><span class="eyebrow">Generated</span><h2>Today's study plan</h2></div><button class="text-btn" id="studyAdjust">Adjust inputs</button></div><div id="studyPlan" class="study-plan"></div></section>
-        <section class="panel"><div class="panel-head"><div><span class="eyebrow">Streak</span><h2>Consistency</h2></div></div><div class="streak-card"><div class="streak-number" id="streakNumber">0</div><div><b>day streak</b><small id="streakText">Complete a focus session to start.</small></div></div><div class="mini-bars" id="weeklyBars"></div></section>
-      </div>
-    </section>
-
-    <section class="view" id="view-lab">
-      <div class="page-title"><div><span class="eyebrow">SOURCE-FIRST EDUCATIONAL IDE</span><h1>Web Lab</h1><p>Edit real project files, auto-save drafts and see browser feedback instantly.</p></div><div class="title-actions"><button class="btn ghost" id="importFilesBtn">Import files</button><button class="btn primary" id="downloadProjectBtn">Download project</button><input type="file" id="fileInput" accept=".html,.css,.js" multiple hidden></div></div>
-      <div class="lab-shell">
-        <aside class="file-tree panel">
-          <div class="file-head"><b>PROJECT</b><button class="icon-btn small" id="newFileBtn">+</button></div>
-          <div id="fileTree"></div>
-          <div class="file-foot"><button class="text-btn" id="saveSnapshotBtn">Save snapshot</button><small id="labSaveState">All changes autosaved</small></div>
-        </aside>
-        <section class="editor panel">
-          <div class="editor-head"><div id="activeFileLabel">index.html</div><div><span id="editorSaved">Saved</span><button class="icon-btn small" id="runLabBtn">▶</button></div></div>
-          <textarea id="codeEditor" spellcheck="false" aria-label="Source editor"></textarea>
-          <div class="editor-foot"><span id="cursorInfo">Ln 1 · Col 1</span><span>Ctrl/Cmd + Enter · Run</span></div>
-        </section>
-        <section class="preview panel">
-          <div class="preview-head"><b>LIVE PREVIEW</b><div><button class="icon-btn small" id="refreshPreviewBtn">↻</button><button class="icon-btn small" id="openPreviewBtn">↗</button></div></div>
-          <iframe id="previewFrame" title="Web Lab preview" sandbox="allow-scripts allow-forms"></iframe>
-        </section>
-      </div>
-      <div class="lab-bottom">
-        <div class="tip"><b>Real source files</b><small>HTML, CSS and JS stay separate, so the lab mirrors an actual project.</small></div>
-        <div class="tip"><b>Instant feedback</b><small>Run the same source inside an isolated browser preview.</small></div>
-        <div class="tip"><b>Automatic backup</b><small>Use snapshots and workspace export before major changes.</small></div>
-      </div>
-    </section>
-
-    <section class="view" id="view-assignments">
-      <div class="page-title"><div><span class="eyebrow">EXECUTION</span><h1>Assignments &amp; Tasks</h1><p>Deadlines, next actions and priority are connected to the daily plan.</p></div><button class="btn primary" id="newTaskBtn">＋ Add task</button></div>
-      <div class="filter-row"><button class="filter active" data-task-filter="all">All</button><button class="filter" data-task-filter="today">Today</button><button class="filter" data-task-filter="study">Study</button><button class="filter" data-task-filter="project">Projects</button><button class="filter" data-task-filter="done">Done</button></div>
-      <div class="task-layout">
-        <section class="panel"><div class="panel-head"><div><span class="eyebrow">Queue</span><h2>Tasks</h2></div><button class="text-btn" id="clearDone">Clear completed</button></div><div id="taskList" class="task-list"></div></section>
-        <aside class="panel"><div class="panel-head"><div><span class="eyebrow">Deadline monitor</span><h2>Upcoming</h2></div></div><div id="assignmentDeadlines" class="deadline-list"></div><button class="btn ghost full" id="assignmentDeadlineBtn">＋ Add deadline</button></aside>
-      </div>
-    </section>
-
-    <section class="view" id="view-analytics">
-      <div class="page-title"><div><span class="eyebrow">PERSONAL TELEMETRY</span><h1>Analytics</h1><p>See where your time went and whether your study system is actually moving forward.</p></div><button class="btn ghost" id="exportReportBtn">Export report</button></div>
-      <div class="stat-grid analytics-top"><article class="stat"><span class="stat-icon">◷</span><div><small>Total focused</small><b id="totalFocused">0m</b></div><em>all sessions</em></article><article class="stat"><span class="stat-icon">✓</span><div><small>Completion rate</small><b id="completionRate">0%</b></div><em>current tasks</em></article><article class="stat"><span class="stat-icon">★</span><div><small>Current streak</small><b id="analyticsStreak">0d</b></div><em>study days</em></article><article class="stat"><span class="stat-icon">⚡</span><div><small>Automation runs</small><b id="analyticsAutomation">0</b></div><em>this workspace</em></article></div>
-      <div class="two-col"><section class="panel"><div class="panel-head"><div><span class="eyebrow">7 days</span><h2>Study activity</h2></div></div><div id="activityChart" class="activity-chart"></div></section><section class="panel"><div class="panel-head"><div><span class="eyebrow">Breakdown</span><h2>By subject</h2></div></div><div id="subjectAnalytics"></div></section></div>
-      <section class="panel"><div class="panel-head"><div><span class="eyebrow">Review</span><h2>Weekly reflection</h2></div><button class="btn ghost" id="generateReviewBtn">Generate review</button></div><div id="weeklyReview" class="review-box">Run the review automation to turn this week's data into a concise reflection.</div></section>
-    </section>
-
-    <section class="view" id="view-notes">
-      <div class="page-title"><div><span class="eyebrow">KNOWLEDGE BASE</span><h1>Notes &amp; Knowledge</h1><p>Quick capture first. Organize later. Search everything instantly.</p></div><button class="btn primary" id="newNoteBtn">＋ New note</button></div>
-      <div class="notes-layout">
-        <section class="panel note-editor-panel"><div class="note-toolbar"><input id="noteSearch" placeholder="Search notes…"><select id="noteType"><option>Note</option><option>Idea</option><option>Learning</option><option>Code</option><option>Review</option></select><button class="btn primary" id="saveNoteBtn">Save</button></div><input id="noteTitle" class="note-title" placeholder="Note title"><textarea id="noteBody" class="note-body" placeholder="Write anything…"></textarea></section>
-        <aside class="panel"><div class="panel-head"><div><span class="eyebrow">Library</span><h2>Recent notes</h2></div></div><div id="notesList" class="notes-list"></div></aside>
-      </div>
-    </section>
-
-    <section class="view" id="view-classes">
-      <div class="page-title"><div><span class="eyebrow">CLASS RESOURCE VAULT</span><h1>Class Files</h1><p>Upload your class materials once and keep PDFs, presentations, documents, images and ZIP files organized by subject. Files stay in this browser using IndexedDB.</p></div><div class="title-actions"><button class="btn ghost" id="classCreateFolderBtn">＋ Class folder</button><button class="btn primary" id="classUploadBtn">＋ Upload files</button><input type="file" id="classFileInput" multiple hidden accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.zip,.rar,.7z,.txt,.md,.jpg,.jpeg,.png,.webp,.gif,.svg,.mp4,.webm"></div></div>
-      <section class="panel class-hero">
-        <div><span class="eyebrow">ONE PLACE FOR EVERY CLASS</span><h2>Upload → organize → search → download.</h2><p>Use subject, class title and tags to keep your learning archive useful instead of turning it into a random Downloads folder.</p></div>
-        <div class="class-stats"><div><b id="classFileCount">0</b><small>files</small></div><div><b id="classSubjectCount">0</b><small>subjects</small></div><div><b id="classStorageNote">Local</b><small>storage</small></div></div>
-      </section>
-      <div class="class-toolbar">
-        <input id="classSearch" placeholder="Search files, class titles or tags…">
-        <select id="classSubjectFilter"><option value="all">All subjects</option></select>
-        <select id="classTypeFilter"><option value="all">All types</option><option value="pdf">PDF</option><option value="document">Documents</option><option value="presentation">Presentations</option><option value="spreadsheet">Spreadsheets</option><option value="archive">Archives</option><option value="image">Images</option><option value="video">Videos</option><option value="text">Text</option></select>
-        <button class="icon-btn small" id="classClearFilters">↺</button>
-      </div>
-      <div class="class-layout">
-        <section class="panel"><div class="panel-head"><div><span class="eyebrow">FILES</span><h2>Your class library</h2></div><span class="pill green" id="classUploadStatus">READY</span></div><div id="classFileGrid" class="class-file-grid"></div></section>
-        <aside class="panel class-folder-panel"><div class="panel-head"><div><span class="eyebrow">SUBJECTS</span><h2>Class folders</h2></div></div><div id="classFolderList" class="class-folder-list"></div><div class="class-tip"><b>Best workflow</b><small>Upload by class → tag by topic → use search before downloading again.</small></div></aside>
-      </div>
-      <div class="class-drop" id="classDropZone"><span>＋</span><div><b>Drop class files here</b><small>Multiple files are supported. Your browser stores them locally.</small></div></div>
-    </section>
-
-    <section class="view" id="view-portfolio">
-      <div class="page-title"><div><span class="eyebrow">PERSONAL BRAND</span><h1>My Portfolio</h1><p>Your student workspace and your professional portfolio now live together.</p></div><div class="title-actions"><a class="btn ghost" href="portfolio.html" target="_blank" rel="noopener">Open public portfolio ↗</a><a class="btn primary" href="portfolio.html" download>Save portfolio page</a></div></div>
-      <section class="portfolio-shell">
-        <div class="portfolio-hero-card">
-          <div class="portfolio-avatar">MO</div>
-          <span class="eyebrow">STUDENT · BUILDER · DIGITAL CREATOR</span>
-          <h2>Mohammed Obaidul Hoque</h2>
-          <p>Web development, data analytics and digital marketing — with a focus on building useful, practical digital products.</p>
-          <div class="portfolio-actions"><a class="btn primary" href="portfolio.html" target="_blank" rel="noopener">View polished portfolio ↗</a><button class="btn ghost" id="portfolioCopyBio">Copy intro</button></div>
-        </div>
-        <div class="portfolio-grid">
-          <article class="portfolio-card"><span class="portfolio-num">01</span><b>Web Development</b><small>Real interfaces, browser-first tools and source-first learning experiences.</small></article>
-          <article class="portfolio-card"><span class="portfolio-num">02</span><b>Data Analytics</b><small>Metrics, dashboards, analysis workflows and data-informed decisions.</small></article>
-          <article class="portfolio-card"><span class="portfolio-num">03</span><b>Digital Marketing</b><small>Content systems, SEO thinking, experiments and measurable growth.</small></article>
-        </div>
-      </section>
-      <section class="panel"><div class="panel-head"><div><span class="eyebrow">FEATURED WORK</span><h2>Projects from your workspace</h2></div><button class="text-btn" data-view-jump="projects">Open project manager →</button></div><div id="portfolioProjectPreview" class="portfolio-project-preview"></div></section>
-    </section>
-
-    <section class="view" id="view-projects">
-      <div class="page-title"><div><span class="eyebrow">BUILD PORTFOLIO</span><h1>Projects</h1><p>Turn learning into visible work and keep the next milestone obvious.</p></div><button class="btn primary" id="newProjectBtn">＋ New project</button></div>
-      <div id="projectGrid" class="project-grid"></div>
-    </section>
-
-    <section class="view" id="view-marketing">
-      <div class="page-title"><div><span class="eyebrow">DIGITAL MARKETING</span><h1>Marketing Console</h1><p>Plan content, SEO tasks and performance experiments without leaving the workspace.</p></div><button class="btn primary" id="newCampaignBtn">＋ Campaign</button></div>
-      <div class="two-col"><section class="panel"><div class="panel-head"><div><span class="eyebrow">Content engine</span><h2>Weekly plan</h2></div></div><div id="contentLanes"></div></section><section class="panel"><div class="panel-head"><div><span class="eyebrow">SEO checklist</span><h2>Publish ready</h2></div></div><div class="check-list"><label><input type="checkbox" data-check="seo1"> Clear search intent</label><label><input type="checkbox" data-check="seo2"> Strong title + description</label><label><input type="checkbox" data-check="seo3"> Internal links</label><label><input type="checkbox" data-check="seo4"> Useful original value</label><label><input type="checkbox" data-check="seo5"> Track one measurable action</label></div></section></div>
-    </section>
-
-    <section class="view" id="view-resources">
-      <div class="page-title"><div><span class="eyebrow">REFERENCE LIBRARY</span><h1>Resources</h1><p>Useful starting points for web development, analytics, marketing and study.</p></div></div>
-      <div id="resourceGrid" class="resource-grid"></div>
-    </section>
-
-    <section class="view" id="view-automation">
-      <div class="page-title"><div><span class="eyebrow">AUTOMATION CENTER</span><h1>Let the system do the repetitive work.</h1><p>These automations run inside the browser and persist locally. Optional notifications and webhooks can extend them further.</p></div><button class="btn primary" id="runAllAutomationBtn">⚡ Run all now</button></div>
-      <div class="automation-grid">
-        <article class="automation-card"><div class="auto-icon">01</div><div><b>Daily planner</b><p>Build today's tasks from subjects, priorities and deadlines.</p></div><label class="switch"><input type="checkbox" data-auto="planner"><span></span></label><button class="text-btn" data-auto-run="planner">Run now</button></article>
-        <article class="automation-card"><div class="auto-icon">02</div><div><b>Deadline watch</b><p>Detect overdue / urgent deadlines and surface them on the home screen.</p></div><label class="switch"><input type="checkbox" data-auto="deadlines"><span></span></label><button class="text-btn" data-auto-run="deadlines">Run now</button></article>
-        <article class="automation-card"><div class="auto-icon">03</div><div><b>Study logging</b><p>Convert completed focus sessions into analytics and streak data.</p></div><label class="switch"><input type="checkbox" data-auto="studyLog"><span></span></label><button class="text-btn" data-auto-run="studyLog">Run now</button></article>
-        <article class="automation-card"><div class="auto-icon">04</div><div><b>Smart capture</b><p>Route Quick Capture text into tasks, ideas, notes or study items.</p></div><label class="switch"><input type="checkbox" data-auto="capture"><span></span></label><button class="text-btn" data-auto-run="capture">Run now</button></article>
-        <article class="automation-card"><div class="auto-icon">05</div><div><b>Backup routine</b><p>Export a timestamped workspace backup whenever you request it.</p></div><label class="switch"><input type="checkbox" data-auto="backup"><span></span></label><button class="text-btn" data-auto-run="backup">Run now</button></article>
-        <article class="automation-card"><div class="auto-icon">06</div><div><b>Notifications</b><p>Ask browser permission and remind you while this app is open.</p></div><label class="switch"><input type="checkbox" data-auto="notifications"><span></span></label><button class="text-btn" data-auto-run="notifications">Enable</button></article>
-      </div>
-      <section class="panel webhook-panel"><div class="panel-head"><div><span class="eyebrow">Optional integration</span><h2>Webhook automation</h2></div><span class="pill">NO SECRET STORAGE</span></div><p class="muted">Connect a public webhook endpoint from a service you control. The browser sends event data; keep private API keys on a server, never inside this page.</p><div class="webhook-row"><input id="webhookUrl" placeholder="https://example.com/webhook"><button class="btn ghost" id="testWebhookBtn">Send test event</button></div></section>
-      <section class="panel"><div class="panel-head"><div><span class="eyebrow">History</span><h2>Automation activity</h2></div><button class="text-btn" id="clearAutomationLog">Clear</button></div><div id="automationHistory" class="history"></div></section>
-    </section>
-  </main>
-</div>
-
-<dialog id="captureModal" class="modal">
-  <div class="modal-head"><div><span class="eyebrow">UNIVERSAL INBOX</span><h2>Quick capture</h2></div><button class="icon-btn small" data-close="captureModal">×</button></div>
-  <p class="muted">Type naturally. Prefixes are optional: <b>/task</b>, <b>/note</b>, <b>/idea</b>, <b>/study</b>.</p>
-  <textarea id="captureInput" class="capture-input" placeholder="e.g. /task finish responsive navbar"></textarea>
-  <div class="capture-actions"><button class="btn ghost" data-close="captureModal">Cancel</button><button class="btn primary" id="processCaptureBtn">Process automatically</button></div>
-</dialog>
-
-<dialog id="settingsModal" class="modal">
-  <div class="modal-head"><div><span class="eyebrow">WORKSPACE SETTINGS</span><h2>Settings</h2></div><button class="icon-btn small" data-close="settingsModal">×</button></div>
-  <div class="settings-stack">
-    <div class="setting"><div><b>Display name</b><small>Shown in profile and future exports.</small></div><input id="displayNameSetting"></div>
-    <div class="setting"><div><b>Daily study minutes</b><small>Used by Auto-plan.</small></div><input id="dailyMinutesSetting" type="number" min="15" max="600"></div>
-    <div class="setting"><div><b>Theme</b><small>Choose your workspace appearance.</small></div><select id="themeSetting"><option value="dark">Dark</option><option value="light">Light</option></select></div>
-    <div class="setting"><div><b>Install app</b><small>Add the workspace to your device when supported.</small></div><button class="btn ghost" id="installAppBtn">Install</button></div>
-    <div class="setting"><div><b>Reset workspace</b><small>This clears local data on this browser.</small></div><button class="btn danger" id="resetWorkspaceBtn">Reset</button></div>
-  </div>
-</dialog>
-
-<dialog id="profileModal" class="modal profile-modal">
-  <div class="profile-avatar">MO</div><span class="eyebrow">WORKSPACE OWNER</span><h2 id="profileName">Mohammed Obaidul Hoque</h2><p class="muted">Student · Web development · Data analytics · Digital marketing</p><button class="btn primary" data-close="profileModal">Close</button>
-</dialog>
-
-<dialog id="commandModal" class="modal">
-  <div class="modal-head"><div><span class="eyebrow">FAST NAVIGATION</span><h2>Command palette</h2></div><button class="icon-btn small" data-close="commandModal">×</button></div>
-  <input id="commandSearch" class="command-input" placeholder="Search a module…">
-  <div id="commandResults" class="command-results"></div>
-</dialog>
-
-<dialog id="taskModal" class="modal">
-  <div class="modal-head"><div><span class="eyebrow">NEW ACTION</span><h2>Add task</h2></div><button class="icon-btn small" data-close="taskModal">×</button></div>
-  <form id="taskForm" class="form-grid"><input id="taskTitle" required placeholder="What needs to be done?"><select id="taskCategory"><option value="study">Study</option><option value="project">Project</option><option value="web">Web</option><option value="marketing">Marketing</option><option value="personal">Personal</option></select><select id="taskPriority"><option value="high">High priority</option><option value="medium" selected>Medium</option><option value="low">Low</option></select><input id="taskDue" type="date"><button class="btn primary" type="submit">Create task</button></form>
-</dialog>
-
-<dialog id="deadlineModal" class="modal">
-  <div class="modal-head"><div><span class="eyebrow">DEADLINE</span><h2>Add deadline</h2></div><button class="icon-btn small" data-close="deadlineModal">×</button></div>
-  <form id="deadlineForm" class="form-grid"><input id="deadlineTitle" required placeholder="e.g. Physics assignment"><input id="deadlineDate" type="date" required><select id="deadlineKind"><option>Assignment</option><option>Exam</option><option>Project</option><option>Application</option><option>Other</option></select><button class="btn primary" type="submit">Save deadline</button></form>
-</dialog>
-
-<dialog id="subjectModal" class="modal">
-  <div class="modal-head"><div><span class="eyebrow">LEARNING MAP</span><h2>Add subject</h2></div><button class="icon-btn small" data-close="subjectModal">×</button></div>
-  <form id="subjectForm" class="form-grid"><input id="subjectTitle" required placeholder="e.g. Physics"><input id="subjectTarget" type="number" min="1" max="20" value="3" placeholder="Priority"><button class="btn primary" type="submit">Add subject</button></form>
-</dialog>
-
-<div id="toast" class="toast"></div>
-<script src="app.js"></script><script src="class-vault.js"></script>
+<div class="ambient a"></div><div class="ambient b"></div>
+<header class="topbar">
+  <a class="brand" href="#home" data-route="home"><span class="brand-mark">O</span><span><strong>Obaidul</strong><small>Mentor Lab</small></span></a>
+  <nav class="topnav"><a href="#home" data-route="home">Home</a><a href="#classes" data-route="classes">Classes</a><a href="#blogs" data-route="blogs">Blogs</a><a href="#workspace" data-route="workspace">Workspace</a></nav>
+  <div class="top-actions"><a class="portfolio" id="portfolioHeader" target="_blank" rel="noreferrer">Portfolio ↗</a><button id="theme" class="icon-btn">☼</button><button id="lock" class="ghost-btn" hidden>Lock</button></div>
+</header>
+<main>
+<section id="home" class="view active" data-view="home">
+ <div class="shell hero"><div><div class="eyebrow"><i></i> Student-first HTML + CSS learning lab</div>
+  <h1>Learn it. <span>Build it.</span> Understand it.</h1>
+  <p>A focused place for students to open the real class files, edit the source, see the browser result, complete guided homework and export their finished project.</p>
+  <div class="actions"><button id="openLab" class="primary">Open student lab →</button><a class="secondary" href="#blogs" data-route="blogs">Read mentor notes</a></div>
+  <div class="proof">Source files <b>•</b> Live preview <b>•</b> Homework checks <b>•</b> ZIP export</div></div>
+  <div class="hero-art"><div class="orb"><strong>O</strong><small>MENTOR</small></div><i class="node n1"></i><i class="node n2"></i><i class="node n3"></i></div></div>
+ <div class="shell feature-grid"><article><b>⌘</b><div><h3>Code-first classes</h3><p>Students work with the actual HTML/CSS/asset files.</p></div></article><article><b>✓</b><div><h3>Interactive homework</h3><p>Each class can define small automated checks and mentor hints.</p></div></article><article><b>↗</b><div><h3>Build → preview → export</h3><p>Changes persist locally and can be downloaded as a project ZIP.</p></div></article><article><b>∞</b><div><h3>Automatic publishing</h3><p>Push a folder or ZIP into Classes and GitHub Actions updates the library.</p></div></article></div>
+</section>
+<section id="classes" class="view shell" data-view="classes">
+ <div class="section-head"><div><div class="eyebrow">Student library</div><h2>Classes</h2><p>Every class becomes a searchable, filterable learning card.</p></div><div class="filters"><input id="classSearch" class="search" placeholder="Search classes…"><select id="tagFilter"><option value="all">All tags</option></select><select id="levelFilter"><option value="all">All levels</option></select></div></div>
+ <div id="classGrid" class="grid"></div><div id="classEmpty" class="empty" hidden><div>∅</div><h3>No classes found</h3><p>Try another filter.</p></div>
+</section>
+<section id="blogs" class="view shell" data-view="blogs">
+ <div class="section-head"><div><div class="eyebrow">Mentor desk</div><h2>Blogs</h2><p>Short, practical explanations connected to the class work.</p></div><input id="blogSearch" class="search" placeholder="Search articles…"></div>
+ <div id="blogGrid" class="grid"></div><div id="blogEmpty" class="empty" hidden><div>∅</div><h3>No posts found</h3></div>
+</section>
+<section id="workspace" class="view shell" data-view="workspace">
+ <div class="workspace-head"><div><div class="eyebrow">Student workspace</div><h2 id="wsTitle">No class opened</h2><p id="wsDescription">Choose a class to start.</p></div><div class="ws-actions"><button id="downloadOriginal" class="ghost-btn" disabled>Provided ZIP</button><button id="downloadEdited" class="primary" disabled>Download my ZIP</button></div></div>
+ <div class="workspace-grid"><aside class="panel files"><div class="panel-head"><b>Explorer</b><span id="fileCount">0 files</span></div><div id="fileList"></div></aside>
+  <section class="panel editor"><div class="panel-head"><span id="activeFile">Select a file</span><div><button id="formatBtn" class="tiny">Format</button><span id="saveState">Ready</span></div></div><div id="monaco" class="monaco"></div><textarea id="fallback" hidden spellcheck="false"></textarea></section>
+  <section class="panel preview"><div class="panel-head"><b>Live preview</b><div><button id="refreshPreview" class="tiny">Refresh</button><button id="popout" class="tiny">Pop out</button></div></div><iframe id="preview" sandbox="allow-scripts allow-forms allow-modals"></iframe></section></div>
+ <div class="bottom-grid"><section class="panel"><div class="panel-head"><b>Homework</b><button id="checkAll" class="tiny">Check all</button></div><div id="tasks"></div></section><section class="panel"><div class="panel-head"><b>Mentor hints</b><button id="nextHint" class="tiny">Next hint</button></div><div id="hints" class="hints">Open a class to see hints.</div></section></div>
+</section>
+<section id="article" class="view shell" data-view="article"><button id="backBlogs" class="back">← Back to blogs</button><article class="article panel"><div id="articleContent"></div></article></section>
+<section id="login" class="view shell" data-view="login"><div class="login panel"><div class="login-icon">⌁</div><div class="eyebrow">Private student access</div><h2>Enter the class password</h2><p>Your password is used only in this browser to decrypt the encrypted class library. It is never sent to the server.</p><form id="unlockForm"><input id="password" type="password" minlength="4" required placeholder="Class access password"><button class="primary" type="submit">Unlock →</button><small id="error"></small></form></div></section>
+</main>
+<footer class="footer shell"><div><strong id="footerText">Obaidul Mentor Lab</strong><span> · </span><span id="footerMessage">Learn it. Build it. Understand it.</span></div><div><span>© <span id="year"></span></span><span> · </span><a id="portfolioFooter" target="_blank" rel="noreferrer">Portfolio ↗</a><span> · </span><a href="./editor.html">Editor ↗</a></div></footer>
+<script>
+window.monacoReady=new Promise(function(resolve){var bases=['https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/vs','https://unpkg.com/monaco-editor@0.56.0/min/vs'];var timer=setTimeout(function(){resolve(null)},7000);function go(i){if(i>=bases.length){clearTimeout(timer);resolve(null);return}var s=document.createElement('script');s.src=bases[i]+'/loader.js';s.onload=function(){try{window.require.config({paths:{vs:bases[i]}});window.require(['vs/editor/editor.main'],function(){clearTimeout(timer);resolve(window.monaco)},function(){go(i+1)})}catch(e){go(i+1)}};s.onerror=function(){go(i+1)};document.head.appendChild(s)}go(0)});
+</script>
+<script src="./app.js"></script>
 </body>
 </html>
