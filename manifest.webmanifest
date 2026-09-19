@@ -1,0 +1,10 @@
+{
+  "name":"Obaid Web Lab — Student OS",
+  "short_name":"Obaid Web Lab",
+  "start_url":"./index.html",
+  "display":"standalone",
+  "background_color":"#07111f",
+  "theme_color":"#07111f",
+  "description":"Automated personal student workspace for study, coding, analytics and projects.",
+  "icons":[{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}

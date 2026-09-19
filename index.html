@@ -1,264 +1,250 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b1220">
-  <meta name="description" content="Obaid Web Lab — a personal command center for web development, data analytics, digital marketing, study, projects, and productivity.">
-  <title>Obaid Web Lab — Personal Command Center</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07111f">
+<meta name="description" content="Obaid Web Lab — an automated student workspace for study, coding, analytics, marketing and projects.">
+<link rel="manifest" href="manifest.webmanifest">
+<title>Obaid Web Lab — Student OS</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="app-shell">
-    <aside class="sidebar" id="sidebar" aria-label="Primary navigation">
-      <div class="brand">
-        <div class="brand-mark" aria-hidden="true">OWL</div>
+<div id="app" class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">OWL</div>
+      <div><strong>Obaid Web Lab</strong><span>Student OS</span></div>
+    </div>
+    <button class="mobile-close" id="closeSidebar" aria-label="Close navigation">×</button>
+    <nav class="nav">
+      <div class="nav-caption">CORE</div>
+      <button class="nav-item active" data-view="home"><span>⌂</span> Command Center</button>
+      <button class="nav-item" data-view="study"><span>◷</span> Study System</button>
+      <button class="nav-item" data-view="lab"><span>&lt;/&gt;</span> Web Lab</button>
+      <button class="nav-item" data-view="assignments"><span>✓</span> Assignments</button>
+      <button class="nav-item" data-view="analytics"><span>◫</span> Analytics</button>
+      <button class="nav-item" data-view="notes"><span>✎</span> Notes &amp; Knowledge</button>
+      <div class="nav-caption">BUILD</div>
+      <button class="nav-item" data-view="projects"><span>◆</span> Projects</button>
+      <button class="nav-item" data-view="marketing"><span>◈</span> Marketing</button>
+      <button class="nav-item" data-view="resources"><span>↗</span> Resources</button>
+      <button class="nav-item" data-view="automation"><span>⚡</span> Automation Center</button>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="mini-health"><span class="green-dot"></span><div><b id="systemState">System ready</b><small>Local-first · offline capable</small></div></div>
+      <button class="settings-link" id="settingsBtn">⚙ Settings</button>
+    </div>
+  </aside>
+  <div id="sidebarOverlay" class="overlay"></div>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn mobile-menu" id="openSidebar" aria-label="Open navigation">☰</button>
+        <button class="crumb" id="crumb">Command Center</button>
+      </div>
+      <div class="topbar-actions">
+        <button class="capture-btn" id="captureBtn">＋ Quick capture</button>
+        <button class="icon-btn" id="commandBtn" aria-label="Command palette">⌘</button>
+        <button class="icon-btn" id="themeBtn" aria-label="Toggle theme">☾</button>
+        <button class="avatar" id="profileBtn">MO</button>
+      </div>
+    </header>
+
+    <section class="view active" id="view-home">
+      <div class="welcome">
         <div>
-          <strong>Obaid Web Lab</strong>
-          <span>Personal Command Center</span>
+          <div class="eyebrow"><span class="green-dot"></span> Personal workspace online</div>
+          <h1>Make your day <em>run itself.</em></h1>
+          <p>One place for HSC study, web development, data analytics, digital marketing, projects and the automations connecting them.</p>
+          <div class="welcome-actions">
+            <button class="btn primary" id="autoPlanBtn">⚡ Auto-plan my day</button>
+            <button class="btn ghost" data-view-jump="study">Start focus session</button>
+          </div>
+        </div>
+        <div class="daily-ring">
+          <div class="ring"><div><span id="dayPercent">0%</span><small>day complete</small></div></div>
         </div>
       </div>
 
-      <button class="mobile-close" id="closeSidebar" aria-label="Close menu">×</button>
-
-      <nav class="nav-group">
-        <p class="nav-label">Workspace</p>
-        <button class="nav-item active" data-section="overview"><span>⌂</span> Overview</button>
-        <button class="nav-item" data-section="web-lab"><span>&lt;/&gt;</span> Web Lab</button>
-        <button class="nav-item" data-section="analytics"><span>◫</span> Analytics</button>
-        <button class="nav-item" data-section="marketing"><span>◈</span> Marketing</button>
-        <button class="nav-item" data-section="study"><span>✦</span> Study Hub</button>
-        <button class="nav-item" data-section="projects"><span>◆</span> Projects</button>
-      </nav>
-
-      <nav class="nav-group">
-        <p class="nav-label">Personal</p>
-        <button class="nav-item" data-section="notes"><span>✎</span> Notes</button>
-        <button class="nav-item" data-section="tasks"><span>✓</span> Tasks</button>
-        <button class="nav-item" data-section="resources"><span>↗</span> Resources</button>
-      </nav>
-
-      <div class="sidebar-bottom">
-        <div class="status-card">
-          <span class="status-dot"></span>
-          <div>
-            <strong>Local-first</strong>
-            <small>Your notes, tasks and lab drafts stay in this browser.</small>
-          </div>
-        </div>
-        <button class="settings-btn" id="settingsBtn">⚙ Settings</button>
+      <div class="stat-grid">
+        <article class="stat"><span class="stat-icon">✓</span><div><small>Open tasks</small><b id="openTasksStat">0</b></div><em id="taskStatNote">No pending items</em></article>
+        <article class="stat"><span class="stat-icon">◷</span><div><small>Study minutes</small><b id="studyMinutesStat">0</b></div><em>tracked automatically</em></article>
+        <article class="stat"><span class="stat-icon">⚡</span><div><small>Automation runs</small><b id="automationStat">0</b></div><em id="automationStatNote">Ready</em></article>
+        <article class="stat"><span class="stat-icon">&lt;/&gt;</span><div><small>Lab sessions</small><b id="labStat">0</b></div><em>source-first workflow</em></article>
       </div>
-    </aside>
 
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+      <div class="two-col">
+        <section class="panel">
+          <div class="panel-head"><div><span class="eyebrow">Right now</span><h2>Today's execution queue</h2></div><button class="text-btn" data-view-jump="assignments">Manage →</button></div>
+          <div id="todayQueue" class="queue"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><div><span class="eyebrow">Upcoming</span><h2>Deadlines</h2></div><button class="icon-btn small" id="addDeadlineBtn">+</button></div>
+          <div id="deadlineList" class="deadline-list"></div>
+        </section>
+      </div>
 
-    <main class="main">
-      <header class="topbar">
-        <div class="topbar-left">
-          <button class="icon-btn menu-btn" id="openSidebar" aria-label="Open navigation">☰</button>
-          <button class="breadcrumb" id="breadcrumb">Overview</button>
-        </div>
-        <div class="topbar-actions">
-          <button class="command-btn" id="commandBtn"><span>⌘</span><span class="hide-sm">Command palette</span><kbd>Ctrl K</kbd></button>
-          <button class="icon-btn" id="themeBtn" aria-label="Toggle theme">☾</button>
-          <button class="avatar" id="profileBtn" aria-label="Profile">MO</button>
-        </div>
-      </header>
-
-      <section id="overview" class="page-section active">
-        <div class="hero">
-          <div class="hero-copy">
-            <div class="eyebrow"><span class="live-dot"></span> Workspace online</div>
-            <h1>Build. Learn. Measure. <span>Grow.</span></h1>
-            <p>One focused home for web development, data analytics, digital marketing, study planning, projects and the small tasks that keep everything moving.</p>
-            <div class="hero-actions">
-              <button class="btn btn-primary" data-go="web-lab">Open Web Lab <span>→</span></button>
-              <button class="btn btn-ghost" data-go="study">Open Study Hub</button>
-            </div>
-          </div>
-          <div class="hero-orbit" aria-hidden="true">
-            <div class="orbit orbit-a"></div>
-            <div class="orbit orbit-b"></div>
-            <div class="orbit-core">
-              <span>OWL</span>
-              <small>FOCUS</small>
-            </div>
-          </div>
-        </div>
-
-        <div class="metrics-grid">
-          <article class="metric-card">
-            <span class="metric-icon">◷</span>
-            <div><small>Local time</small><strong id="liveClock">--:--</strong></div>
-            <em id="liveDate">Loading…</em>
-          </article>
-          <article class="metric-card">
-            <span class="metric-icon">✓</span>
-            <div><small>Tasks done</small><strong id="taskMetric">0</strong></div>
-            <em>This browser</em>
-          </article>
-          <article class="metric-card">
-            <span class="metric-icon">&lt;/&gt;</span>
-            <div><small>Lab launches</small><strong id="labMetric">0</strong></div>
-            <em>Saved locally</em>
-          </article>
-          <article class="metric-card">
-            <span class="metric-icon">✦</span>
-            <div><small>Study streak</small><strong id="streakMetric">1 day</strong></div>
-            <em id="streakHint">Keep it moving</em>
-          </article>
-        </div>
-
-        <div class="section-heading">
-          <div><span class="eyebrow">Quick access</span><h2>Everything you use most</h2></div>
-          <button class="text-btn" data-go="resources">View resources →</button>
-        </div>
-
-        <div class="module-grid">
-          <button class="module-card module-blue" data-go="web-lab">
-            <span class="module-icon">&lt;/&gt;</span><strong>Web Lab</strong>
-            <span>Write HTML, CSS and JS and preview the result instantly.</span><b>Open lab →</b>
-          </button>
-          <button class="module-card module-green" data-go="analytics">
-            <span class="module-icon">◫</span><strong>Data Analytics</strong>
-            <span>Keep metrics, formulas, datasets and analysis ideas organized.</span><b>Open analytics →</b>
-          </button>
-          <button class="module-card module-purple" data-go="marketing">
-            <span class="module-icon">◈</span><strong>Digital Marketing</strong>
-            <span>Plan campaigns, content, funnels and performance checkpoints.</span><b>Open marketing →</b>
-          </button>
-          <button class="module-card module-amber" data-go="study">
-            <span class="module-icon">✦</span><strong>Study Hub</strong>
-            <span>Turn subjects into focused sessions, revision blocks and goals.</span><b>Open study →</b>
-          </button>
-        </div>
-
-        <div class="dashboard-grid">
-          <section class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Today</span><h3>Focus board</h3></div><button class="icon-btn small" data-go="tasks">+</button></div>
-            <div class="focus-list" id="focusList"></div>
-          </section>
-          <section class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Snapshot</span><h3>Work streams</h3></div><button class="text-btn" data-go="projects">Projects →</button></div>
-            <div class="stream-row"><div><span class="stream-dot web"></span><strong>Web development</strong></div><span>Build & ship</span><div class="progress"><i style="width:78%"></i></div></div>
-            <div class="stream-row"><div><span class="stream-dot data"></span><strong>Data analytics</strong></div><span>Analyze & report</span><div class="progress"><i style="width:56%"></i></div></div>
-            <div class="stream-row"><div><span class="stream-dot marketing"></span><strong>Digital marketing</strong></div><span>Plan & measure</span><div class="progress"><i style="width:64%"></i></div></div>
-            <div class="stream-row"><div><span class="stream-dot study"></span><strong>Study</strong></div><span>Learn & revise</span><div class="progress"><i style="width:72%"></i></div></div>
-          </section>
-        </div>
+      <section class="panel automation-strip">
+        <div><span class="eyebrow">Automation feed</span><h2>What the system just did</h2></div>
+        <div id="automationFeed" class="feed"></div>
       </section>
 
-      <section id="web-lab" class="page-section">
-        <div class="section-title"><div><span class="eyebrow">Build in the browser</span><h2>Web Lab</h2><p>A practical mini IDE for quick HTML/CSS/JS experiments. Drafts are saved locally.</p></div><button class="btn btn-primary" id="runLabBtn">Run preview ↗</button></div>
-        <div class="lab-layout">
-          <div class="lab-editor panel">
-            <div class="editor-tabs">
-              <button class="editor-tab active" data-editor="html">HTML</button>
-              <button class="editor-tab" data-editor="css">CSS</button>
-              <button class="editor-tab" data-editor="js">JS</button>
-              <span class="editor-spacer"></span><button class="text-btn" id="resetLab">Reset</button>
-            </div>
-            <textarea id="htmlEditor" class="code-editor" spellcheck="false" aria-label="HTML editor"></textarea>
-            <textarea id="cssEditor" class="code-editor hidden" spellcheck="false" aria-label="CSS editor"></textarea>
-            <textarea id="jsEditor" class="code-editor hidden" spellcheck="false" aria-label="JavaScript editor"></textarea>
-            <div class="editor-status"><span><span class="status-dot"></span> Autosaved</span><span>Ctrl / Cmd + Enter to run</span></div>
-          </div>
-          <div class="preview panel">
-            <div class="preview-head"><div><span class="eyebrow">Live output</span><strong>Preview</strong></div><button class="icon-btn small" id="openPreview">↗</button></div>
-            <iframe id="previewFrame" title="Web Lab preview" sandbox="allow-scripts"></iframe>
-          </div>
-        </div>
-        <div class="tip-grid">
-          <div class="tip"><strong>HTML</strong><span>Keep structure semantic and accessible.</span></div>
-          <div class="tip"><strong>CSS</strong><span>Use layout primitives before micro-tuning.</span></div>
-          <div class="tip"><strong>JS</strong><span>Keep behavior modular and easy to test.</span></div>
-        </div>
-      </section>
+      <div class="quick-grid">
+        <button class="quick-card" data-view-jump="lab"><span>&lt;/&gt;</span><b>Build a web project</b><small>Open the real file workspace</small></button>
+        <button class="quick-card" data-view-jump="study"><span>◷</span><b>Start a focused session</b><small>Timer logs progress automatically</small></button>
+        <button class="quick-card" data-view-jump="notes"><span>✎</span><b>Capture an idea</b><small>Turn thoughts into searchable notes</small></button>
+        <button class="quick-card" data-view-jump="automation"><span>⚡</span><b>Automate a workflow</b><small>Set rules once, reuse every day</small></button>
+      </div>
+    </section>
 
-      <section id="analytics" class="page-section">
-        <div class="section-title"><div><span class="eyebrow">Think with numbers</span><h2>Data Analytics</h2><p>Capture hypotheses, metrics and next analysis steps before opening a notebook.</p></div><button class="btn btn-ghost" id="newAnalysis">+ Analysis note</button></div>
-        <div class="analytics-cards">
-          <div class="analysis-stat"><small>Metrics to watch</small><strong>08</strong><span>Keep definitions explicit.</span></div>
-          <div class="analysis-stat"><small>Open hypotheses</small><strong>04</strong><span>Turn assumptions into tests.</span></div>
-          <div class="analysis-stat"><small>Reports</small><strong>12</strong><span>Track decisions, not vanity.</span></div>
-        </div>
-        <div class="dashboard-grid">
-          <section class="panel">
-            <div class="panel-head"><div><span class="eyebrow">Analysis workflow</span><h3>From question to action</h3></div></div>
-            <div class="workflow"><div class="workflow-step"><b>01</b><strong>Question</strong><span>What exactly are we trying to learn?</span></div><div class="workflow-arrow">→</div><div class="workflow-step"><b>02</b><strong>Data</strong><span>What evidence can answer it?</span></div><div class="workflow-arrow">→</div><div class="workflow-step"><b>03</b><strong>Insight</strong><span>What pattern survives scrutiny?</span></div><div class="workflow-arrow">→</div><div class="workflow-step"><b>04</b><strong>Action</strong><span>What changes because of it?</span></div></div>
-          </section>
-          <section class="panel checklist-panel"><div class="panel-head"><div><span class="eyebrow">Checklist</span><h3>Before reporting</h3></div></div><label><input type="checkbox" data-savecheck="data1"> Define the metric</label><label><input type="checkbox" data-savecheck="data2"> Check missing / duplicate data</label><label><input type="checkbox" data-savecheck="data3"> Validate the comparison</label><label><input type="checkbox" data-savecheck="data4"> Write one decision statement</label></section>
-        </div>
-      </section>
+    <section class="view" id="view-study">
+      <div class="page-title"><div><span class="eyebrow">STUDENT SYSTEM</span><h1>Study System</h1><p>Give the system your subjects, priorities and deadlines. It handles the repetitive planning.</p></div><button class="btn primary" id="studyAutoPlan">⚡ Generate study plan</button></div>
+      <div class="study-layout">
+        <section class="panel focus-panel">
+          <div class="panel-head"><div><span class="eyebrow">Focus engine</span><h2 id="focusTitle">25-minute focus</h2></div><span class="pill green" id="focusStatus">READY</span></div>
+          <div class="timer" id="timer">25:00</div>
+          <div class="timer-progress"><i id="timerBar"></i></div>
+          <div class="timer-controls"><button class="btn primary" id="timerToggle">Start</button><button class="btn ghost" id="timerReset">Reset</button></div>
+          <div class="focus-select-row"><select id="focusSubject"></select><select id="focusMode"><option value="25">25 min deep work</option><option value="50">50 min deep work</option><option value="15">15 min sprint</option></select></div>
+          <small class="muted">Completed sessions are logged, counted toward your streak, and reflected in analytics.</small>
+        </section>
+        <section class="panel">
+          <div class="panel-head"><div><span class="eyebrow">Subjects</span><h2>Your learning map</h2></div><button class="icon-btn small" id="addSubjectBtn">+</button></div>
+          <div id="subjectList" class="subject-list"></div>
+        </section>
+      </div>
+      <div class="two-col">
+        <section class="panel"><div class="panel-head"><div><span class="eyebrow">Generated</span><h2>Today's study plan</h2></div><button class="text-btn" id="studyAdjust">Adjust inputs</button></div><div id="studyPlan" class="study-plan"></div></section>
+        <section class="panel"><div class="panel-head"><div><span class="eyebrow">Streak</span><h2>Consistency</h2></div></div><div class="streak-card"><div class="streak-number" id="streakNumber">0</div><div><b>day streak</b><small id="streakText">Complete a focus session to start.</small></div></div><div class="mini-bars" id="weeklyBars"></div></section>
+      </div>
+    </section>
 
-      <section id="marketing" class="page-section">
-        <div class="section-title"><div><span class="eyebrow">Create with intent</span><h2>Digital Marketing</h2><p>A compact campaign room for ideas, content, channels and measurable outcomes.</p></div><button class="btn btn-primary" id="addCampaign">+ Campaign</button></div>
-        <div class="marketing-board">
-          <div class="funnel panel"><div class="panel-head"><div><span class="eyebrow">Funnel</span><h3>Content → conversion</h3></div></div><div class="funnel-step"><b>Awareness</b><span>Reach the right audience</span><strong>100%</strong></div><div class="funnel-step"><b>Consideration</b><span>Earn attention and trust</span><strong>68%</strong></div><div class="funnel-step"><b>Action</b><span>Make the next step obvious</span><strong>31%</strong></div><div class="funnel-step"><b>Retention</b><span>Give people a reason to return</span><strong>18%</strong></div></div>
-          <div class="panel"><div class="panel-head"><div><span class="eyebrow">Content engine</span><h3>Weekly lanes</h3></div></div><div class="content-lane"><span>01</span><div><strong>Teach</strong><small>Useful educational content</small></div><b>2×</b></div><div class="content-lane"><span>02</span><div><strong>Build in public</strong><small>Show work, experiments, lessons</small></div><b>2×</b></div><div class="content-lane"><span>03</span><div><strong>Proof</strong><small>Results, case studies, screenshots</small></div><b>1×</b></div><div class="content-lane"><span>04</span><div><strong>Community</strong><small>Questions, replies, conversations</small></div><b>1×</b></div></div>
-        </div>
-      </section>
+    <section class="view" id="view-lab">
+      <div class="page-title"><div><span class="eyebrow">SOURCE-FIRST EDUCATIONAL IDE</span><h1>Web Lab</h1><p>Edit real project files, auto-save drafts and see browser feedback instantly.</p></div><div class="title-actions"><button class="btn ghost" id="importFilesBtn">Import files</button><button class="btn primary" id="downloadProjectBtn">Download project</button><input type="file" id="fileInput" accept=".html,.css,.js" multiple hidden></div></div>
+      <div class="lab-shell">
+        <aside class="file-tree panel">
+          <div class="file-head"><b>PROJECT</b><button class="icon-btn small" id="newFileBtn">+</button></div>
+          <div id="fileTree"></div>
+          <div class="file-foot"><button class="text-btn" id="saveSnapshotBtn">Save snapshot</button><small id="labSaveState">All changes autosaved</small></div>
+        </aside>
+        <section class="editor panel">
+          <div class="editor-head"><div id="activeFileLabel">index.html</div><div><span id="editorSaved">Saved</span><button class="icon-btn small" id="runLabBtn">▶</button></div></div>
+          <textarea id="codeEditor" spellcheck="false" aria-label="Source editor"></textarea>
+          <div class="editor-foot"><span id="cursorInfo">Ln 1 · Col 1</span><span>Ctrl/Cmd + Enter · Run</span></div>
+        </section>
+        <section class="preview panel">
+          <div class="preview-head"><b>LIVE PREVIEW</b><div><button class="icon-btn small" id="refreshPreviewBtn">↻</button><button class="icon-btn small" id="openPreviewBtn">↗</button></div></div>
+          <iframe id="previewFrame" title="Web Lab preview" sandbox="allow-scripts allow-forms"></iframe>
+        </section>
+      </div>
+      <div class="lab-bottom">
+        <div class="tip"><b>Real source files</b><small>HTML, CSS and JS stay separate, so the lab mirrors an actual project.</small></div>
+        <div class="tip"><b>Instant feedback</b><small>Run the same source inside an isolated browser preview.</small></div>
+        <div class="tip"><b>Automatic backup</b><small>Use snapshots and workspace export before major changes.</small></div>
+      </div>
+    </section>
 
-      <section id="study" class="page-section">
-        <div class="section-title"><div><span class="eyebrow">Student mode</span><h2>Study Hub</h2><p>Protect focused time by keeping goals, sessions and revision in one place.</p></div><button class="btn btn-primary" id="startFocus">Start 25-min focus</button></div>
-        <div class="study-grid">
-          <section class="panel focus-timer"><span class="eyebrow">Focus timer</span><div id="timerDisplay">25:00</div><div class="timer-actions"><button class="btn btn-primary" id="timerToggle">Start</button><button class="btn btn-ghost" id="timerReset">Reset</button></div><small id="timerMessage">A distraction-free block beats an open-ended session.</small></section>
-          <section class="panel"><div class="panel-head"><div><span class="eyebrow">Learning queue</span><h3>Next sessions</h3></div></div><div class="session"><span>WEB</span><div><strong>CSS architecture</strong><small>Layout systems · 30 min</small></div><b>Today</b></div><div class="session"><span>DATA</span><div><strong>Spreadsheet analysis</strong><small>Cleaning + charts · 40 min</small></div><b>Next</b></div><div class="session"><span>MARKETING</span><div><strong>Content analytics</strong><small>CTR + retention · 35 min</small></div><b>Later</b></div></section>
-        </div>
-        <div class="panel syllabus"><div class="panel-head"><div><span class="eyebrow">Simple learning loop</span><h3>Learn → practice → explain → revise</h3></div></div><div class="loop"><span>Learn</span><i>→</i><span>Practice</span><i>→</i><span>Explain</span><i>→</i><span>Revise</span></div></div>
-      </section>
+    <section class="view" id="view-assignments">
+      <div class="page-title"><div><span class="eyebrow">EXECUTION</span><h1>Assignments &amp; Tasks</h1><p>Deadlines, next actions and priority are connected to the daily plan.</p></div><button class="btn primary" id="newTaskBtn">＋ Add task</button></div>
+      <div class="filter-row"><button class="filter active" data-task-filter="all">All</button><button class="filter" data-task-filter="today">Today</button><button class="filter" data-task-filter="study">Study</button><button class="filter" data-task-filter="project">Projects</button><button class="filter" data-task-filter="done">Done</button></div>
+      <div class="task-layout">
+        <section class="panel"><div class="panel-head"><div><span class="eyebrow">Queue</span><h2>Tasks</h2></div><button class="text-btn" id="clearDone">Clear completed</button></div><div id="taskList" class="task-list"></div></section>
+        <aside class="panel"><div class="panel-head"><div><span class="eyebrow">Deadline monitor</span><h2>Upcoming</h2></div></div><div id="assignmentDeadlines" class="deadline-list"></div><button class="btn ghost full" id="assignmentDeadlineBtn">＋ Add deadline</button></aside>
+      </div>
+    </section>
 
-      <section id="projects" class="page-section">
-        <div class="section-title"><div><span class="eyebrow">Make things real</span><h2>Projects</h2><p>Keep the objective, current state and next action visible.</p></div><button class="btn btn-primary" id="addProject">+ Project</button></div>
-        <div class="project-grid" id="projectGrid">
-          <article class="project-card"><div class="project-top"><span class="pill blue">WEB</span><span>Active</span></div><h3>Obaid Web Lab</h3><p>Source-first educational workspace for building and testing web ideas directly in the browser.</p><div class="project-meta"><span>Frontend</span><span>Local-first</span></div><div class="progress"><i style="width:82%"></i></div></article>
-          <article class="project-card"><div class="project-top"><span class="pill green">DATA</span><span>Planned</span></div><h3>Analytics Toolkit</h3><p>A reusable collection of analysis templates, KPI definitions and reporting workflows.</p><div class="project-meta"><span>Analytics</span><span>Templates</span></div><div class="progress"><i style="width:38%"></i></div></article>
-          <article class="project-card"><div class="project-top"><span class="pill purple">MARKETING</span><span>Idea</span></div><h3>Growth Console</h3><p>A simple space for campaign experiments, content plans and performance notes.</p><div class="project-meta"><span>Growth</span><span>Content</span></div><div class="progress"><i style="width:18%"></i></div></article>
-        </div>
-      </section>
+    <section class="view" id="view-analytics">
+      <div class="page-title"><div><span class="eyebrow">PERSONAL TELEMETRY</span><h1>Analytics</h1><p>See where your time went and whether your study system is actually moving forward.</p></div><button class="btn ghost" id="exportReportBtn">Export report</button></div>
+      <div class="stat-grid analytics-top"><article class="stat"><span class="stat-icon">◷</span><div><small>Total focused</small><b id="totalFocused">0m</b></div><em>all sessions</em></article><article class="stat"><span class="stat-icon">✓</span><div><small>Completion rate</small><b id="completionRate">0%</b></div><em>current tasks</em></article><article class="stat"><span class="stat-icon">★</span><div><small>Current streak</small><b id="analyticsStreak">0d</b></div><em>study days</em></article><article class="stat"><span class="stat-icon">⚡</span><div><small>Automation runs</small><b id="analyticsAutomation">0</b></div><em>this workspace</em></article></div>
+      <div class="two-col"><section class="panel"><div class="panel-head"><div><span class="eyebrow">7 days</span><h2>Study activity</h2></div></div><div id="activityChart" class="activity-chart"></div></section><section class="panel"><div class="panel-head"><div><span class="eyebrow">Breakdown</span><h2>By subject</h2></div></div><div id="subjectAnalytics"></div></section></div>
+      <section class="panel"><div class="panel-head"><div><span class="eyebrow">Review</span><h2>Weekly reflection</h2></div><button class="btn ghost" id="generateReviewBtn">Generate review</button></div><div id="weeklyReview" class="review-box">Run the review automation to turn this week's data into a concise reflection.</div></section>
+    </section>
 
-      <section id="notes" class="page-section">
-        <div class="section-title"><div><span class="eyebrow">Capture the useful bits</span><h2>Notes</h2><p>A fast scratchpad for ideas, code snippets, observations and decisions.</p></div><button class="btn btn-primary" id="saveNote">Save note</button></div>
-        <div class="notes-layout"><textarea id="noteEditor" class="note-editor" placeholder="Write a note...&#10;&#10;Tip: notes are saved to this browser, not a server."></textarea><aside class="panel saved-notes"><div class="panel-head"><div><span class="eyebrow">Saved locally</span><h3>Recent notes</h3></div></div><div id="noteList" class="note-list"></div></aside></div>
-      </section>
+    <section class="view" id="view-notes">
+      <div class="page-title"><div><span class="eyebrow">KNOWLEDGE BASE</span><h1>Notes &amp; Knowledge</h1><p>Quick capture first. Organize later. Search everything instantly.</p></div><button class="btn primary" id="newNoteBtn">＋ New note</button></div>
+      <div class="notes-layout">
+        <section class="panel note-editor-panel"><div class="note-toolbar"><input id="noteSearch" placeholder="Search notes…"><select id="noteType"><option>Note</option><option>Idea</option><option>Learning</option><option>Code</option><option>Review</option></select><button class="btn primary" id="saveNoteBtn">Save</button></div><input id="noteTitle" class="note-title" placeholder="Note title"><textarea id="noteBody" class="note-body" placeholder="Write anything…"></textarea></section>
+        <aside class="panel"><div class="panel-head"><div><span class="eyebrow">Library</span><h2>Recent notes</h2></div></div><div id="notesList" class="notes-list"></div></aside>
+      </div>
+    </section>
 
-      <section id="tasks" class="page-section">
-        <div class="section-title"><div><span class="eyebrow">Keep the loop tight</span><h2>Tasks</h2><p>Small next actions keep large projects moving.</p></div></div>
-        <div class="task-layout"><form id="taskForm" class="panel add-task"><span class="eyebrow">New task</span><h3>Add the next action</h3><input id="taskInput" required maxlength="120" placeholder="e.g. Refactor the navbar CSS"><select id="taskBucket"><option value="Web">Web</option><option value="Data">Data</option><option value="Marketing">Marketing</option><option value="Study">Study</option><option value="Personal">Personal</option></select><button class="btn btn-primary" type="submit">Add task</button></form><section class="panel"><div class="panel-head"><div><span class="eyebrow">Queue</span><h3>Current tasks</h3></div><button class="text-btn" id="clearDone">Clear done</button></div><div id="taskList" class="task-list"></div></section></div>
-      </section>
+    <section class="view" id="view-projects">
+      <div class="page-title"><div><span class="eyebrow">BUILD PORTFOLIO</span><h1>Projects</h1><p>Turn learning into visible work and keep the next milestone obvious.</p></div><button class="btn primary" id="newProjectBtn">＋ New project</button></div>
+      <div id="projectGrid" class="project-grid"></div>
+    </section>
 
-      <section id="resources" class="page-section">
-        <div class="section-title"><div><span class="eyebrow">Useful starting points</span><h2>Resources</h2><p>Curated categories for the work you repeatedly do.</p></div></div>
-        <div class="resource-grid">
-          <a class="resource-card" href="https://developer.mozilla.org/" target="_blank" rel="noreferrer"><span>&lt;/&gt;</span><strong>MDN Web Docs</strong><small>HTML, CSS and JavaScript reference</small>↗</a>
-          <a class="resource-card" href="https://javascript.info/" target="_blank" rel="noreferrer"><span>JS</span><strong>JavaScript.info</strong><small>Modern JavaScript lessons</small>↗</a>
-          <a class="resource-card" href="https://developers.google.com/analytics" target="_blank" rel="noreferrer"><span>GA</span><strong>Google Analytics</strong><small>Analytics learning & docs</small>↗</a>
-          <a class="resource-card" href="https://support.google.com/webmasters/" target="_blank" rel="noreferrer"><span>SEO</span><strong>Search Console Help</strong><small>Search performance & indexing</small>↗</a>
-          <a class="resource-card" href="https://www.kaggle.com/learn" target="_blank" rel="noreferrer"><span>DS</span><strong>Kaggle Learn</strong><small>Data and machine learning practice</small>↗</a>
-          <a class="resource-card" href="https://www.canva.com/designschool/" target="_blank" rel="noreferrer"><span>CR</span><strong>Canva Design School</strong><small>Visual communication fundamentals</small>↗</a>
-        </div>
-      </section>
-    </main>
+    <section class="view" id="view-marketing">
+      <div class="page-title"><div><span class="eyebrow">DIGITAL MARKETING</span><h1>Marketing Console</h1><p>Plan content, SEO tasks and performance experiments without leaving the workspace.</p></div><button class="btn primary" id="newCampaignBtn">＋ Campaign</button></div>
+      <div class="two-col"><section class="panel"><div class="panel-head"><div><span class="eyebrow">Content engine</span><h2>Weekly plan</h2></div></div><div id="contentLanes"></div></section><section class="panel"><div class="panel-head"><div><span class="eyebrow">SEO checklist</span><h2>Publish ready</h2></div></div><div class="check-list"><label><input type="checkbox" data-check="seo1"> Clear search intent</label><label><input type="checkbox" data-check="seo2"> Strong title + description</label><label><input type="checkbox" data-check="seo3"> Internal links</label><label><input type="checkbox" data-check="seo4"> Useful original value</label><label><input type="checkbox" data-check="seo5"> Track one measurable action</label></div></section></div>
+    </section>
+
+    <section class="view" id="view-resources">
+      <div class="page-title"><div><span class="eyebrow">REFERENCE LIBRARY</span><h1>Resources</h1><p>Useful starting points for web development, analytics, marketing and study.</p></div></div>
+      <div id="resourceGrid" class="resource-grid"></div>
+    </section>
+
+    <section class="view" id="view-automation">
+      <div class="page-title"><div><span class="eyebrow">AUTOMATION CENTER</span><h1>Let the system do the repetitive work.</h1><p>These automations run inside the browser and persist locally. Optional notifications and webhooks can extend them further.</p></div><button class="btn primary" id="runAllAutomationBtn">⚡ Run all now</button></div>
+      <div class="automation-grid">
+        <article class="automation-card"><div class="auto-icon">01</div><div><b>Daily planner</b><p>Build today's tasks from subjects, priorities and deadlines.</p></div><label class="switch"><input type="checkbox" data-auto="planner"><span></span></label><button class="text-btn" data-auto-run="planner">Run now</button></article>
+        <article class="automation-card"><div class="auto-icon">02</div><div><b>Deadline watch</b><p>Detect overdue / urgent deadlines and surface them on the home screen.</p></div><label class="switch"><input type="checkbox" data-auto="deadlines"><span></span></label><button class="text-btn" data-auto-run="deadlines">Run now</button></article>
+        <article class="automation-card"><div class="auto-icon">03</div><div><b>Study logging</b><p>Convert completed focus sessions into analytics and streak data.</p></div><label class="switch"><input type="checkbox" data-auto="studyLog"><span></span></label><button class="text-btn" data-auto-run="studyLog">Run now</button></article>
+        <article class="automation-card"><div class="auto-icon">04</div><div><b>Smart capture</b><p>Route Quick Capture text into tasks, ideas, notes or study items.</p></div><label class="switch"><input type="checkbox" data-auto="capture"><span></span></label><button class="text-btn" data-auto-run="capture">Run now</button></article>
+        <article class="automation-card"><div class="auto-icon">05</div><div><b>Backup routine</b><p>Export a timestamped workspace backup whenever you request it.</p></div><label class="switch"><input type="checkbox" data-auto="backup"><span></span></label><button class="text-btn" data-auto-run="backup">Run now</button></article>
+        <article class="automation-card"><div class="auto-icon">06</div><div><b>Notifications</b><p>Ask browser permission and remind you while this app is open.</p></div><label class="switch"><input type="checkbox" data-auto="notifications"><span></span></label><button class="text-btn" data-auto-run="notifications">Enable</button></article>
+      </div>
+      <section class="panel webhook-panel"><div class="panel-head"><div><span class="eyebrow">Optional integration</span><h2>Webhook automation</h2></div><span class="pill">NO SECRET STORAGE</span></div><p class="muted">Connect a public webhook endpoint from a service you control. The browser sends event data; keep private API keys on a server, never inside this page.</p><div class="webhook-row"><input id="webhookUrl" placeholder="https://example.com/webhook"><button class="btn ghost" id="testWebhookBtn">Send test event</button></div></section>
+      <section class="panel"><div class="panel-head"><div><span class="eyebrow">History</span><h2>Automation activity</h2></div><button class="text-btn" id="clearAutomationLog">Clear</button></div><div id="automationHistory" class="history"></div></section>
+    </section>
+  </main>
+</div>
+
+<dialog id="captureModal" class="modal">
+  <div class="modal-head"><div><span class="eyebrow">UNIVERSAL INBOX</span><h2>Quick capture</h2></div><button class="icon-btn small" data-close="captureModal">×</button></div>
+  <p class="muted">Type naturally. Prefixes are optional: <b>/task</b>, <b>/note</b>, <b>/idea</b>, <b>/study</b>.</p>
+  <textarea id="captureInput" class="capture-input" placeholder="e.g. /task finish responsive navbar"></textarea>
+  <div class="capture-actions"><button class="btn ghost" data-close="captureModal">Cancel</button><button class="btn primary" id="processCaptureBtn">Process automatically</button></div>
+</dialog>
+
+<dialog id="settingsModal" class="modal">
+  <div class="modal-head"><div><span class="eyebrow">WORKSPACE SETTINGS</span><h2>Settings</h2></div><button class="icon-btn small" data-close="settingsModal">×</button></div>
+  <div class="settings-stack">
+    <div class="setting"><div><b>Display name</b><small>Shown in profile and future exports.</small></div><input id="displayNameSetting"></div>
+    <div class="setting"><div><b>Daily study minutes</b><small>Used by Auto-plan.</small></div><input id="dailyMinutesSetting" type="number" min="15" max="600"></div>
+    <div class="setting"><div><b>Theme</b><small>Choose your workspace appearance.</small></div><select id="themeSetting"><option value="dark">Dark</option><option value="light">Light</option></select></div>
+    <div class="setting"><div><b>Install app</b><small>Add the workspace to your device when supported.</small></div><button class="btn ghost" id="installAppBtn">Install</button></div>
+    <div class="setting"><div><b>Reset workspace</b><small>This clears local data on this browser.</small></div><button class="btn danger" id="resetWorkspaceBtn">Reset</button></div>
   </div>
+</dialog>
 
-  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<dialog id="profileModal" class="modal profile-modal">
+  <div class="profile-avatar">MO</div><span class="eyebrow">WORKSPACE OWNER</span><h2 id="profileName">Mohammed Obaidul Hoque</h2><p class="muted">Student · Web development · Data analytics · Digital marketing</p><button class="btn primary" data-close="profileModal">Close</button>
+</dialog>
 
-  <dialog class="modal" id="commandModal">
-    <div class="modal-head"><div><span class="eyebrow">Navigate faster</span><h3>Command palette</h3></div><button class="icon-btn small" data-close="commandModal">×</button></div>
-    <input id="commandInput" class="command-input" placeholder="Search sections…">
-    <div id="commandResults" class="command-results"></div>
-  </dialog>
+<dialog id="commandModal" class="modal">
+  <div class="modal-head"><div><span class="eyebrow">FAST NAVIGATION</span><h2>Command palette</h2></div><button class="icon-btn small" data-close="commandModal">×</button></div>
+  <input id="commandSearch" class="command-input" placeholder="Search a module…">
+  <div id="commandResults" class="command-results"></div>
+</dialog>
 
-  <dialog class="modal profile-modal" id="profileModal">
-    <div class="profile-big"><span>MO</span></div><span class="eyebrow">Workspace owner</span><h3>Mohammed Obaidul Hoque</h3><p>Student · Web development · Data analytics · Digital marketing</p><button class="btn btn-primary" data-close="profileModal">Close</button>
-  </dialog>
+<dialog id="taskModal" class="modal">
+  <div class="modal-head"><div><span class="eyebrow">NEW ACTION</span><h2>Add task</h2></div><button class="icon-btn small" data-close="taskModal">×</button></div>
+  <form id="taskForm" class="form-grid"><input id="taskTitle" required placeholder="What needs to be done?"><select id="taskCategory"><option value="study">Study</option><option value="project">Project</option><option value="web">Web</option><option value="marketing">Marketing</option><option value="personal">Personal</option></select><select id="taskPriority"><option value="high">High priority</option><option value="medium" selected>Medium</option><option value="low">Low</option></select><input id="taskDue" type="date"><button class="btn primary" type="submit">Create task</button></form>
+</dialog>
 
-  <dialog class="modal settings-modal" id="settingsModal">
-    <div class="modal-head"><div><span class="eyebrow">Preferences</span><h3>Settings</h3></div><button class="icon-btn small" data-close="settingsModal">×</button></div>
-    <label class="setting-row"><span><strong>Theme</strong><small>Switch between light and dark mode.</small></span><button class="btn btn-ghost" id="settingsTheme">Toggle</button></label>
-    <label class="setting-row"><span><strong>Reset local data</strong><small>Clear tasks, notes, lab drafts and saved preferences.</small></span><button class="btn btn-danger" id="resetLocal">Reset</button></label>
-  </dialog>
+<dialog id="deadlineModal" class="modal">
+  <div class="modal-head"><div><span class="eyebrow">DEADLINE</span><h2>Add deadline</h2></div><button class="icon-btn small" data-close="deadlineModal">×</button></div>
+  <form id="deadlineForm" class="form-grid"><input id="deadlineTitle" required placeholder="e.g. Physics assignment"><input id="deadlineDate" type="date" required><select id="deadlineKind"><option>Assignment</option><option>Exam</option><option>Project</option><option>Application</option><option>Other</option></select><button class="btn primary" type="submit">Save deadline</button></form>
+</dialog>
 
-  <script src="app.js"></script>
+<dialog id="subjectModal" class="modal">
+  <div class="modal-head"><div><span class="eyebrow">LEARNING MAP</span><h2>Add subject</h2></div><button class="icon-btn small" data-close="subjectModal">×</button></div>
+  <form id="subjectForm" class="form-grid"><input id="subjectTitle" required placeholder="e.g. Physics"><input id="subjectTarget" type="number" min="1" max="20" value="3" placeholder="Priority"><button class="btn primary" type="submit">Add subject</button></form>
+</dialog>
+
+<div id="toast" class="toast"></div>
+<script src="app.js"></script>
 </body>
 </html>
