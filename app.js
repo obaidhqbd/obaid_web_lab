@@ -1,51 +1,791 @@
-(function(){
-'use strict';
-var $=function(s,r){return (r||document).querySelector(s)},$$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
-var state={site:null,catalog:null,current:null,files:new Map(),original:null,monaco:null,editor:null,activeFile:null,done:{},hint:0};
-var els={classGrid:$('#classGrid'),classSearch:$('#classSearch'),tagFilter:$('#tagFilter'),levelFilter:$('#levelFilter'),classEmpty:$('#classEmpty'),blogGrid:$('#blogGrid'),blogSearch:$('#blogSearch'),blogEmpty:$('#blogEmpty'),wsTitle:$('#wsTitle'),wsDescription:$('#wsDescription'),fileList:$('#fileList'),fileCount:$('#fileCount'),activeFile:$('#activeFile'),monaco:$('#monaco'),fallback:$('#fallback'),preview:$('#preview'),saveState:$('#saveState'),tasks:$('#tasks'),hints:$('#hints'),original:$('#downloadOriginal'),edited:$('#downloadEdited'),theme:$('#theme'),portfolioHeader:$('#portfolioHeader'),portfolioFooter:$('#portfolioFooter'),footerText:$('#footerText'),footerMessage:$('#footerMessage')};
-function toast(m){var t=document.createElement('div');t.className='toast';t.textContent=m;document.body.appendChild(t);requestAnimationFrame(function(){t.classList.add('show')});setTimeout(function(){t.remove()},1900)}
-function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
-function safeGet(k){try{return localStorage.getItem(k)}catch(e){return null}}function safeSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-function view(name){$$('.view').forEach(function(v){v.classList.toggle('active',v.dataset.view===name)});$$('.topnav a').forEach(function(a){a.classList.toggle('active',a.dataset.route===name)});window.scrollTo({top:0,behavior:'smooth'})}
-function route(){var h=location.hash.slice(1),parts=h.split('/'),name=parts[0]||'home';if(name==='class'&&parts[1]){openClass(parts[1]);return}if(name==='blog'&&parts[1]){openBlog(parts[1]);return}view(name)}
-window.addEventListener('hashchange',route);
-$$('[data-route]').forEach(function(a){a.addEventListener('click',function(e){var v=a.getAttribute('data-route');if(v!=='home')e.preventDefault();location.hash=v})});
-$('#openLab').onclick=function(){location.hash='classes'};$('#backBlogs').onclick=function(){location.hash='blogs'};
-$('#theme').onclick=function(){var light=document.body.classList.toggle('light');safeSet('oml-theme',light?'light':'dark')};if(safeGet('oml-theme')==='light')document.body.classList.add('light');
+/* Obaidul Mentor Lab - resilient browser learning workspace */
+(() => {
+  'use strict';
 
-async function siteInfo(){try{state.site=await fetch('./data/site.json',{cache:'no-store'}).then(function(r){return r.json()});var draft=safeGet('oml-editor-draft');if(draft)try{state.site=Object.assign({},state.site,JSON.parse(draft))}catch(e){}var b=state.site.brand||{},f=state.site.footer||{};document.title=b.name||'Obaidul Mentor Lab';if(b.portfolioUrl){els.portfolioHeader.href=b.portfolioUrl;els.portfolioFooter.href=b.portfolioUrl}else{els.portfolioHeader.hidden=true;els.portfolioFooter.hidden=true}els.footerText.textContent=f.text||b.name||'Obaidul Mentor Lab';els.footerMessage.textContent=f.message||''}catch(e){}}
-async function loadCatalog(){try{state.catalog=await fetch('./data/catalog.json',{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('catalog unavailable');return r.json()});renderCatalog();}catch(e){console.error(e);toast('Class catalog is not built yet')}}
-function card(item,type){var tags=(item.tags||[]).slice(0,5).map(function(t){return '<span class="badge">'+esc(t)+'</span>'}).join('');var href=type==='class'?'#class/'+encodeURIComponent(item.id):'#blog/'+encodeURIComponent(item.id);return '<article class="card"><div><div class="badges">'+(tags||'<span class="badge">'+type+'</span>')+'</div><h3>'+esc(item.title)+'</h3><p>'+esc(item.description||item.summary||'')+'</p></div><div class="meta"><span>'+esc(item.level||'All levels')+(item.duration?' · '+esc(item.duration):'')+'</span><a class="tiny" href="'+href+'">'+(type==='class'?'Open class →':'Read article →')+'</a></div></article>'}
-function populateFilters(){var cs=state.catalog.classes||[],tags=[],levels=[];cs.forEach(function(x){(x.tags||[]).forEach(function(t){if(tags.indexOf(t)<0)tags.push(t)});if(x.level&&levels.indexOf(x.level)<0)levels.push(x.level)});tags.sort();levels.sort();els.tagFilter.innerHTML='<option value="all">All tags</option>'+tags.map(function(t){return '<option>'+esc(t)+'</option>'}).join('');els.levelFilter.innerHTML='<option value="all">All levels</option>'+levels.map(function(t){return '<option>'+esc(t)+'</option>'}).join('')}
-function renderClasses(){var q=(els.classSearch.value||'').toLowerCase(),tag=els.tagFilter.value,level=els.levelFilter.value,arr=(state.catalog.classes||[]).filter(function(x){var text=(x.title+' '+x.description+' '+(x.tags||[]).join(' ')).toLowerCase();return text.indexOf(q)>=0&&(tag==='all'||(x.tags||[]).indexOf(tag)>=0)&&(level==='all'||x.level===level)});els.classGrid.innerHTML=arr.map(function(x){return card(x,'class')}).join('');els.classEmpty.hidden=arr.length>0}
-function renderBlogs(){var q=(els.blogSearch.value||'').toLowerCase(),arr=(state.catalog.blogs||[]).filter(function(x){return (x.title+' '+x.description+' '+(x.tags||[]).join(' ')).toLowerCase().indexOf(q)>=0});els.blogGrid.innerHTML=arr.map(function(x){return card(x,'blog')}).join('');els.blogEmpty.hidden=arr.length>0}
-function renderCatalog(){populateFilters();renderClasses();renderBlogs()}
-els.classSearch.oninput=renderClasses;els.tagFilter.onchange=renderClasses;els.levelFilter.onchange=renderClasses;els.blogSearch.oninput=renderBlogs;
+  const state = {
+    catalog: null,
+    site: null,
+    password: null,
+    current: null,
+    monaco: null,
+    editor: null,
+    models: new Map(),
+    files: new Map(),
+    originalZip: null,
+    saveTimer: null,
+    previewTimer: null,
+    autoCheckTimer: null,
+    selectionToken: 0,
+    hintIndex: 0,
+    pending: null,
+    dark: true,
+    smartSuggestions: [],
+    smartSuggestionIndex: 0,
+    smartSuggestionVisible: false,
+    monacoProvidersInstalled: false,
+    memoryStore: new Map()
+  };
 
-function normalizePath(p){p=p.replace(/\\/g,'/').replace(/^\.\//,'');var out=[];p.split('/').forEach(function(part){if(!part||part==='.'){return}if(part==='..')out.pop();else out.push(part)});return out.join('/')}
-function textFile(n){return /\.(html?|css|js|json|md|txt|svg)$/i.test(n)}function fileIcon(n){return /\.html?$/i.test(n)?'HTML':/\.css$/i.test(n)?'CSS':/\.js$/i.test(n)?'JS':/\.(png|jpe?g|gif|webp|svg)$/i.test(n)?'IMG':'FILE'}
-function saveKey(name){return 'oml-edit-'+state.current.meta.id+'-'+name}function getText(name){var v=safeGet(saveKey(name));if(v!==null)return v;var b=state.files.get(name);return b?new TextDecoder().decode(b):''}function setText(name,v){safeSet(saveKey(name),v);state.files.set(name,new TextEncoder().encode(v))}
-function lang(n){return /\.html?$/i.test(n)?'html':/\.css$/i.test(n)?'css':/\.json$/i.test(n)?'json':'javascript'}
-async function setupEditor(){try{var monaco=window.monacoReady&&await window.monacoReady;if(monaco){state.monaco=monaco;state.editor=monaco.editor.create(els.monaco,{value:'',language:'html',theme:document.body.classList.contains('light')?'vs':'vs-dark',automaticLayout:true,minimap:{enabled:false},fontSize:13});state.editor.onDidChangeModelContent(function(){if(state.activeFile){setText(state.activeFile,state.editor.getValue());els.saveState.textContent='Saved locally';updatePreviewDebounced()}});return}}catch(e){}els.monaco.hidden=true;els.fallback.hidden=false;els.fallback.oninput=function(){if(state.activeFile){setText(state.activeFile,els.fallback.value);els.saveState.textContent='Saved locally';updatePreviewDebounced()}}}
-function selectFile(n){state.activeFile=n;els.activeFile.textContent=n;$$('.file-item').forEach(function(b){b.classList.toggle('active',b.dataset.file===n)});if(state.editor){state.editor.setValue(textFile(n)?getText(n):'');state.editor.setModelLanguage(state.editor.getModel(),lang(n))}else els.fallback.value=textFile(n)?getText(n):'';updatePreview()}
-function renderFiles(){els.fileList.innerHTML='';var ns=Array.from(state.files.keys()).sort();els.fileCount.textContent=ns.length+' files';ns.forEach(function(n){var b=document.createElement('button');b.className='file-item';b.type='button';b.dataset.file=n;b.innerHTML='<span>'+fileIcon(n)+'</span><span>'+esc(n)+'</span>';b.onclick=function(){selectFile(n)};els.fileList.appendChild(b)})}
-async function assetMap(){var map={};state.files.forEach(function(bytes,n){if(/\.(png|jpe?g|gif|webp|svg|ico)$/i.test(n)){var mime=/\.png$/i.test(n)?'image/png':/\.jpe?g$/i.test(n)?'image/jpeg':/\.gif$/i.test(n)?'image/gif':/\.webp$/i.test(n)?'image/webp':/\.svg$/i.test(n)?'image/svg+xml':'image/x-icon';var bin='';for(var i=0;i<bytes.length;i++)bin+=String.fromCharCode(bytes[i]);map[n]='data:'+mime+';base64,'+btoa(bin)}});return map}
-function rewriteCss(css,assets){return css.replace(/url\((['"]?)([^'")]+)\1\)/gi,function(m,q,u){var p=normalizePath(u);return assets[p]?'url("'+assets[p]+'")':m})}
-var previewTimer=null;function updatePreviewDebounced(){clearTimeout(previewTimer);previewTimer=setTimeout(updatePreview,260)}
-async function updatePreview(){if(!state.current)return;var html=state.files.has('index.html')?getText('index.html'):'';var css=state.files.has('styles.css')?getText('styles.css'):state.files.has('style.css')?getText('style.css'):'';var js=state.files.has('app.js')?getText('app.js'):'';var assets=await assetMap();css=rewriteCss(css,assets);Object.keys(assets).forEach(function(n){var base=n.split('/').pop();['src','href'].forEach(function(attr){html=html.replaceAll(attr+'="'+n+'"',attr+'="'+assets[n]+'"').replaceAll(attr+"='"+n+"'",attr+"='"+assets[n]+"'").replaceAll(attr+'="'+base+'"',attr+'="'+assets[n]+'"').replaceAll(attr+"='"+base+"'",attr+"='"+assets[n]+"'")})});var doc='<!doctype html><html><head><meta charset="utf-8"><style>'+css+'</style></head><body>'+html+'<script>'+js.replace(/<\/script/gi,'<\\/script')+'<\/script></body></html>';els.preview.srcdoc=doc}
-function loadDone(){try{state.done=JSON.parse(safeGet('oml-done-'+state.current.meta.id)||'{}')}catch(e){state.done={}}}function saveDone(){safeSet('oml-done-'+state.current.meta.id,JSON.stringify(state.done))}
-function escapeRe(v){return String(v).replace(/[|\\{}()[\]^$+*?.-]/g,'\\$&')}
-function evalCheck(c){var name=normalizePath(c.file||state.activeFile||''),txt=state.files.has(name)?getText(name):'';try{if(c.type==='contains')return c.flags&&c.flags.indexOf('i')>=0?txt.toLowerCase().indexOf(String(c.value).toLowerCase())>=0:txt.indexOf(String(c.value))>=0;if(c.type==='not_contains')return txt.indexOf(String(c.value))<0;if(c.type==='min_length')return txt.length>=Number(c.value||0);if(c.type==='regex')return new RegExp(c.pattern,c.flags||'').test(txt);if(c.type==='files_exist')return (c.files||[]).every(function(f){return state.files.has(normalizePath(f))});if(c.type==='html_elements'){var d=new DOMParser().parseFromString(txt,'text/html');return d.querySelectorAll(c.tag).length>=Number(c.min||1)}if(c.type==='css_property')return new RegExp('[-a-z]+\\s*:\\s*'+escapeRe(c.value||''),'i').test(txt);if(c.all)return c.all.every(evalCheck);if(c.any)return c.any.some(evalCheck);return false}catch(e){return false}}
-function taskItems(){return (state.current.meta.homework&&state.current.meta.homework.tasks)||[]}function renderTasks(){var ts=taskItems();els.tasks.innerHTML=ts.length?ts.map(function(t,i){return '<label class="task '+(state.done[i]?'done':'')+'"><input type="checkbox" data-task="'+i+'" '+(state.done[i]?'checked':'')+'><div><strong>'+esc(t.title)+'</strong><p>'+esc(t.description||'')+'</p></div><button class="tiny" data-check="'+i+'" type="button">Check</button></label>'}).join(''):'<div class="hints">No homework was configured for this class.</div>';$$('[data-task]').forEach(function(c){c.onchange=function(){state.done[c.dataset.task]=c.checked;saveDone();renderTasks()}});$$('[data-check]').forEach(function(b){b.onclick=function(){checkTask(Number(b.dataset.check))}})}
-function checkTask(i){var t=taskItems()[i],checks=t&&t.checks||[],ok=checks.length?checks.every(evalCheck):true;if(ok){state.done[i]=true;saveDone();renderTasks();toast('Task complete ✓')}else toast('Not complete yet')}
-$('#checkAll').onclick=function(){taskItems().forEach(function(t,i){if((t.checks||[]).every(evalCheck))state.done[i]=true});saveDone();renderTasks();toast('Homework checked')};
-function renderHints(){var h=(state.current.meta.homework&&state.current.meta.homework.hints)||[];els.hints.innerHTML=h.length?h.map(function(x,i){return '<div class="hint" '+(i===0?'':'hidden')+'>'+esc(x)+'</div>'}).join(''):'No hints configured.';state.hint=0}
-$('#nextHint').onclick=function(){var a=els.hints.querySelectorAll('.hint');if(!a.length)return;state.hint=(state.hint+1)%a.length;a.forEach(function(x,i){x.hidden=i!==state.hint})};
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => [...document.querySelectorAll(sel)];
+  const els = {
+    year: $('#year'), toast: $('#toast'), heroAccess: $('#hero-access'), lock: $('#lock-button'),
+    classGrid: $('#class-grid'), blogGrid: $('#blog-grid'), classSearch: $('#class-search'), blogSearch: $('#blog-search'),
+    workspaceTitle: $('#workspace-title'), workspaceSubtitle: $('#workspace-subtitle'), fileList: $('#file-list'), fileCount: $('#file-count'),
+    editor: $('#editor'), fallback: $('#fallback-editor'), fallbackSuggest: $('#fallback-suggest'), activeFile: $('#active-file'), saveState: $('#save-state'),
+    preview: $('#preview-frame'), refreshPreview: $('#refresh-preview'), openPreview: $('#open-preview'), format: $('#format-code'),
+    originalZip: $('#download-original'), editedZip: $('#download-edited'), taskList: $('#task-list'), taskProgress: $('#task-progress-label'),
+    taskProgressHint: $('#task-progress-hint'), checkAll: $('#check-all'), progressRing: $('#class-progress-ring'), progressPercent: $('#class-progress-percent'), progressStatus: $('#progress-status'),
+    hintBox: $('#hint-box'), nextHint: $('#next-hint'), unlockForm: $('#unlock-form'), password: $('#access-password'), unlockError: $('#unlock-error'),
+    article: $('#article-content'), articleBack: $('#article-back'), theme: $('#theme-toggle'), portfolioHeader: $('#portfolio-link-header'), portfolioFooter: $('#portfolio-link-footer')
+  };
 
-async function openClass(id){if(!state.catalog)await loadCatalog();var meta=(state.catalog.classes||[]).find(function(x){return x.id===decodeURIComponent(id)});if(!meta)return toast('Class not found');if(!(await ensureZip()))return toast('ZIP engine unavailable');try{var bytes=await fetch(meta.resource).then(function(r){return r.arrayBuffer()}),zip=await JSZip.loadAsync(bytes);state.files=new Map();for(var key in zip.files){if(zip.files[key].dir)continue;var n=normalizePath(key);if(!n||n.indexOf('.git/')===0||n.indexOf('node_modules/')>=0)continue;state.files.set(n,await zip.files[key].async('uint8array'))}state.original=bytes;state.current={meta:meta};loadDone();view('workspace');renderFiles();els.wsTitle.textContent=meta.title;els.wsDescription.textContent=meta.description||'';els.original.disabled=false;els.edited.disabled=false;var first=state.files.has('index.html')?'index.html':Array.from(state.files.keys()).find(function(n){return /\.(html?|css)$/i.test(n)})||Array.from(state.files.keys())[0];await setupEditor();if(first)selectFile(first);renderTasks();renderHints()}catch(e){console.error(e);toast('Could not open this class')}}
-function markdown(md){var s=String(md||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');s=s.replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\x60([^\x60]+)\x60/g,'<code>$1</code>');return s.split(/\n\n+/).map(function(x){return /^<h[123]>/.test(x)?x:'<p>'+x.replace(/\n/g,'<br>')+'</p>'}).join('')}
-async function openBlog(id){if(!state.catalog)await loadCatalog();var meta=(state.catalog.blogs||[]).find(function(x){return x.id===decodeURIComponent(id)});if(!meta)return toast('Article not found');if(!(await ensureZip()))return toast('ZIP engine unavailable');try{var bytes=await fetch(meta.resource).then(function(r){return r.arrayBuffer()}),zip=await JSZip.loadAsync(bytes),name=Object.keys(zip.files).find(function(n){return /(^|\/)(article|index|readme)\.md$/i.test(n)})||Object.keys(zip.files).find(function(n){return /\.md$/i.test(n)});var md=name?await zip.files[name].async('text'):meta.description||'';$('#articleContent').innerHTML=markdown(md);view('article')}catch(e){toast('Could not open article')}}
-async function downloadZip(edited){if(!state.current||!(await ensureZip()))return;var zip=new JSZip();state.files.forEach(function(bytes,n){if(edited&&textFile(n))bytes=new TextEncoder().encode(getText(n));zip.file(n,bytes)});var blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=state.current.meta.id+'-'+(edited?'edited':'provided')+'.zip';a.click();setTimeout(function(){URL.revokeObjectURL(a.href)},2000)}
-els.original.onclick=function(){downloadZip(false)};els.edited.onclick=function(){downloadZip(true)};$('#refreshPreview').onclick=updatePreview;$('#popout').onclick=function(){var w=window.open();if(w){w.document.write(els.preview.srcdoc);w.document.close()}};$('#formatBtn').onclick=function(){if(!state.editor)return;var v=state.editor.getValue();if(/^\s*</.test(v))v=v.replace(/>\s*</g,'>\n<');state.editor.setValue(v);toast('Basic formatting applied')};
-async function boot(){document.getElementById('year').textContent=new Date().getFullYear();await siteInfo();route()}boot();
+  els.year.textContent = new Date().getFullYear();
+
+  const HTML_SUGGESTIONS = [
+    {label:'! + Tab', detail:'HTML document skeleton', insertText:'<!doctype html>\n<html lang="en">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1.0">\n  <title>Document</title>\n</head>\n<body>\n  $0\n</body>\n</html>'},
+    {label:'div', detail:'Block container', insertText:'<div>$0</div>'},
+    {label:'section', detail:'Semantic section', insertText:'<section>$0</section>'},
+    {label:'header', detail:'Semantic header', insertText:'<header>$0</header>'},
+    {label:'main', detail:'Main content', insertText:'<main>$0</main>'},
+    {label:'article', detail:'Standalone content', insertText:'<article>$0</article>'},
+    {label:'nav', detail:'Navigation region', insertText:'<nav>$0</nav>'},
+    {label:'form', detail:'HTML form', insertText:'<form action="#" method="post">\n  $0\n</form>'},
+    {label:'label', detail:'Form label', insertText:'<label for="$1">$0</label>'},
+    {label:'input', detail:'Form input', insertText:'<input id="$1" name="$2" type="$3" $0>'},
+    {label:'button', detail:'Button control', insertText:'<button type="button">$0</button>'},
+    {label:'a', detail:'Link', insertText:'<a href="$1">$0</a>'},
+    {label:'img', detail:'Image', insertText:'<img src="$1" alt="$0">'}
+  ];
+  const CSS_SUGGESTIONS = [
+    {label:'display', detail:'Layout display mode', insertText:'display: $0;'},
+    {label:'position', detail:'Positioning', insertText:'position: $0;'},
+    {label:'margin', detail:'Outer spacing', insertText:'margin: $0;'},
+    {label:'padding', detail:'Inner spacing', insertText:'padding: $0;'},
+    {label:'width', detail:'Element width', insertText:'width: $0;'},
+    {label:'max-width', detail:'Maximum width', insertText:'max-width: $0;'},
+    {label:'height', detail:'Element height', insertText:'height: $0;'},
+    {label:'color', detail:'Text color', insertText:'color: $0;'},
+    {label:'background', detail:'Background shorthand', insertText:'background: $0;'},
+    {label:'background-color', detail:'Background color', insertText:'background-color: $0;'},
+    {label:'border', detail:'Border shorthand', insertText:'border: $0;'},
+    {label:'border-radius', detail:'Rounded corners', insertText:'border-radius: $0;'},
+    {label:'box-shadow', detail:'Shadow', insertText:'box-shadow: $0;'},
+    {label:'font-size', detail:'Text size', insertText:'font-size: $0;'},
+    {label:'font-weight', detail:'Text weight', insertText:'font-weight: $0;'},
+    {label:'line-height', detail:'Text line height', insertText:'line-height: $0;'},
+    {label:'gap', detail:'Flex/grid gap', insertText:'gap: $0;'},
+    {label:'grid-template-columns', detail:'Grid columns', insertText:'grid-template-columns: $0;'},
+    {label:'justify-content', detail:'Main-axis alignment', insertText:'justify-content: $0;'},
+    {label:'align-items', detail:'Cross-axis alignment', insertText:'align-items: $0;'},
+    {label:'transition', detail:'Smooth interaction', insertText:'transition: $0;'},
+    {label:'transform', detail:'Visual transform', insertText:'transform: $0;'},
+    {label:'opacity', detail:'Element opacity', insertText:'opacity: $0;'}
+  ];
+
+  function toast(msg, duration = 2200) {
+    els.toast.textContent = msg;
+    els.toast.classList.add('show');
+    clearTimeout(toast.t);
+    toast.t = setTimeout(() => els.toast.classList.remove('show'), duration);
+  }
+
+  function safeGet(key) { try { const v=localStorage.getItem(key); if(v!==null) return v; } catch {} return state.memoryStore.has(key) ? state.memoryStore.get(key) : null; }
+  function safeSet(key, value) { state.memoryStore.set(key, String(value)); try { localStorage.setItem(key, value); return true; } catch { return false; } }
+  function safeRemove(key) { state.memoryStore.delete(key); try { localStorage.removeItem(key); } catch {} }
+
+  state.dark = safeGet('oml:theme') !== 'light';
+
+  function setTheme() {
+    document.body.classList.toggle('light', !state.dark);
+    els.theme.textContent = state.dark ? '☼' : '☾';
+    safeSet('oml:theme', state.dark ? 'dark' : 'light');
+    if (state.monaco) state.monaco.editor.setTheme(state.dark ? 'vs-dark' : 'vs');
+  }
+  setTheme();
+  els.theme.addEventListener('click', () => { state.dark = !state.dark; setTheme(); });
+
+  function showView(name, shouldScroll = true) {
+    $$('.view').forEach(v => v.classList.toggle('active-view', v.dataset.view === name));
+    $$('.topnav a').forEach(a => a.classList.toggle('active', a.dataset.route === name));
+    if (shouldScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function rememberPending(target, id = null) { state.pending = { target, id }; }
+
+  function route() {
+    const rawHash = location.hash.replace(/^#/, '');
+    const [name, id] = rawHash.split('/');
+    const query = new URLSearchParams(location.search);
+    const classId = query.get('class');
+    const blogId = query.get('blog');
+
+    if (!state.catalog) {
+      if (name === 'classes' || name === 'blogs' || name === 'workspace' || name === 'article') rememberPending(name === 'article' ? 'blogs' : name, id || classId || blogId);
+      else if (classId) rememberPending('classes', classId);
+      else if (blogId) rememberPending('blogs', blogId);
+      else { showView('home'); return; }
+      showView('login');
+      return;
+    }
+
+    if (classId && !state.current) { openClass(classId); return; }
+    if (blogId) { openArticle(blogId); return; }
+    if (name === 'classes') { showView('classes'); return; }
+    if (name === 'blogs') { showView('blogs'); return; }
+    if (name === 'workspace') { state.current ? showView('workspace') : (rememberPending('workspace'), showView('login')); return; }
+    if (name === 'article' && id) { openArticle(decodeURIComponent(id)); return; }
+    showView('home');
+  }
+
+  window.addEventListener('hashchange', route);
+  $$('[data-route]').forEach(a => a.addEventListener('click', e => {
+    const r = a.dataset.route;
+    if (r === 'home') return;
+    e.preventDefault();
+    requireUnlock(r);
+  }));
+
+  function requireUnlock(target) {
+    if (state.catalog) { showView(target); return; }
+    rememberPending(target);
+    showView('login');
+    requestAnimationFrame(() => els.password.focus());
+  }
+
+  els.heroAccess.addEventListener('click', () => requireUnlock('classes'));
+  els.lock.addEventListener('click', () => {
+    state.catalog = null;
+    state.password = null;
+    state.current = null;
+    state.files.clear();
+    state.originalZip = null;
+    destroyEditor();
+    els.preview.srcdoc = '';
+    els.lock.hidden = true;
+    showView('home');
+    safeRemove('oml:last-unlock');
+    toast('Library locked on this browser.');
+  });
+
+  async function loadJson(path) {
+    const res = await fetch(path, { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  }
+
+  async function ensureZipLibrary() {
+    if (window.JSZip) return true;
+    const cdns = [
+      'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',
+      'https://unpkg.com/jszip@3.10.1/dist/jszip.min.js'
+    ];
+    for (const src of cdns) {
+      try {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = src; s.onload = resolve; s.onerror = reject; document.head.appendChild(s);
+        });
+        if (window.JSZip) return true;
+      } catch {}
+    }
+    return false;
+  }
+
+  function hexToBytes(hex) { return new Uint8Array((hex.match(/.{1,2}/g) || []).map(b => parseInt(b, 16))); }
+  function base64ToBytes(b64) { const s = atob(b64); const out = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i); return out; }
+  async function deriveKey(password, envelope) {
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), 'PBKDF2', false, ['deriveKey']);
+    return crypto.subtle.deriveKey({ name:'PBKDF2', salt:hexToBytes(envelope.salt), iterations:envelope.iterations, hash:'SHA-256' }, base, { name:'AES-GCM', length:256 }, false, ['decrypt']);
+  }
+  async function decryptEnvelope(envelope, password) {
+    const key = await deriveKey(password, envelope);
+    const iv = base64ToBytes(envelope.iv), tag = base64ToBytes(envelope.tag), data = base64ToBytes(envelope.data);
+    const full = new Uint8Array(data.length + tag.length); full.set(data); full.set(tag, data.length);
+    const plain = await crypto.subtle.decrypt({ name:'AES-GCM', iv, tagLength:128, additionalData:new TextEncoder().encode(envelope.aad || '') }, key, full);
+    return new Uint8Array(plain);
+  }
+  const bytesToText = (bytes) => new TextDecoder().decode(bytes);
+
+  els.unlockForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    els.unlockError.textContent = 'Checking…';
+    try {
+      if (!(await ensureZipLibrary())) throw new Error('ZIP library unavailable');
+      const envelope = await loadJson('./data/catalog.enc.json');
+      const plain = await decryptEnvelope(envelope, els.password.value);
+      const catalog = JSON.parse(bytesToText(plain));
+      if (!catalog || !Array.isArray(catalog.classes) || !Array.isArray(catalog.blogs)) throw new Error('Invalid catalog');
+      state.password = els.password.value;
+      state.catalog = catalog;
+      els.password.value = '';
+      els.unlockError.textContent = '';
+      els.lock.hidden = false;
+      safeSet('oml:last-unlock', '1');
+      renderCatalog();
+      toast('Student library unlocked.');
+      const pending = state.pending;
+      state.pending = null;
+      if (pending?.id && pending.target === 'classes') await openClass(pending.id);
+      else if (pending?.id && pending.target === 'blogs') await openArticle(pending.id);
+      else showView(pending?.target || 'classes');
+    } catch (err) {
+      console.error(err);
+      els.unlockError.textContent = 'That password did not unlock the student library.';
+      els.password.select();
+    }
+  });
+
+  async function loadSiteInfo() {
+    try {
+      state.site = await loadJson('./data/site.json');
+      const brand = state.site.brand || {};
+      document.title = brand.name || document.title;
+      if (els.portfolioHeader) {
+        if (brand.portfolioUrl) { els.portfolioHeader.href = brand.portfolioUrl; els.portfolioHeader.textContent = `${brand.portfolioLabel || 'Portfolio'} ↗`; els.portfolioHeader.hidden = false; }
+        else els.portfolioHeader.hidden = true;
+      }
+      if (els.portfolioFooter) {
+        if (brand.portfolioUrl) { els.portfolioFooter.href = brand.portfolioUrl; els.portfolioFooter.textContent = `${brand.portfolioLabel || 'Portfolio'} ↗`; els.portfolioFooter.hidden = false; }
+        else els.portfolioFooter.hidden = true;
+      }
+    } catch (err) { console.warn('Site branding could not be loaded', err); }
+  }
+
+  function renderCatalog() { renderClasses(); renderBlogs(); }
+  function card(item, type) {
+    const tags = (item.tags || []).slice(0, 4).map(t => `<span class="badge">${escapeHtml(t)}</span>`).join('');
+    const action = type === 'class' ? `open-class="${escapeAttr(item.id)}"` : `open-blog="${escapeAttr(item.id)}"`;
+    const download = type === 'class' ? `<button class="tiny-btn card-download-btn" download-class="${escapeAttr(item.id)}" type="button" aria-label="Download ${escapeAttr(item.title)} as ZIP">Download ZIP ↓</button>` : '';
+    return `<article class="content-card"><div><div class="badge-row">${tags || `<span class="badge">${type}</span>`}</div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description || item.summary || '')}</p></div><div class="card-meta"><span>${escapeHtml(item.level || 'All levels')}</span><div class="card-actions">${download}<button class="tiny-btn" ${action} type="button">${type === 'class' ? 'Open class' : 'Read article'} →</button></div></div></article>`;
+  }
+  function renderClasses() {
+    const q = els.classSearch.value.trim().toLowerCase();
+    const list = (state.catalog?.classes || []).filter(x => `${x.title} ${x.description} ${(x.tags || []).join(' ')}`.toLowerCase().includes(q));
+    els.classGrid.innerHTML = list.map(x => card(x, 'class')).join('');
+    $('#classes-empty').hidden = list.length > 0;
+    $$('[open-class]').forEach(b => b.addEventListener('click', () => openClass(b.getAttribute('open-class'))));
+    $$('[download-class]').forEach(b => b.addEventListener('click', () => downloadClassFromCard(b.getAttribute('download-class'), b)));
+  }
+
+  async function downloadClassFromCard(id, button) {
+    if (!state.catalog || !state.password) { rememberPending('classes', id); showView('login'); return; }
+    const meta = state.catalog.classes.find(x => x.id === id);
+    if (!meta) { toast('Class not found.'); return; }
+    const originalLabel = button?.textContent;
+    if (button) { button.disabled = true; button.textContent = 'Preparing…'; }
+    try {
+      const env = await loadJson(meta.resource);
+      const zipBytes = await decryptEnvelope(env, state.password);
+      const blob = new Blob([zipBytes], { type: 'application/zip' });
+      const href = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = href;
+      a.download = `${safeFileName(meta.title)}-provided.zip`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(href), 2500);
+      toast('Class ZIP ready.');
+    } catch (err) {
+      console.error(err);
+      toast('This class ZIP could not be downloaded.');
+    } finally {
+      if (button) { button.disabled = false; button.textContent = originalLabel || 'Download ZIP ↓'; }
+    }
+  }
+  function renderBlogs() {
+    const q = els.blogSearch.value.trim().toLowerCase();
+    const list = (state.catalog?.blogs || []).filter(x => `${x.title} ${x.description} ${(x.tags || []).join(' ')}`.toLowerCase().includes(q));
+    els.blogGrid.innerHTML = list.map(x => card(x, 'blog')).join('');
+    $('#blogs-empty').hidden = list.length > 0;
+    $$('[open-blog]').forEach(b => b.addEventListener('click', () => openArticle(b.getAttribute('open-blog'))));
+  }
+  els.classSearch.addEventListener('input', renderClasses);
+  els.blogSearch.addEventListener('input', renderBlogs);
+
+  function normalizePath(p) {
+    return String(p || '').replace(/\\/g, '/').replace(/^\.\//, '').replace(/\/+/g, '/');
+  }
+  function textFile(n) { return /\.(html?|css|md|txt|json)$/i.test(n); }
+  function safeZipFileName(n) { return normalizePath(n).split('/').some(part => part === '..') ? null : normalizePath(n); }
+  function resolveVirtualPath(baseFile, target) {
+    const raw = String(target || '').trim();
+    if (!raw || /^(?:[a-z]+:|#|data:|blob:|\/\/)/i.test(raw)) return null;
+    const baseParts = normalizePath(baseFile).split('/'); baseParts.pop();
+    for (const part of raw.split('/')) {
+      if (!part || part === '.') continue;
+      if (part === '..') baseParts.pop(); else baseParts.push(part);
+    }
+    const out = normalizePath(baseParts.join('/'));
+    return out.startsWith('../') ? null : out;
+  }
+
+  async function openClass(id) {
+    if (!state.catalog) { rememberPending('classes', id); showView('login'); return; }
+    const meta = state.catalog.classes.find(x => x.id === id);
+    if (!meta) { toast('Class not found in the current catalog.'); return; }
+    if (!(await ensureZipLibrary())) { toast('The ZIP engine could not load.'); return; }
+    const token = ++state.selectionToken;
+    toast('Opening class…');
+    try {
+      const env = await loadJson(meta.resource);
+      const zipBytes = await decryptEnvelope(env, state.password);
+      const zip = await JSZip.loadAsync(zipBytes);
+      const files = new Map();
+      for (const [rawName, f] of Object.entries(zip.files)) {
+        if (f.dir) continue;
+        const name = safeZipFileName(rawName);
+        if (!name || name.startsWith('.git/') || name.includes('/node_modules/')) continue;
+        files.set(name, await f.async('uint8array'));
+      }
+      if (token !== state.selectionToken) return;
+      state.current = { meta, type:'class' };
+      state.files = files;
+      state.originalZip = zipBytes;
+      await openWorkspace();
+      history.replaceState(null, '', `${location.pathname}#workspace`);
+    } catch (err) {
+      console.error(err);
+      toast('This class could not be opened. Check the resource build and try again.');
+    }
+  }
+
+  async function openWorkspace() {
+    showView('workspace', false);
+    els.workspaceTitle.textContent = state.current.meta.title;
+    els.workspaceSubtitle.textContent = state.current.meta.description || '';
+    els.fileCount.textContent = `${state.files.size} files`;
+    els.fileList.innerHTML = '';
+    destroyEditor();
+    const names = [...state.files.keys()].sort((a, b) => fileSort(a) - fileSort(b));
+    names.forEach(name => {
+      const b = document.createElement('button');
+      b.className = 'file-item'; b.dataset.file = name; b.type = 'button';
+      b.innerHTML = `<span>${fileIcon(name)}</span><span>${escapeHtml(name)}</span>`;
+      b.addEventListener('click', () => selectFile(name));
+      els.fileList.appendChild(b);
+    });
+    const first = names.find(n => /\.html?$/i.test(n) && /^index\.html$/i.test(n)) || names.find(n => /\.(html?|css)$/i.test(n)) || names[0];
+    if (first) await selectFile(first);
+    renderTasks();
+    renderHints();
+    els.originalZip.disabled = false;
+    els.editedZip.disabled = false;
+    updatePreview();
+  }
+
+  function fileSort(a) { if (/^index\.html$/i.test(a)) return -10; if (/\.html?$/i.test(a)) return 0; if (/\.css$/i.test(a)) return 1; return 2; }
+  function fileIcon(n) { if (/\.html?$/i.test(n)) return '◇'; if (/\.css$/i.test(n)) return '#'; if (/\.(png|jpg|jpeg|gif|svg|webp|avif)$/i.test(n)) return '▧'; return '·'; }
+  function langFor(name) { if (/\.css$/i.test(name)) return 'css'; if (/\.json$/i.test(name)) return 'json'; if (/\.html?$/i.test(name)) return 'html'; return 'plaintext'; }
+
+  function savedKey(classId, file) { return `oml:code:${classId}:${file}`; }
+  function readSaved(classId, file) { return safeGet(savedKey(classId, file)); }
+  function saveFile(classId, file, text) { return safeSet(savedKey(classId, file), text); }
+  function getFileText(name) { const b = state.files.get(name); if (!b) return ''; const saved = readSaved(state.current.meta.id, name); return saved !== null ? saved : bytesToText(b); }
+  function currentText() { if (!state.current) return ''; if (state.editor && !els.fallback.hidden && state.editor.getModel()) return state.editor.getValue(); return els.fallback.value; }
+
+  async function selectFile(name) {
+    const token = ++state.selectionToken;
+    $$('.file-item').forEach(b => b.classList.toggle('active', b.dataset.file === name));
+    els.activeFile.textContent = name;
+    if (!textFile(name)) {
+      toggleFallback(true);
+      els.fallback.value = 'Binary/asset file. Use the live preview or download it.';
+      hideSmartSuggestions();
+      updatePreviewDebounced();
+      return;
+    }
+    const original = state.files.get(name);
+    let text = bytesToText(original || new Uint8Array());
+    const saved = readSaved(state.current.meta.id, name);
+    if (saved !== null) text = saved;
+    await setupEditor(name, text);
+    if (token !== state.selectionToken) return;
+    hideSmartSuggestions();
+    schedulePreview(50);
+  }
+
+  function toggleFallback(on) {
+    els.editor.style.display = on ? 'none' : '';
+    els.fallback.hidden = !on;
+    if (!on) hideSmartSuggestions();
+  }
+
+  async function setupEditor(name, text) {
+    if (!state.monaco) {
+      try { state.monaco = await window.monacoReady; } catch { state.monaco = null; }
+    }
+    if (state.monaco) {
+      installMonacoEnhancements(state.monaco);
+      toggleFallback(false);
+      const lang = langFor(name);
+      let model = state.models.get(name);
+      if (!model || model.isDisposed()) {
+        model = state.monaco.editor.createModel(text, lang, state.monaco.Uri.parse(`inmemory://model/${encodeURIComponent(state.current.meta.id)}/${encodeURIComponent(name)}`));
+        state.models.set(name, model);
+      } else if (model.getValue() !== text) model.setValue(text);
+      if (!state.editor) {
+        state.editor = state.monaco.editor.create(els.editor, {
+          model, fontSize:13, lineHeight:20, theme:state.dark?'vs-dark':'vs', automaticLayout:true, minimap:{enabled:false},
+          wordWrap:'on', padding:{top:10}, scrollBeyondLastLine:false, tabSize:2, insertSpaces:true,
+          formatOnPaste:true, formatOnType:false, quickSuggestions:{other:true,comments:true,strings:true},
+          suggestOnTriggerCharacters:true, acceptSuggestionOnEnter:'on', acceptSuggestionOnCommitCharacter:true,
+          snippetSuggestions:'top', tabCompletion:'on', parameterHints:{enabled:true}, inlineSuggest:{enabled:true},
+          suggest:{showMethods:true,showFunctions:true,showConstructors:true,showFields:true,showVariables:true,showProperties:true,showKeywords:true,preview:true},
+          folding:true, bracketPairColorization:{enabled:true}, guides:{bracketPairs:true},
+          renderWhitespace:'selection', smoothScrolling:true
+        });
+        state.editor.onDidChangeModelContent(onEditorChange);
+      } else state.editor.setModel(model);
+      state.monaco.editor.setModelMarkers(model, `oml-${state.current.meta.id}`, []);
+      state.monaco.editor.setTheme(state.dark?'vs-dark':'vs');
+      els.saveState.textContent = readSaved(state.current.meta.id, name) !== null ? 'Restored' : 'Original';
+      state.editor.focus();
+    } else {
+      toggleFallback(true);
+      els.fallback.value = text;
+      els.fallback.oninput = onEditorChange;
+      els.fallback.onkeydown = onFallbackKeydown;
+      els.fallback.focus();
+      els.saveState.textContent = 'Smart fallback';
+      maybeShowFallbackSuggestions();
+    }
+  }
+
+  function destroyEditor() {
+    state.models.forEach(m => { try { m.dispose(); } catch {} });
+    state.models.clear();
+    if (state.editor) { try { state.editor.dispose(); } catch {} state.editor = null; }
+    els.fallback.oninput = null;
+    els.fallback.onkeydown = null;
+    toggleFallback(false);
+  }
+
+  function onEditorChange() {
+    if (!state.current) return;
+    const file = els.activeFile.textContent;
+    if (!file || !textFile(file)) return;
+    const text = state.monaco && state.editor ? state.editor.getValue() : els.fallback.value;
+    const saved = saveFile(state.current.meta.id, file, text);
+    els.saveState.textContent = saved ? 'Saved locally' : 'Session saved';
+    clearTimeout(state.saveTimer);
+    state.saveTimer = setTimeout(() => { els.saveState.textContent = 'Autosaved'; }, 380);
+    schedulePreview(90);
+    scheduleAutoChecks();
+    if (!state.monaco) maybeShowFallbackSuggestions();
+  }
+
+  function schedulePreview(ms = 120) {
+    clearTimeout(state.previewTimer);
+    state.previewTimer = setTimeout(updatePreview, ms);
+  }
+  function updatePreviewDebounced() { schedulePreview(90); }
+
+  function updatePreview() {
+    if (!state.current) return;
+    const htmlName = [...state.files.keys()].find(n => /^index\.html$/i.test(n)) || [...state.files.keys()].find(n => /\.html?$/i.test(n));
+    if (!htmlName) return;
+    let html = getFileText(htmlName);
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      // Inline local stylesheets so preview follows every CSS edit immediately.
+      [...doc.querySelectorAll('link[rel~="stylesheet"][href]')].forEach(link => {
+        const href = link.getAttribute('href');
+        const resolved = resolveVirtualPath(htmlName, href);
+        if (!resolved || !state.files.has(resolved)) return;
+        const style = doc.createElement('style');
+        style.setAttribute('data-oml-source', resolved);
+        style.textContent = rewriteCssUrls(getFileText(resolved), resolved);
+        link.replaceWith(style);
+      });
+      // Inline common local assets; remote URLs remain untouched.
+      for (const el of doc.querySelectorAll('[src], [poster], link[href]')) {
+        const attr = el.hasAttribute('src') ? 'src' : el.hasAttribute('poster') ? 'poster' : 'href';
+        if (el.tagName === 'LINK' && /stylesheet/i.test(el.getAttribute('rel') || '')) continue;
+        const value = el.getAttribute(attr);
+        const resolved = resolveVirtualPath(htmlName, value);
+        const data = resolved ? assetData(resolved) : null;
+        if (data) el.setAttribute(attr, data);
+      }
+      html = '<!doctype html>\n' + doc.documentElement.outerHTML;
+    } catch (err) {
+      console.warn('Preview parse fallback', err);
+    }
+    els.preview.srcdoc = html;
+  }
+
+  function rewriteCssUrls(css, cssFile) {
+    return String(css).replace(/url\((\s*["']?)([^)"']+)["']?\s*\)/gi, (m, q, target) => {
+      const resolved = resolveVirtualPath(cssFile, target.trim());
+      const data = resolved ? assetData(resolved) : null;
+      return data ? `url(${q}${data}${q})` : m;
+    });
+  }
+  function assetData(key) {
+    const clean = normalizePath(key);
+    const b = state.files.get(clean);
+    if (!b) return null;
+    const ext = clean.split('.').pop().toLowerCase();
+    const mime = { png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', gif:'image/gif', svg:'image/svg+xml', webp:'image/webp', avif:'image/avif', ico:'image/x-icon', woff:'font/woff', woff2:'font/woff2', ttf:'font/ttf', otf:'font/otf' }[ext] || 'application/octet-stream';
+    let binary = ''; const chunk = 0x8000;
+    for (let i = 0; i < b.length; i += chunk) binary += String.fromCharCode(...b.subarray(i, i + chunk));
+    return `data:${mime};base64,${btoa(binary)}`;
+  }
+
+  els.refreshPreview.addEventListener('click', () => { updatePreview(); toast('Preview refreshed.'); });
+  els.openPreview.addEventListener('click', () => {
+    if (!els.preview.srcdoc) return;
+    const w = window.open();
+    if (w) { w.document.open(); w.document.write(els.preview.srcdoc); w.document.close(); }
+  });
+  els.format.addEventListener('click', async () => {
+    if (!state.editor) { toast('Use the smart fallback editor or install a Monaco connection.'); return; }
+    try {
+      await state.editor.getAction('editor.action.formatDocument')?.run();
+      toast('Formatter applied.');
+    } catch { toast('Formatter is not available for this file.'); }
+  });
+
+  function normalizeTask(task, i) {
+    if (typeof task === 'string') return { title:task, description:'Complete this learning task.', checks:[] };
+    return { title:task?.title || `Task ${i + 1}`, description:task?.description || '', checks:Array.isArray(task?.checks) ? task.checks : [] };
+  }
+  function tasksForCurrent() {
+    const hw = state.current?.meta?.homework || {};
+    const raw = Array.isArray(hw.tasks) ? hw.tasks : Array.isArray(hw.checks) ? hw.checks : [];
+    return raw.map(normalizeTask);
+  }
+  function readDone(tasks) {
+    try {
+      const raw = JSON.parse(safeGet(`oml:tasks:${state.current.meta.id}`) || '[]');
+      return Array.from({length:tasks.length}, (_, i) => Boolean(raw[i]));
+    } catch { return tasks.map(() => false); }
+  }
+  function writeDone(done) { safeSet(`oml:tasks:${state.current.meta.id}`, JSON.stringify(done)); }
+  function updateProgress(done, tasks) {
+    const total = tasks.length; const count = done.filter(Boolean).length; const pct = total ? Math.round((count / total) * 100) : 0;
+    els.taskProgress.textContent = `${count} / ${total} tasks`;
+    els.progressPercent.textContent = `${pct}%`;
+    els.progressRing.style.setProperty('--progress', `${pct * 3.6}deg`);
+    els.progressStatus.textContent = total === 0 ? 'No homework yet' : pct === 100 ? 'Class complete 🎉' : `${total - count} task${total - count === 1 ? '' : 's'} remaining`;
+    if (pct === 100) els.progressRing.classList.add('complete'); else els.progressRing.classList.remove('complete');
+  }
+  function renderTasks() {
+    const tasks = tasksForCurrent(); const done = readDone(tasks);
+    els.taskList.innerHTML = tasks.length ? tasks.map((t,i) => `
+      <div class="task-item ${done[i] ? 'is-done' : ''}">
+        <label class="task-main"><input class="task-check" type="checkbox" data-task="${i}" ${done[i] ? 'checked' : ''} aria-label="Mark ${escapeAttr(t.title)} complete"><span class="task-box" aria-hidden="true">✓</span><span class="task-copy"><strong>${escapeHtml(t.title)}</strong><p>${escapeHtml(t.description)}</p></span></label>
+        <button class="check-btn" data-check="${i}" type="button">${t.checks.length ? 'Auto-check' : 'Mark done'}</button>
+      </div>`).join('') : `<div class="hint-box"><p>No homework metadata yet. Add <code>homework.tasks</code> to the class metadata JSON.</p></div>`;
+    updateProgress(done, tasks);
+    $$('.task-check').forEach(c => c.addEventListener('change', () => {
+      const d = readDone(tasks); d[+c.dataset.task] = c.checked; writeDone(d); renderTasks(); toast(c.checked ? 'Task marked complete.' : 'Task reopened.');
+    }));
+    $$('[data-check]').forEach(b => b.addEventListener('click', () => checkTask(+b.dataset.check)));
+    els.checkAll.disabled = !tasks.some(t => t.checks.length);
+    els.taskProgressHint.textContent = tasks.some(t => t.checks.length) ? 'Code changes re-check verified tasks automatically' : 'Use the task rows to track your work';
+  }
+
+  async function checkTask(i, silent = false) {
+    const tasks = tasksForCurrent(); const task = tasks[i]; if (!task) return false;
+    const ok = task.checks.length ? await evaluateChecks(task.checks) : true;
+    const done = readDone(tasks); done[i] = ok; writeDone(done); renderTasks();
+    if (!silent) toast(ok ? 'Task passed ✓' : 'Not quite yet. Read the requirement and try again.');
+    if (ok && !silent) confetti();
+    return ok;
+  }
+  async function checkAllTasks() {
+    const tasks = tasksForCurrent(); if (!tasks.length) return;
+    const done = readDone(tasks);
+    for (let i = 0; i < tasks.length; i++) if (tasks[i].checks.length) done[i] = await evaluateChecks(tasks[i].checks);
+    writeDone(done); renderTasks(); toast('Homework checks updated.');
+    if (done.length && done.every(Boolean)) confetti();
+  }
+  async function evaluateChecks(checks) {
+    if (!Array.isArray(checks) || !checks.length) return false;
+    for (const c of checks) {
+      const ok = await evalCheck(c);
+      if (c?.mode === 'any' && ok) return true;
+      if (c?.mode !== 'any' && !ok) return false;
+    }
+    return true;
+  }
+  async function evalCheck(c) {
+    if (!c || typeof c !== 'object') return false;
+    if (c.mode === 'any') { for (const child of c.checks || []) if (await evalCheck(child)) return true; return false; }
+    if (c.mode === 'all') { for (const child of c.checks || []) if (!(await evalCheck(child))) return false; return true; }
+    if (c.type === 'files_exist') return (c.files || []).every(f => state.files.has(normalizePath(f)));
+    const file = normalizePath(c.file); if (!file || !state.files.has(file)) return false;
+    const text = getFileText(file);
+    if (c.type === 'contains') return c.value == null ? false : (c.flags === 'i' ? text.toLowerCase().includes(String(c.value).toLowerCase()) : text.includes(String(c.value)));
+    if (c.type === 'not_contains') return !text.includes(String(c.value));
+    if (c.type === 'regex') { try { return new RegExp(c.pattern, c.flags || '').test(text); } catch { return false; } }
+    if (c.type === 'min_length') return text.length >= Number(c.value || 0);
+    if (c.type === 'html_elements') { const re = new RegExp(`<${escapeRegExp(c.tag)}(?:\\s|>)`, 'ig'); return (text.match(re) || []).length >= Number(c.min || 1); }
+    if (c.type === 'css_property') return new RegExp(`${escapeRegExp(c.property)}\\s*:\\s*${escapeRegExp(String(c.value || ''))}`, 'i').test(text);
+    return false;
+  }
+  function scheduleAutoChecks() {
+    clearTimeout(state.autoCheckTimer);
+    state.autoCheckTimer = setTimeout(async () => {
+      const tasks = tasksForCurrent(); if (!tasks.some(t => t.checks.length)) return;
+      const done = readDone(tasks); let changed = false;
+      for (let i = 0; i < tasks.length; i++) {
+        if (!tasks[i].checks.length) continue;
+        const ok = await evaluateChecks(tasks[i].checks);
+        if (done[i] !== ok) { done[i] = ok; changed = true; }
+      }
+      if (changed) { writeDone(done); renderTasks(); }
+    }, 650);
+  }
+  els.checkAll.addEventListener('click', checkAllTasks);
+
+  function renderHints() {
+    const hints = state.current?.meta?.homework?.hints || [];
+    state.hintIndex = 0;
+    els.hintBox.innerHTML = hints.length ? `<div class="hint">${escapeHtml(hints[0])}</div>` : '<p>Small hint: read the requirement first, then inspect the starter files before writing code.</p>';
+  }
+  els.nextHint.addEventListener('click', () => {
+    const hints = state.current?.meta?.homework?.hints || [];
+    if (!hints.length) return toast('No more hints have been added for this class.');
+    state.hintIndex = (state.hintIndex + 1) % hints.length;
+    els.hintBox.innerHTML = `<div class="hint hint-pop">${escapeHtml(hints[state.hintIndex])}</div>`;
+  });
+
+  async function downloadZip(edited) {
+    if (!state.current) return;
+    if (!(await ensureZipLibrary())) { toast('The ZIP engine could not load.'); return; }
+    const zip = new JSZip();
+    for (const [name, bytes] of state.files.entries()) {
+      let data = bytes;
+      if (edited && textFile(name)) data = new TextEncoder().encode(getFileText(name));
+      zip.file(name, data);
+    }
+    const blob = await zip.generateAsync({ type:'blob', compression:'DEFLATE', compressionOptions:{level:6} });
+    const a = document.createElement('a'); const href = URL.createObjectURL(blob);
+    a.href = href; a.download = `${safeFileName(state.current.meta.title)}-${edited ? 'edited' : 'provided'}.zip`;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(href), 2500);
+    toast(`${edited ? 'Edited' : 'Provided'} ZIP ready.`);
+  }
+  els.originalZip.addEventListener('click', () => downloadZip(false));
+  els.editedZip.addEventListener('click', () => downloadZip(true));
+
+  async function openArticle(id) {
+    if (!state.catalog) { rememberPending('blogs', id); showView('login'); return; }
+    const meta = state.catalog.blogs.find(x => x.id === id); if (!meta) { toast('Article not found.'); return; }
+    if (!(await ensureZipLibrary())) { toast('The ZIP engine could not load.'); return; }
+    toast('Opening article…');
+    try {
+      const env = await loadJson(meta.resource); const bytes = await decryptEnvelope(env, state.password); const zip = await JSZip.loadAsync(bytes);
+      let md = '';
+      for (const n of ['article.md','index.md','README.md','readme.md']) if (zip.files[n]) { md = await zip.files[n].async('text'); break; }
+      if (!md) for (const n of Object.keys(zip.files)) if (/\.md$/i.test(n)) { md = await zip.files[n].async('text'); break; }
+      els.article.innerHTML = markdown(md, meta); showView('article'); history.replaceState(null, '', `${location.pathname}#article/${encodeURIComponent(id)}`);
+    } catch (err) { console.error(err); toast('This article could not be opened.'); }
+  }
+  els.articleBack.addEventListener('click', () => { location.hash = 'blogs'; showView('blogs'); });
+
+  function markdown(src, meta) {
+    const lines = String(src || '').replace(/\r/g, '').split('\n');
+    let out = `<div class="article-content"><div class="eyebrow">${escapeHtml((meta.tags || []).join(' · ') || 'Mentor note')}</div><h1>${escapeHtml(meta.title || 'Article')}</h1><p>${escapeHtml(meta.description || '')}</p>`;
+    let inCode = false, code = [], inList = false;
+    for (const line of lines) {
+      if (line.trim().startsWith('```')) { if (!inCode) { if (inList) { out += '</ul>'; inList=false; } inCode=true; code=[]; } else { out += `<pre><code>${escapeHtml(code.join('\n'))}</code></pre>`; inCode=false; } continue; }
+      if (inCode) { code.push(line); continue; }
+      if (/^###\s+/.test(line)) { if(inList){out+='</ul>';inList=false;} out += `<h3>${inlineMd(line.replace(/^###\s+/,''))}</h3>`; }
+      else if (/^##\s+/.test(line)) { if(inList){out+='</ul>';inList=false;} out += `<h2>${inlineMd(line.replace(/^##\s+/,''))}</h2>`; }
+      else if (/^#\s+/.test(line)) { if(inList){out+='</ul>';inList=false;} out += `<h2>${inlineMd(line.replace(/^#\s+/,''))}</h2>`; }
+      else if (/^[-*]\s+/.test(line)) { if(!inList){out+='<ul>';inList=true;} out += `<li>${inlineMd(line.replace(/^[-*]\s+/,''))}</li>`; }
+      else if (line.trim()) { if(inList){out+='</ul>';inList=false;} out += `<p>${inlineMd(line)}</p>`; }
+      else if(inList){out+='</ul>';inList=false;}
+    }
+    if (inList) out += '</ul>';
+    return out + '</div>';
+  }
+  function inlineMd(s) { return escapeHtml(s).replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\[([^\]]+)\]\((https?:[^\)]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>'); }
+
+  function installMonacoEnhancements(monaco) {
+    if (state.monacoProvidersInstalled) return;
+    state.monacoProvidersInstalled = true;
+    monaco.languages.registerCompletionItemProvider('html', {
+      triggerCharacters:['<',' ','/','"','='],
+      provideCompletionItems(model, position) {
+        const line = model.getValueInRange({startLineNumber:position.lineNumber,startColumn:1,endLineNumber:position.lineNumber,endColumn:position.column});
+        const before = line.slice(0,-1 + 1);
+        const word = model.getWordUntilPosition(position); const range = new monaco.Range(position.lineNumber, word.startColumn, position.lineNumber, position.column);
+        let items = HTML_SUGGESTIONS;
+        if (/!$/.test(line.trim())) items = [HTML_SUGGESTIONS[0]];
+        else if (!/<[^>]*$/.test(line) && !/<\w+\s+[^>]*$/.test(line)) items = HTML_SUGGESTIONS.slice(1);
+        return { suggestions: items.map((s) => ({ label:s.label, kind:monaco.languages.CompletionItemKind.Keyword, detail:s.detail, insertText:s.insertText.replace(/\$0/g,''), insertTextRules:monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, range })) };
+      }
+    });
+    monaco.languages.registerCompletionItemProvider('css', {
+      triggerCharacters:['-',';',':'],
+      provideCompletionItems(model, position) {
+        const word = model.getWordUntilPosition(position);
+        const range = new monaco.Range(position.lineNumber, word.startColumn, position.lineNumber, position.column);
+        return { suggestions: CSS_SUGGESTIONS.map(s => ({ label:s.label, kind:monaco.languages.CompletionItemKind.Property, detail:s.detail, insertText:s.insertText, insertTextRules:monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet, range })) };
+      }
+    });
+  }
+
+  function getFallbackContext() {
+    const text = els.fallback.value; const pos = els.fallback.selectionStart; const lineStart = text.lastIndexOf('\n', pos - 1) + 1; const line = text.slice(lineStart, pos);
+    const lang = langFor(els.activeFile.textContent); return { text, pos, lineStart, line, lang };
+  }
+  function smartSuggestionsFor(context) {
+    if (context.lang === 'css') {
+      const m = context.line.match(/(?:^|[;{]\s*)([\w-]*)$/); if (!m) return [];
+      const q = m[1].toLowerCase(); return CSS_SUGGESTIONS.filter(s => s.label.startsWith(q)).slice(0,8);
+    }
+    const trimmed = context.line.trim();
+    if (trimmed === '!') return [HTML_SUGGESTIONS[0]];
+    const m = context.line.match(/<\/?([\w-]*)$/); if (m) { const q = m[1].toLowerCase(); return HTML_SUGGESTIONS.filter(s => s.label !== '! + Tab' && s.label.startsWith(q)).slice(0,8); }
+    return [];
+  }
+  function maybeShowFallbackSuggestions() {
+    if (state.monaco || els.fallback.hidden) return hideSmartSuggestions();
+    const suggestions = smartSuggestionsFor(getFallbackContext());
+    state.smartSuggestions = suggestions; state.smartSuggestionIndex = 0;
+    if (!suggestions.length) return hideSmartSuggestions();
+    els.fallbackSuggest.innerHTML = suggestions.map((s,i) => `<button type="button" class="smart-suggestion ${i===0?'active':''}" data-suggest="${i}" role="option"><strong>${escapeHtml(s.label)}</strong><span>${escapeHtml(s.detail)}</span></button>`).join('');
+    els.fallbackSuggest.hidden = false; state.smartSuggestionVisible = true;
+    $$('.smart-suggestion').forEach(b => b.addEventListener('mousedown', e => { e.preventDefault(); acceptFallbackSuggestion(+b.dataset.suggest); }));
+  }
+  function hideSmartSuggestions() { els.fallbackSuggest.hidden = true; state.smartSuggestionVisible = false; }
+  function renderSuggestionSelection() { $$('.smart-suggestion').forEach((b,i) => b.classList.toggle('active', i === state.smartSuggestionIndex)); }
+  function onFallbackKeydown(e) {
+    if (!state.smartSuggestionVisible) return;
+    if (e.key === 'ArrowDown') { e.preventDefault(); state.smartSuggestionIndex=(state.smartSuggestionIndex+1)%state.smartSuggestions.length; renderSuggestionSelection(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); state.smartSuggestionIndex=(state.smartSuggestionIndex-1+state.smartSuggestions.length)%state.smartSuggestions.length; renderSuggestionSelection(); }
+    else if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); acceptFallbackSuggestion(state.smartSuggestionIndex); }
+    else if (e.key === 'Escape') { e.preventDefault(); hideSmartSuggestions(); }
+  }
+  function acceptFallbackSuggestion(index) {
+    const s = state.smartSuggestions[index]; if (!s) return;
+    const ctx = getFallbackContext(); const before = ctx.text.slice(0, ctx.pos); const after = ctx.text.slice(ctx.pos);
+    let start = ctx.pos;
+    if (ctx.lang === 'css') { const m=ctx.line.match(/[\w-]*$/); start = ctx.pos - (m?.[0]?.length || 0); }
+    else if (ctx.line.trim()==='!') start = ctx.lineStart + ctx.line.search(/\S/);
+    else { const m=ctx.line.match(/([\w-]*)$/); start = ctx.pos - (m?.[1]?.length || 0); }
+    let insert=s.insertText.replace(/\$\d+/g,'').replace(/\$0/g,'');
+    const next = ctx.text.slice(0,start) + insert + after;
+    els.fallback.value=next; const caret=start+insert.length; els.fallback.setSelectionRange(caret,caret); onEditorChange(); maybeShowFallbackSuggestions();
+  }
+
+  function confetti() {
+    const pieces=[]; for(let i=0;i<22;i++){const x=document.createElement('span');x.textContent=i%2?'✦':'·';x.className='confetti-piece';x.style.left=`${45+Math.random()*10}%`;x.style.top=`${42+Math.random()*8}%`;x.style.setProperty('--dx',`${Math.random()*240-120}px`);x.style.setProperty('--dy',`${Math.random()*260-130}px`);pieces.push(x);document.body.appendChild(x);setTimeout(()=>x.remove(),900);}
+  }
+
+  function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
+  function escapeAttr(s) { return escapeHtml(s).replace(/`/g,'&#96;'); }
+  function escapeRegExp(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+  function safeFileName(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'student-project'; }
+
+  // Expose a small diagnostics hook for manual browser testing.
+  window.ObaidulMentorLab = { getState: () => ({ unlocked:!!state.catalog, current:state.current?.meta?.id || null, files:state.files.size, monaco:!!state.monaco }) };
+
+  loadSiteInfo().finally(route);
 })();

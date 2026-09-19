@@ -5,10 +5,9 @@
   "description": "Static GitHub Pages premium student support lab for HTML and CSS classes.",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "clean": "node scripts/clean.mjs",
-    "verify": "node scripts/verify-build.mjs"
+    "clean": "node scripts/clean.mjs"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   }
 }

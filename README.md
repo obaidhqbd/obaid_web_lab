@@ -1,86 +1,87 @@
 # Obaidul Mentor Lab
 
-Student-first HTML and CSS learning platform.
+A static, GitHub Pages-friendly premium support portal for HTML + CSS students.
 
-## Your workflow
+## What it does
 
-Put a class project **folder or ZIP** in `Classes/`. You do not need to build the catalog manually.
+- Upload classes into `Classes/` as folders or ZIP files.
+- Upload mentor articles into `Blogs/` as folders or ZIP files.
+- `metadata.json` is the preferred content schema. `README.md` / `article.md` is used as a fallback for title and description when metadata is missing.
+- GitHub Actions detects content, generates the catalog, packages each item as ZIP, encrypts every package, generates a sitemap, and deploys `dist/` to GitHub Pages.
+- Students unlock the library in-browser with a password. The password is never sent to a server.
+- Monaco Editor provides a VS Code-style coding experience with HTML/CSS/JSON IntelliSense and validation. A textarea editor is used automatically if Monaco cannot load.
+- Student edits and homework progress are saved locally in the browser. No account/database is required.
+- Students can download the original provided ZIP or their edited ZIP.
+- Live preview runs inside a sandboxed iframe. Local image assets are converted to data URLs for previewing.
+- A service worker adds a cache layer for the static shell and already-fetched encrypted catalog/packages.
 
-On every push to main, GitHub Actions:
-1. scans Classes and Blogs;
-2. reads metadata.json when present;
-3. falls back to README/article/index.html when metadata is missing;
-4. infers common tags from folder and file names;
-5. packages each class/blog as a ZIP;
-6. generates a searchable catalog with tags and levels;
-7. verifies every generated ZIP;
-8. deploys the generated `dist/` site to GitHub Pages.
+## Content schema
 
-## Student experience
+### `Classes/<class-folder>/metadata.json`
 
-Students can:
-- browse Classes and Blogs;
-- search classes;
-- filter classes by automatically inferred or supplied tags and level;
-- open a real project file tree;
-- edit HTML/CSS/JS with Monaco or the fallback editor;
-- see an immediate sandboxed live preview;
-- complete automated homework checks;
-- use mentor hints;
-- download the original project ZIP or their edited ZIP.
+```json
+{
+  "id": "html-forms",
+  "title": "HTML Forms: Structure, Labels & Inputs",
+  "description": "Build a clean semantic HTML form.",
+  "summary": "Optional short summary.",
+  "level": "Beginner",
+  "duration": "45–60 min",
+  "tags": ["HTML", "Forms"],
+  "order": 1,
+  "featured": true,
+  "homework": {
+    "hints": ["Hint 1", "Hint 2"],
+    "tasks": [
+      {
+        "title": "Add the form",
+        "description": "Create the main form.",
+        "checks": [
+          {"type": "contains", "file": "index.html", "value": "<form"}
+        ]
+      }
+    ]
+  }
+}
+```
 
-## Class folder structure
+Supported homework checks include `contains`, `not_contains`, `regex`, `min_length`, `html_elements`, `css_property`, `files_exist`, and nested `all` / `any` groups.
 
-A typical class can look like:
+### Blogs
 
-`Classes/02-css-flexbox/`
-- `index.html`
-- `styles.css`
-- `assets/`
-- optional `metadata.json`
-- optional `README.md`
+Use the same metadata fields where useful. Put the article in `article.md`. `README.md` also works.
 
-A ZIP with the same internal structure is supported. The build system preserves that structure inside the generated class ZIP.
+## GitHub setup
 
-## Metadata
+1. Put this project in your repository.
+2. Put classes in `Classes/` and blog folders in `Blogs/`.
+3. In **Settings → Secrets and variables → Actions → New repository secret**, create:
 
-`metadata.json` is optional.
+`CLASS_ACCESS_PASSWORD`
 
-Supported fields include:
-- `id`
-- `title`
-- `description`
-- `summary`
-- `level`
-- `duration`
-- `tags`
-- `order`
-- `featured`
-- `homework.hints`
-- `homework.tasks` with automated checks
+Use a strong password. The workflow uses it only during the build to encrypt the catalog and packages. GitHub Actions secrets are encrypted in GitHub and are only exposed to a workflow when the workflow references them.
 
-When fields are omitted, the builder derives sensible defaults from filenames, README headings and HTML titles/headings.
+4. Optional: create an Actions variable named `SITE_URL` with your Pages URL. If omitted, the build uses a placeholder URL in the generated sitemap.
+5. In **Settings → Pages**, set the publishing source to **GitHub Actions**. The workflow uses GitHub's Pages deployment actions to build and publish the generated `dist/` directory.
+6. Push to `main`. The workflow builds and deploys automatically.
 
-## Owner editor
+## Security reality you should know
 
-Open `editor.html` from the footer to:
-- edit footer and branding values;
-- download a new `site-config.json`;
-- select a local class folder;
-- infer a title and tags;
-- generate `metadata.json`;
-- generate a ready-to-upload class ZIP.
+The published website does not expose the plaintext class files. It only publishes encrypted catalog/package blobs. However, if this repository is public, the original files inside the Git repository are still public. GitHub Pages is static hosting and does not provide a server-side password wall. Repository visibility and Pages availability also depend on your GitHub plan.
 
-Commit the generated files/folders to `Classes/` and the normal GitHub Actions pipeline publishes them.
+For **true confidentiality of the source material**, keep the content repository private and have the build workflow read that private repository using a narrowly scoped credential (or use a plan/setup that supports a private Pages source). Do not put the raw class repository in public Git history and assume the browser password hides it.
 
-## Deployment
+## Local testing
 
-GitHub Pages is deployed from the generated `dist/` directory by GitHub Actions. No repository secret is required for the public content pipeline.
+Run:
 
-## Source privacy
+```bash
+CLASS_ACCESS_PASSWORD=demo-only-change-me node scripts/build.mjs
+python -m http.server 4173 -d dist
+```
 
-Because the repository is public, files committed under `Classes/` and `Blogs/` are publicly visible on GitHub. The generated Pages site also exposes the learning content by design. Use a private content repository and a deployment setup with appropriate access if the class source must remain private.
+Open `http://localhost:4173` and use `demo-only-change-me`. Never use that password for real students.
 
-## Local usage
+## Design principles
 
-Serve the repository through localhost or GitHub Pages. Monaco and browser file APIs work most reliably over HTTP(S) rather than opening the HTML file directly from disk.
+Minimal interface, subtle infinite-loop motion, restrained mentor branding, keyboard-friendly controls, responsive layout, progressive enhancement, local-first persistence and graceful fallbacks.

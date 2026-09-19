@@ -1,15 +1,105 @@
-import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import os from 'node:os';import {execFileSync} from 'node:child_process';
-const ROOT=process.cwd(),DIST=path.join(ROOT,'dist'),WORK=path.join(os.tmpdir(),'oml-build-'+crypto.randomUUID());const BUILD_PASSWORD='public-build';
-function mkdir(p){fs.mkdirSync(p,{recursive:true})}function clean(p){if(fs.existsSync(p))fs.rmSync(p,{recursive:true,force:true});mkdir(p)}function safeId(s){return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,80)||'item'}function copy(a,b){mkdir(path.dirname(b));fs.cpSync(a,b,{recursive:true})}
-function firstPara(f){if(!f||!fs.existsSync(f))return '';const t=fs.readFileSync(f,'utf8').replace(/^#.*$/gm,'').trim();return (t.split(/\n\s*\n/)[0]||'').replace(/[*_]/g,'').slice(0,300)}
-function inferTags(name,dir){const src=(name+' '+path.basename(dir)+' '+fs.readdirSync(dir).join(' ')).toLowerCase();const map=[['html','HTML'],['css','CSS'],['form','Forms'],['flex','Flexbox'],['grid','CSS Grid'],['responsive','Responsive'],['javascript','JavaScript'],['js','JavaScript'],['dom','DOM'],['semantic','Semantics'],['access','Accessibility'],['layout','Layout'],['animation','Animation'],['git','Git'],['github','GitHub'],['portfolio','Portfolio'],['project','Project']];return [...new Set(map.filter(x=>src.includes(x[0])).map(x=>x[1]))]}
-function titleFromName(s){return String(s).replace(/\.zip$/i,'').replace(/^\d+[-_ ]*/,'').replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()).trim()||'Untitled'}
-function parseMeta(dir,type,name){let meta={};for(const f of ['metadata.json','meta.json']){const p=path.join(dir,f);if(fs.existsSync(p)){try{meta=JSON.parse(fs.readFileSync(p,'utf8'));break}catch{}}}const readme=['README.md','readme.md','article.md','index.md'].map(f=>path.join(dir,f)).find(fs.existsSync);const idx=path.join(dir,'index.html');let title=meta.title||'',description=meta.description||meta.summary||'';if(!title&&readme){const h=fs.readFileSync(readme,'utf8').match(/^#\s+(.+)$/m);if(h)title=h[1].trim()}if(!title&&fs.existsSync(idx)){const h=fs.readFileSync(idx,'utf8').match(/<title[^>]*>([\s\S]*?)<\/title>/i)||fs.readFileSync(idx,'utf8').match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);if(h)title=h[1].replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim()}if(!title)title=titleFromName(name);if(!description)description=firstPara(readme)||'A practical web development lesson.';const tags=[...(Array.isArray(meta.tags)?meta.tags:[]),...inferTags(name,dir)];const unique=[...new Set(tags)];const defaults=type==='class'?{level:'Beginner',duration:'Self-paced',tags:unique.length?unique:['HTML','CSS'],order:999,featured:false,homework:{hints:['Read the task carefully.','Change one thing at a time and use the live preview.'],tasks:[]}}:{level:'General',duration:'5 min read',tags:unique.length?unique:['Web design'],order:999,featured:false};const merged={...defaults,...meta,title,description,summary:meta.summary||description,tags:unique.length?unique:defaults.tags};if(type==='class'){const ts=Array.isArray(merged.homework?.tasks)?merged.homework.tasks:[];merged.homework={...(defaults.homework||{}),...(merged.homework||{}),tasks:ts.map((t,i)=>typeof t==='string'?{title:t,description:'Complete this learning task.',checks:[]}:{title:t.title||('Task '+(i+1)),description:t.description||'',checks:Array.isArray(t.checks)?t.checks:[]})}}return {...merged,id:safeId(meta.id||name),type}}
-function findSource(input,tmp){if(fs.statSync(input).isDirectory())return input;mkdir(tmp);execFileSync('unzip',['-q',input,'-d',tmp]);const e=fs.readdirSync(tmp,{withFileTypes:true}).filter(x=>!x.name.startsWith('.'));if(e.length===1&&e[0].isDirectory())return path.join(tmp,e[0].name);return tmp}
+import fs from 'node:fs';
+import path from 'node:path';
+import os from 'node:os';
+import crypto from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 
-function zipDir(dir){const out=path.join(WORK,crypto.randomUUID()+'.zip');const cwd=process.cwd();process.chdir(dir);try{execFileSync('zip',['-qr',out,'.','-x','*.DS_Store','.git/*','node_modules/*'])}finally{process.chdir(cwd)}return fs.readFileSync(out)}
-function processCollection(folder,type,catalog){const base=path.join(ROOT,folder);if(!fs.existsSync(base))return;const outDir=path.join(DIST,'data',type==='class'?'classes':'blogs');mkdir(outDir);fs.readdirSync(base,{withFileTypes:true}).filter(e=>!e.name.startsWith('.')).forEach(ent=>{const tmp=path.join(WORK,'x-'+crypto.randomUUID());const src=findSource(path.join(base,ent.name),tmp);const meta=parseMeta(src,type,ent.name);const resource='./data/'+(type==='class'?'classes':'blogs')+'/'+meta.id+'.zip';fs.writeFileSync(path.join(outDir,meta.id+'.zip'),zipDir(src));catalog.push({...meta,resource,updatedAt:new Date().toISOString()})})}
-clean(DIST);clean(WORK);['index.html','styles.css','app.js','sw.js','site.webmanifest','robots.txt','404.html','editor.html'].forEach(f=>copy(path.join(ROOT,f),path.join(DIST,f)));copy(path.join(ROOT,'assets'),path.join(DIST,'assets'));
-const cfg=JSON.parse(fs.readFileSync(path.join(ROOT,'site-config.json'),'utf8'));const catalog={site:cfg,classes:[],blogs:[],generatedAt:new Date().toISOString()};processCollection('Classes','class',catalog.classes);processCollection('Blogs','blog',catalog.blogs);catalog.classes.sort((a,b)=>(Number(a.order)||999)-(Number(b.order)||999)||a.title.localeCompare(b.title));catalog.blogs.sort((a,b)=>(Number(a.order)||999)-(Number(b.order)||999)||a.title.localeCompare(b.title));
-mkdir(path.join(DIST,'data/classes'));mkdir(path.join(DIST,'data/blogs'));fs.writeFileSync(path.join(DIST,'data/catalog.json'),JSON.stringify(catalog,null,2));fs.writeFileSync(path.join(DIST,'data/site.json'),JSON.stringify(cfg,null,2));fs.writeFileSync(path.join(DIST,'data/build-info.json'),JSON.stringify({version:1,generatedAt:catalog.generatedAt,classes:catalog.classes.length,blogs:catalog.blogs.length,commit:process.env.GITHUB_SHA||null},null,2));
-const siteUrl=(process.env.SITE_URL||'https://example.github.io/mentor-lab').replace(/\/$/,'');const urls=[siteUrl,...catalog.classes.map(x=>siteUrl+'/?class='+encodeURIComponent(x.id)),...catalog.blogs.map(x=>siteUrl+'/?blog='+encodeURIComponent(x.id))];fs.writeFileSync(path.join(DIST,'sitemap.xml'),'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'+urls.map(u=>'  <url><loc>'+u+'</loc></url>').join('\n')+'\n</urlset>');fs.writeFileSync(path.join(DIST,'robots.txt'),'User-agent: *\nAllow: /\nSitemap: '+siteUrl+'/sitemap.xml\n');fs.writeFileSync(path.join(DIST,'.nojekyll'),'');fs.rmSync(WORK,{recursive:true,force:true});console.log('Built '+catalog.classes.length+' classes and '+catalog.blogs.length+' blogs.')
+const ROOT = process.cwd();
+const DIST = path.join(ROOT, 'dist');
+const WORK = fs.mkdtempSync(path.join(os.tmpdir(), 'obaidul-lab-'));
+const ITERATIONS = 600_000;
+const PASSWORD = process.env.CLASS_ACCESS_PASSWORD || 'demo-only-change-me';
+const IS_PROD = Boolean(process.env.GITHUB_ACTIONS);
+
+if (IS_PROD && PASSWORD === 'demo-only-change-me') {
+  throw new Error('CLASS_ACCESS_PASSWORD GitHub Secret is required for production builds.');
+}
+
+function cleanDir(dir){ if(fs.existsSync(dir))fs.rmSync(dir,{recursive:true,force:true}); fs.mkdirSync(dir,{recursive:true}); }
+function safeId(value){return String(value||'item').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,90)||'item';}
+function titleFromName(name){return String(name).replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()).trim();}
+function readJson(file){return JSON.parse(fs.readFileSync(file,'utf8'));}
+function readSiteConfig(){const file=path.join(ROOT,'site-config.json');if(!fs.existsSync(file))return {brand:{name:'Obaidul Mentor Lab',mentor:'Mohammed Obaidul Hoque',role:'web development mentor',portfolioUrl:'',portfolioLabel:'Portfolio'},site:{description:'A focused premium support lab for students learning web design with HTML and CSS.'}};try{return readJson(file)}catch(err){throw new Error(`Invalid site-config.json: ${err.message}`)}}
+function copy(src,dst){fs.cpSync(src,dst,{recursive:true});}
+function listFiles(dir,base=dir,out=[]){for(const ent of fs.readdirSync(dir,{withFileTypes:true})){if(['.git','node_modules','.DS_Store'].includes(ent.name))continue;const abs=path.join(dir,ent.name);if(ent.isDirectory())listFiles(abs,base,out);else out.push(path.relative(base,abs).replaceAll(path.sep,'/'));}return out;}
+function firstMarkdownParagraph(file){if(!fs.existsSync(file))return '';const lines=fs.readFileSync(file,'utf8').split(/\r?\n/);for(const line of lines){const s=line.trim();if(!s||s.startsWith('#')||s.startsWith('```')||s.startsWith('- ')||s.startsWith('* '))continue;return s.replace(/[*_`]/g,'').slice(0,280);}return '';}
+function parseMeta(dir,type,name){
+  const metaFile=['metadata.json','meta.json'].map(n=>path.join(dir,n)).find(fs.existsSync) || path.join(dir,'metadata.json'); let meta={};
+  if(fs.existsSync(metaFile)){try{meta=readJson(metaFile)}catch(err){console.warn(`Invalid metadata.json in ${name}: ${err.message}`)}}
+  const readme=path.join(dir,'README.md');
+  const blogMd=['article.md','index.md','README.md','readme.md'].map(n=>path.join(dir,n)).find(fs.existsSync);
+  const title=meta.title || (()=>{if(fs.existsSync(readme)){const h=fs.readFileSync(readme,'utf8').match(/^#\s+(.+)$/m);if(h)return h[1].trim();}if(blogMd){const h=fs.readFileSync(blogMd,'utf8').match(/^#\s+(.+)$/m);if(h)return h[1].trim();}if(fs.existsSync(path.join(dir,'index.html'))){const html=fs.readFileSync(path.join(dir,'index.html'),'utf8');const t=html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);if(t)return t[1].replace(/\s+/g,' ').trim();const h=html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);if(h)return h[1].replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();}return titleFromName(name)})();
+  const description=meta.description || meta.summary || firstMarkdownParagraph(blogMd || readme);
+  const defaults=type==='class'?{
+    level:'Beginner',duration:'Self-paced',tags:['HTML','CSS'],order:999,featured:false,
+    homework:{tasks:[],hints:['Read the task carefully before coding.','Change one thing at a time and use the live preview.']}
+  }:{level:'General',duration:'5 min read',tags:['Web design'],order:999,featured:false};
+  const merged={...defaults,...meta};
+  if(type==='class'){
+    const rawTasks=Array.isArray(merged.homework?.tasks)?merged.homework.tasks:(Array.isArray(merged.homework?.checks)?merged.homework.checks:[]);
+    merged.homework={...(defaults.homework||{}),...(merged.homework||{}),tasks:rawTasks.map((t,i)=>typeof t==='string'?{title:t,description:'Complete this learning task.',checks:[]}:{title:t?.title||`Task ${i+1}`,description:t?.description||'',checks:Array.isArray(t?.checks)?t.checks:[]})};
+  }
+  return {...merged,id:safeId(meta.id || name),title,description,summary:meta.summary||description,type};
+}
+function findSourceDir(input,extractTo){
+  if(fs.statSync(input).isDirectory()) return input;
+  fs.mkdirSync(extractTo,{recursive:true}); execFileSync('unzip',['-q',input,'-d',extractTo]);
+  const entries=fs.readdirSync(extractTo,{withFileTypes:true});
+  if(entries.length===1 && entries[0].isDirectory()) return path.join(extractTo,entries[0].name);
+  const candidates=[extractTo,...entries.filter(e=>e.isDirectory()).map(e=>path.join(extractTo,e.name))];
+  return candidates.find(d=>fs.existsSync(path.join(d,'metadata.json'))||fs.existsSync(path.join(d,'README.md'))||fs.existsSync(path.join(d,'index.html'))) || extractTo;
+}
+function aesEncrypt(input, password, aad){
+  const salt=crypto.randomBytes(16); const iv=crypto.randomBytes(12); const key=crypto.pbkdf2Sync(Buffer.from(password),salt,ITERATIONS,32,'sha256');
+  const cipher=crypto.createCipheriv('aes-256-gcm',key,iv); cipher.setAAD(Buffer.from(aad)); const data=Buffer.concat([cipher.update(input),cipher.final()]); const tag=cipher.getAuthTag();
+  return {version:1,algorithm:'AES-256-GCM',kdf:'PBKDF2-SHA256',iterations:ITERATIONS,salt:salt.toString('hex'),iv:iv.toString('base64'),tag:tag.toString('base64'),aad,data:data.toString('base64')};
+}
+function makeZip(sourceDir,outZip){
+  const prev=process.cwd(); process.chdir(sourceDir); try {execFileSync('zip',['-qr',outZip,'.','-x','*.DS_Store','.git/*','node_modules/*']);} finally {process.chdir(prev);} return fs.readFileSync(outZip);
+}
+function copySiteShell(){
+  cleanDir(DIST);
+  for(const file of ['index.html','styles.css','app.js','sw.js','site.webmanifest','robots.txt','404.html']) fs.copyFileSync(path.join(ROOT,file),path.join(DIST,file));
+  copy(path.join(ROOT,'assets'),path.join(DIST,'assets'));
+}
+function ensureDir(p){fs.mkdirSync(p,{recursive:true});}
+function processCollection(folderName,type,catalog,manifestEntries){
+  const sourceRoot=path.join(ROOT,folderName); if(!fs.existsSync(sourceRoot))return;
+  const workRoot=path.join(WORK,folderName); ensureDir(workRoot); const inputs=fs.readdirSync(sourceRoot,{withFileTypes:true}).filter(e=>!e.name.startsWith('.'));
+  const seen=new Set();
+  for(const inputEnt of inputs){
+    const input=path.join(sourceRoot,inputEnt.name); let tempExtract=path.join(WORK,'extract',safeId(inputEnt.name)); ensureDir(tempExtract);
+    let src=findSourceDir(input,tempExtract); if(!fs.existsSync(src))continue;
+    const meta=parseMeta(src,type,inputEnt.name); let id=meta.id; let n=2; while(seen.has(id)||catalog.some(x=>x.id===id)){id=`${id}-${n++}`;} seen.add(id); meta.id=id;
+    const zipPath=path.join(workRoot,`${id}.zip`); const zipBuf=makeZip(src,zipPath); const envelope=aesEncrypt(zipBuf,PASSWORD,`${type}:${id}:package:v1`);
+    const targetDir=path.join(DIST,'data',type==='class'?'classes':'blogs');ensureDir(targetDir); const resourceFolder=type==='class'?'classes':'blogs'; const resRel=`./data/${resourceFolder}/${id}.enc.json`; fs.writeFileSync(path.join(targetDir,`${id}.enc.json`),JSON.stringify(envelope));
+    const packageMeta={...meta,resource:resRel,updatedAt:new Date().toISOString()}; delete packageMeta.internal;
+    manifestEntries.push(packageMeta);
+  }
+}
+
+copySiteShell();
+ensureDir(path.join(DIST,'data/classes')); ensureDir(path.join(DIST,'data/blogs'));
+const siteConfig=readSiteConfig();
+const catalog={site:{...siteConfig.brand,...siteConfig.site},classes:[],blogs:[],generatedAt:new Date().toISOString()};
+processCollection('Classes','class',catalog.classes,catalog.classes);
+processCollection('Blogs','blog',catalog.blogs,catalog.blogs);
+catalog.classes.sort((a,b)=>(Number(a.order)||999)-(Number(b.order)||999)||a.title.localeCompare(b.title));
+catalog.blogs.sort((a,b)=>(Number(a.order)||999)-(Number(b.order)||999)||a.title.localeCompare(b.title));
+const catalogEnvelope=aesEncrypt(Buffer.from(JSON.stringify(catalog)),PASSWORD,'catalog:v1');
+fs.writeFileSync(path.join(DIST,'data/catalog.enc.json'),JSON.stringify(catalogEnvelope));
+fs.writeFileSync(path.join(DIST,'data/site.json'),JSON.stringify(catalog.site,null,2));
+const buildInfo={version:1,generatedAt:catalog.generatedAt,node:process.version,classes:catalog.classes.length,blogs:catalog.blogs.length,repository:process.env.GITHUB_REPOSITORY||null,commit:process.env.GITHUB_SHA||null};
+fs.writeFileSync(path.join(DIST,'data/build-info.json'),JSON.stringify(buildInfo,null,2));
+
+const siteOrigin=(process.env.SITE_URL||'https://example.github.io/mentor-lab').replace(/\/$/,'');
+const urls=[`${siteOrigin}/`,'']
+  .concat(catalog.classes.map(x=>`${siteOrigin}/?class=${encodeURIComponent(x.id)}`))
+  .concat(catalog.blogs.map(x=>`${siteOrigin}/?blog=${encodeURIComponent(x.id)}`));
+const sitemap=['<?xml version="1.0" encoding="UTF-8"?>','<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',...urls.filter(Boolean).map(u=>`  <url><loc>${u}</loc></url>`),'</urlset>'].join('\n');
+fs.writeFileSync(path.join(DIST,'sitemap.xml'),sitemap);
+fs.writeFileSync(path.join(DIST,'robots.txt'),`User-agent: *\nAllow: /\nSitemap: ${siteOrigin}/sitemap.xml\n`);
+fs.writeFileSync(path.join(DIST,'.nojekyll'),'');
+
+console.log(`Built ${catalog.classes.length} classes and ${catalog.blogs.length} blogs.`);
+if(!IS_PROD)console.log('Development build used demo password. Set CLASS_ACCESS_PASSWORD for a real build.');
