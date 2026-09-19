@@ -4,12 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#0b1220" />
-  <meta name="description" content="__SITE_DESCRIPTION__" />
+  <meta name="description" content="Obaidul Mentor Lab is a premium HTML and CSS learning workspace with protected classes, homework, live preview and a VS Code-style editor." />
   <meta name="robots" content="index,follow" />
   <link rel="manifest" href="./site.webmanifest" />
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./styles.css" />
-  <title>__BRAND_NAME__</title>
+  <title>Obaidul Mentor Lab</title>
 </head>
 <body>
   <div class="ambient ambient-a" aria-hidden="true"></div>
@@ -18,7 +18,7 @@
   <header class="topbar">
     <a class="brand" href="#home" data-route="home" aria-label="Obaidul Mentor Lab home">
       <span class="brand-mark" aria-hidden="true">O</span>
-      <span class="brand-copy"><strong>__BRAND_NAME__</strong><small>Mentor Lab</small></span>
+      <span class="brand-copy"><strong>Obaidul</strong><small>Mentor Lab</small></span>
     </a>
     <nav class="topnav" aria-label="Primary navigation">
       <a href="#home" data-route="home">Home</a>
@@ -26,7 +26,7 @@
       <a href="#blogs" data-route="blogs">Blogs</a>
       <a href="#workspace" data-route="workspace">Workspace</a>
     </nav>
-    <div class="top-actions">
+    <div class="top-actions"><a class="portfolio-link" id="portfolio-link-header" href="https://obaidulctg.github.io/pro" target="_blank" rel="noopener noreferrer">Portfolio ↗</a>
       <button class="icon-btn" id="theme-toggle" type="button" aria-label="Toggle theme" title="Toggle theme">☼</button>
       <button class="ghost-btn" id="lock-button" type="button" hidden>Lock</button>
     </div>
@@ -90,6 +90,7 @@
       <div class="workspace-shell">
         <div class="workspace-head">
           <div><div class="eyebrow">Your local workspace</div><h2 id="workspace-title">No class opened</h2><p id="workspace-subtitle">Choose a class to start coding.</p></div>
+          <div class="workspace-progress" aria-label="Class progress"><div class="progress-ring" id="class-progress-ring" style="--progress:0deg"><div class="progress-ring-core"><strong id="class-progress-percent">0%</strong><span>complete</span></div></div><div class="progress-copy"><strong id="progress-status">Start your first task</strong><span id="task-progress-label">0 / 0 tasks</span></div></div>
           <div class="workspace-actions">
             <button class="ghost-btn" id="download-original" type="button" disabled>Provided ZIP</button>
             <button class="primary-btn" id="download-edited" type="button" disabled>Download my ZIP</button>
@@ -102,17 +103,23 @@
           </aside>
           <section class="editor-panel panel">
             <div class="editor-toolbar"><span id="active-file">Select a file</span><div class="toolbar-right"><button id="format-code" class="tiny-btn" type="button">Format</button><span id="save-state">Ready</span></div></div>
-            <div id="editor" class="editor"></div>
-            <textarea id="fallback-editor" class="fallback-editor" spellcheck="false" hidden></textarea>
+            <div class="editor-stage">
+              <div id="editor" class="editor"></div>
+              <textarea id="fallback-editor" class="fallback-editor" spellcheck="false" hidden aria-label="Code editor fallback"></textarea>
+              <div id="fallback-suggest" class="smart-suggestions" hidden role="listbox" aria-label="Code suggestions"></div>
+            </div>
           </section>
           <section class="preview-panel panel">
-            <div class="panel-head"><strong>Live preview</strong><div class="preview-tools"><button id="refresh-preview" class="tiny-btn" type="button">Refresh</button><button id="open-preview" class="tiny-btn" type="button">Pop out</button></div></div>
+            <div class="panel-head"><div class="preview-title"><strong>Live preview</strong><span class="live-badge">● Live</span></div><div class="preview-tools"><button id="refresh-preview" class="tiny-btn" type="button">Refresh</button><button id="open-preview" class="tiny-btn" type="button">Pop out</button></div></div>
             <iframe id="preview-frame" title="Student project live preview" sandbox="allow-forms allow-modals"></iframe>
           </section>
         </div>
         <div class="workspace-bottom">
-          <section class="tasks-panel panel"><div class="panel-head"><strong>Homework</strong><span id="task-progress-label">0 / 0</span></div><div id="task-list" class="task-list"></div></section>
-          <section class="tips-panel panel"><div class="panel-head"><strong>Mentor hints</strong><span>Local</span></div><div id="hint-box" class="hint-box"><p>Open a class and its task hints will appear here.</p></div></section>
+          <section class="tasks-panel panel">
+            <div class="panel-head"><div><strong>Homework</strong><small id="task-progress-hint">Checked tasks update automatically</small></div><button id="check-all" class="tiny-btn" type="button">Check all</button></div>
+            <div id="task-list" class="task-list"></div>
+          </section>
+          <section class="tips-panel panel"><div class="panel-head"><strong>Mentor hints</strong><button id="next-hint" class="tiny-btn" type="button">Next hint</button></div><div id="hint-box" class="hint-box"><p>Open a class and its task hints will appear here.</p></div></section>
         </div>
       </div>
     </section>
@@ -135,8 +142,8 @@
   </main>
 
   <footer class="site-footer shell">
-    <div><strong>__BRAND_NAME__</strong><span>·</span><span>__BRAND_ROLE__</span></div>
-    <div><a class="portfolio-link" id="portfolio-link" href="__PORTFOLIO_URL__" target="_blank" rel="noopener noreferrer">__PORTFOLIO_LABEL__ ↗</a><span>·</span><span>© <span id="year"></span> __BRAND_MENTOR__</span></div>
+    <div><strong>Obaidul Mentor Lab</strong><span>·</span><span>web development mentor</span></div>
+    <div>© <span id="year"></span> Obaidul <span>·</span> <a id="portfolio-link-footer" href="https://obaidulctg.github.io/pro" target="_blank" rel="noopener noreferrer">Portfolio ↗</a></div>
   </footer>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
@@ -145,25 +152,35 @@
   <script>
     window.MONACO_VERSION = '0.56.0';
     window.monacoReady = new Promise((resolve) => {
-      let settled = false;
-      const finish = (value) => { if (!settled) { settled = true; resolve(value); } };
-      const timer = setTimeout(() => finish(null), 9000);
-      const loader = document.createElement('script');
-      loader.src = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/vs/loader.js';
-      loader.onload = () => {
-        try {
-          require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/vs' } });
-          require(['vs/editor/editor.main'], () => {
-            clearTimeout(timer);
-            finish(window.monaco || null);
-          }, () => { clearTimeout(timer); finish(null); });
-        } catch (err) {
-          clearTimeout(timer);
-          finish(null);
+      const cdns = [
+        'https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/vs',
+        'https://unpkg.com/monaco-editor@0.56.0/min/vs'
+      ];
+      const finish = (value) => resolve(value || null);
+      const timeout = setTimeout(() => finish(null), 7000);
+      window.MonacoEnvironment = {
+        getWorkerUrl() {
+          const base = cdns[0];
+          const proxy = `self.MonacoEnvironment={baseUrl:'${'https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/'}'};importScripts('${'https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/vs/base/worker/workerMain.js'}');`;
+          return `data:text/javascript;charset=utf-8,${encodeURIComponent(proxy)}`;
         }
       };
-      loader.onerror = () => { clearTimeout(timer); finish(null); };
-      document.head.appendChild(loader);
+      const tryLoader = (i) => {
+        if (i >= cdns.length) { clearTimeout(timeout); finish(null); return; }
+        const loader = document.createElement('script');
+        loader.src = `${cdns[i]}/loader.js`;
+        loader.onload = () => {
+          try {
+            window.require.config({ paths: { vs: cdns[i] } });
+            window.require(['vs/editor/editor.main'], () => { clearTimeout(timeout); finish(window.monaco); }, () => tryLoader(i + 1));
+          } catch {
+            tryLoader(i + 1);
+          }
+        };
+        loader.onerror = () => tryLoader(i + 1);
+        document.head.appendChild(loader);
+      };
+      tryLoader(0);
     });
   </script>
   <script src="./app.js"></script>
