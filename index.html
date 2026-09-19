@@ -24,8 +24,8 @@
       <button class="nav-item" data-view="lab"><span>&lt;/&gt;</span> Web Lab</button>
       <button class="nav-item" data-view="assignments"><span>✓</span> Assignments</button>
       <button class="nav-item" data-view="analytics"><span>◫</span> Analytics</button>
-      <button class="nav-item" data-view="notes"><span>✎</span> Notes &amp; Knowledge</button>
-      <div class="nav-caption">BUILD</div>
+      <button class="nav-item" data-view="notes"><span>✎</span> Notes &amp; Knowledge</button>\n      <button class="nav-item" data-view="classes"><span>▣</span> Class Files</button>
+      <div class="nav-caption">PERSONAL BRAND</div>\n      <button class="nav-item" data-view="portfolio"><span>◉</span> My Portfolio</button>\n      <div class="nav-caption">BUILD</div>
       <button class="nav-item" data-view="projects"><span>◆</span> Projects</button>
       <button class="nav-item" data-view="marketing"><span>◈</span> Marketing</button>
       <button class="nav-item" data-view="resources"><span>↗</span> Resources</button>
@@ -170,6 +170,44 @@
       </div>
     </section>
 
+    <section class="view" id="view-classes">
+      <div class="page-title"><div><span class="eyebrow">CLASS RESOURCE VAULT</span><h1>Class Files</h1><p>Upload your class materials once and keep PDFs, presentations, documents, images and ZIP files organized by subject. Files stay in this browser using IndexedDB.</p></div><div class="title-actions"><button class="btn ghost" id="classCreateFolderBtn">＋ Class folder</button><button class="btn primary" id="classUploadBtn">＋ Upload files</button><input type="file" id="classFileInput" multiple hidden accept=".pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.zip,.rar,.7z,.txt,.md,.jpg,.jpeg,.png,.webp,.gif,.svg,.mp4,.webm"></div></div>
+      <section class="panel class-hero">
+        <div><span class="eyebrow">ONE PLACE FOR EVERY CLASS</span><h2>Upload → organize → search → download.</h2><p>Use subject, class title and tags to keep your learning archive useful instead of turning it into a random Downloads folder.</p></div>
+        <div class="class-stats"><div><b id="classFileCount">0</b><small>files</small></div><div><b id="classSubjectCount">0</b><small>subjects</small></div><div><b id="classStorageNote">Local</b><small>storage</small></div></div>
+      </section>
+      <div class="class-toolbar">
+        <input id="classSearch" placeholder="Search files, class titles or tags…">
+        <select id="classSubjectFilter"><option value="all">All subjects</option></select>
+        <select id="classTypeFilter"><option value="all">All types</option><option value="pdf">PDF</option><option value="document">Documents</option><option value="presentation">Presentations</option><option value="spreadsheet">Spreadsheets</option><option value="archive">Archives</option><option value="image">Images</option><option value="video">Videos</option><option value="text">Text</option></select>
+        <button class="icon-btn small" id="classClearFilters">↺</button>
+      </div>
+      <div class="class-layout">
+        <section class="panel"><div class="panel-head"><div><span class="eyebrow">FILES</span><h2>Your class library</h2></div><span class="pill green" id="classUploadStatus">READY</span></div><div id="classFileGrid" class="class-file-grid"></div></section>
+        <aside class="panel class-folder-panel"><div class="panel-head"><div><span class="eyebrow">SUBJECTS</span><h2>Class folders</h2></div></div><div id="classFolderList" class="class-folder-list"></div><div class="class-tip"><b>Best workflow</b><small>Upload by class → tag by topic → use search before downloading again.</small></div></aside>
+      </div>
+      <div class="class-drop" id="classDropZone"><span>＋</span><div><b>Drop class files here</b><small>Multiple files are supported. Your browser stores them locally.</small></div></div>
+    </section>
+
+    <section class="view" id="view-portfolio">
+      <div class="page-title"><div><span class="eyebrow">PERSONAL BRAND</span><h1>My Portfolio</h1><p>Your student workspace and your professional portfolio now live together.</p></div><div class="title-actions"><a class="btn ghost" href="portfolio.html" target="_blank" rel="noopener">Open public portfolio ↗</a><a class="btn primary" href="portfolio.html" download>Save portfolio page</a></div></div>
+      <section class="portfolio-shell">
+        <div class="portfolio-hero-card">
+          <div class="portfolio-avatar">MO</div>
+          <span class="eyebrow">STUDENT · BUILDER · DIGITAL CREATOR</span>
+          <h2>Mohammed Obaidul Hoque</h2>
+          <p>Web development, data analytics and digital marketing — with a focus on building useful, practical digital products.</p>
+          <div class="portfolio-actions"><a class="btn primary" href="portfolio.html" target="_blank" rel="noopener">View polished portfolio ↗</a><button class="btn ghost" id="portfolioCopyBio">Copy intro</button></div>
+        </div>
+        <div class="portfolio-grid">
+          <article class="portfolio-card"><span class="portfolio-num">01</span><b>Web Development</b><small>Real interfaces, browser-first tools and source-first learning experiences.</small></article>
+          <article class="portfolio-card"><span class="portfolio-num">02</span><b>Data Analytics</b><small>Metrics, dashboards, analysis workflows and data-informed decisions.</small></article>
+          <article class="portfolio-card"><span class="portfolio-num">03</span><b>Digital Marketing</b><small>Content systems, SEO thinking, experiments and measurable growth.</small></article>
+        </div>
+      </section>
+      <section class="panel"><div class="panel-head"><div><span class="eyebrow">FEATURED WORK</span><h2>Projects from your workspace</h2></div><button class="text-btn" data-view-jump="projects">Open project manager →</button></div><div id="portfolioProjectPreview" class="portfolio-project-preview"></div></section>
+    </section>
+
     <section class="view" id="view-projects">
       <div class="page-title"><div><span class="eyebrow">BUILD PORTFOLIO</span><h1>Projects</h1><p>Turn learning into visible work and keep the next milestone obvious.</p></div><button class="btn primary" id="newProjectBtn">＋ New project</button></div>
       <div id="projectGrid" class="project-grid"></div>
@@ -245,6 +283,6 @@
 </dialog>
 
 <div id="toast" class="toast"></div>
-<script src="app.js"></script>
+<script src="app.js"></script><script src="class-vault.js"></script>
 </body>
 </html>
