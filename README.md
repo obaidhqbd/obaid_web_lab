@@ -4,40 +4,83 @@ Student-first HTML and CSS learning platform.
 
 ## Your workflow
 
-Put a class project **folder or ZIP** in `Classes/`. You do not need to manually build a web catalog.
+Put a class project **folder or ZIP** in `Classes/`. You do not need to build the catalog manually.
 
 On every push to main, GitHub Actions:
 1. scans Classes and Blogs;
-2. reads metadata when present;
-3. automatically falls back to README/title/index.html when metadata is missing;
+2. reads metadata.json when present;
+3. falls back to README/article/index.html when metadata is missing;
 4. infers common tags from folder and file names;
-5. packages each class/blog as ZIP;
-6. encrypts the catalog/packages during the build;
-7. generates the searchable tag/level catalog;
-8. verifies the generated resources;
-9. deploys dist/ to GitHub Pages.
+5. packages each class/blog as a ZIP;
+6. generates a searchable catalog with tags and levels;
+7. verifies every generated ZIP;
+8. deploys the generated `dist/` site to GitHub Pages.
 
 ## Student experience
 
 Students can:
-- browse Classes, search and filter by tags/level;
-- unlock the class library in the browser;
-- open the real project file tree;
+- browse Classes and Blogs;
+- search classes;
+- filter classes by automatically inferred or supplied tags and level;
+- open a real project file tree;
 - edit HTML/CSS/JS with Monaco or the fallback editor;
 - see an immediate sandboxed live preview;
-- complete automatic homework checks;
+- complete automated homework checks;
 - use mentor hints;
-- download the original project ZIP or their edited ZIP;
-- read mentor Blogs.
+- download the original project ZIP or their edited ZIP.
+
+## Class folder structure
+
+A typical class can look like:
+
+`Classes/02-css-flexbox/`
+- `index.html`
+- `styles.css`
+- `assets/`
+- optional `metadata.json`
+- optional `README.md`
+
+A ZIP with the same internal structure is supported. The build system preserves that structure inside the generated class ZIP.
+
+## Metadata
+
+`metadata.json` is optional.
+
+Supported fields include:
+- `id`
+- `title`
+- `description`
+- `summary`
+- `level`
+- `duration`
+- `tags`
+- `order`
+- `featured`
+- `homework.hints`
+- `homework.tasks` with automated checks
+
+When fields are omitted, the builder derives sensible defaults from filenames, README headings and HTML titles/headings.
 
 ## Owner editor
 
-Open editor.html from the footer to edit the footer/branding and download a new site-config.json. The same panel can scan a local class folder and generate metadata.json or a ready-to-upload class ZIP.
+Open `editor.html` from the footer to:
+- edit footer and branding values;
+- download a new `site-config.json`;
+- select a local class folder;
+- infer a title and tags;
+- generate `metadata.json`;
+- generate a ready-to-upload class ZIP.
 
-## Required GitHub setup
+Commit the generated files/folders to `Classes/` and the normal GitHub Actions pipeline publishes them.
 
-Create an Actions repository secret named CLASS_ACCESS_PASSWORD. Optionally create an Actions variable named SITE_URL. Set GitHub Pages publishing to GitHub Actions.
+## Deployment
 
-## Security reality
+GitHub Pages is deployed from the generated `dist/` directory by GitHub Actions. No repository secret is required for the public content pipeline.
 
-The built Pages artifact contains encrypted catalog/package blobs, but a public GitHub repository still contains raw source files under Classes/ and Blogs/. If the raw source must be private, keep the content repository private and use a deployment setup that can read it.
+## Source privacy
+
+Because the repository is public, files committed under `Classes/` and `Blogs/` are publicly visible on GitHub. The generated Pages site also exposes the learning content by design. Use a private content repository and a deployment setup with appropriate access if the class source must remain private.
+
+## Local usage
+
+Serve the repository through localhost or GitHub Pages. Monaco and browser file APIs work most reliably over HTTP(S) rather than opening the HTML file directly from disk.
