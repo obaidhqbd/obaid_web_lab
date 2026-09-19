@@ -1,66 +1,43 @@
-# Obaid Web Lab — Student OS + Portfolio
+# Obaidul Mentor Lab
 
-A browser-first, automation-first personal workspace for Mohammed Obaidul Hoque, combining study, coding, class resources, analytics, marketing, projects and a professional portfolio in one site.
+Student-first HTML and CSS learning platform.
 
-## Main modules
+## Your workflow
 
-- Command Center with live daily queue, deadlines and automation feed
-- Study System with subject priorities, automatic daily planning, focus timer, streaks and study analytics
-- **Class Files / Class Vault** with multi-file upload for PDF, DOC/DOCX, PPT/PPTX, spreadsheet, ZIP/RAR/7Z, images, text and video
-- Class-file search, subject filters, type filters, preview/download/delete actions
-- IndexedDB storage for uploaded binary files so they do not depend on localStorage
-- Source-first Web Lab with separate HTML/CSS/JS files, autosave, isolated preview, snapshots, imports and standalone project download
-- Assignments & Tasks linked to daily planning
-- Notes & Knowledge
-- Projects
-- Digital Marketing console and SEO checklist
-- Analytics and weekly review
-- Resource library
-- Automation Center
-- **Integrated personal workspace portfolio**
-- **Public portfolio page** at portfolio.html
-- PWA shell and offline cache
-- Dark/light theme and responsive mobile navigation
-- GitHub Pages deployment
-- CI syntax/JSON validation workflow
+Put a class project **folder or ZIP** in `Classes/`. You do not need to manually build a web catalog.
 
-## Class Vault data model
+On every push to main, GitHub Actions:
+1. scans Classes and Blogs;
+2. reads metadata when present;
+3. automatically falls back to README/title/index.html when metadata is missing;
+4. infers common tags from folder and file names;
+5. packages each class/blog as ZIP;
+6. encrypts the catalog/packages during the build;
+7. generates the searchable tag/level catalog;
+8. verifies the generated resources;
+9. deploys dist/ to GitHub Pages.
 
-Uploaded files are stored in the browser's IndexedDB database ObaidWebLabClassVault. File metadata includes original filename, MIME type, size, subject, class title, tags and upload date.
+## Student experience
 
-This means the current static version does not upload private class files to a server. Files remain on the device/browser that uploaded them. Use the workspace backup/export separately for the app's structured data; binary class files remain in the browser vault.
+Students can:
+- browse Classes, search and filter by tags/level;
+- unlock the class library in the browser;
+- open the real project file tree;
+- edit HTML/CSS/JS with Monaco or the fallback editor;
+- see an immediate sandboxed live preview;
+- complete automatic homework checks;
+- use mentor hints;
+- download the original project ZIP or their edited ZIP;
+- read mentor Blogs.
 
-## Automation
+## Owner editor
 
-Local browser automations connect the workflow:
+Open editor.html from the footer to edit the footer/branding and download a new site-config.json. The same panel can scan a local class folder and generate metadata.json or a ready-to-upload class ZIP.
 
-1. Inputs -> subjects, priorities and deadlines.
-2. Planner -> generates today's study blocks and tasks.
-3. Focus timer -> logs completed sessions.
-4. Analytics -> recalculates streaks and study activity.
-5. Deadline Watch -> detects urgent deadlines.
-6. Smart Capture -> routes quick text into tasks, notes, ideas or learning items.
-7. Backup routine -> exports workspace data or a standalone Web Lab project.
-8. Notifications -> optional browser reminders while the app is open.
-9. Webhook -> optional external event delivery; keep private secrets on a server.
+## Required GitHub setup
 
-## Portfolio
+Create an Actions repository secret named CLASS_ACCESS_PASSWORD. Optionally create an Actions variable named SITE_URL. Set GitHub Pages publishing to GitHub Actions.
 
-The public portfolio is designed to present:
+## Security reality
 
-- Mohammed Obaidul Hoque
-- Web development
-- Data analytics
-- Digital marketing
-- Selected projects
-- Skills
-- GitHub link
-- Entry back into the Student OS
-
-## Deploy
-
-Enable GitHub Pages with **GitHub Actions** as the publishing source. The included workflow deploys the static site on pushes to main.
-
-## Local usage
-
-Open index.html directly or serve the repository from a local/static web server. Some browser APIs, especially PWA installation, service workers and notification behavior, work best under HTTPS or localhost.
+The built Pages artifact contains encrypted catalog/package blobs, but a public GitHub repository still contains raw source files under Classes/ and Blogs/. If the raw source must be private, keep the content repository private and use a deployment setup that can read it.
