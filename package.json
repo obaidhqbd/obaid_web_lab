@@ -1,0 +1,1 @@
+{"name":"obaidul-mentor-lab","version":"2.0.0","private":true,"description":"Student-first HTML and CSS learning lab with automated class publishing.","scripts":{"build":"node scripts/build.mjs","clean":"node scripts/clean.mjs","verify":"node scripts/verify-build.mjs"},"engines":{"node":">=22"}}
