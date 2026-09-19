@@ -37,7 +37,7 @@ web:{files:{
 'styles.css':'body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0b1220;color:#f5f7fb;font:16px system-ui}.demo{width:min(560px,82vw);padding:42px;border:1px solid #33435f;border-radius:24px;background:#111d30;box-shadow:0 30px 80px #0005}.demo span{font-size:10px;letter-spacing:.18em;color:#8ebcff}.demo h1{font-size:42px;letter-spacing:-.05em;margin:12px 0}.demo p{color:#96a4ba}.demo button{padding:10px 14px;border:0;border-radius:9px;background:#edf4ff;color:#0b1220;font-weight:800}',
 'app.js':"document.querySelector('#hello').addEventListener('click',()=>alert('JavaScript is running inside Obaid Web Lab.'));"
 },active:'index.html',runs:0,snapshots:[]},
-automations:{planner:true,deadlines:true,studyLog:true,capture:true,backup:false,notifications:false,runs:0,history:[]},
+automations:{planner:true,deadlines:true,studyLog:true,capture:true,backup:false,notifications:false,runs:0,history:[],lastDailyRun:null},
 check:{},
 lastPlan:[],
 installPrompt:null
@@ -86,6 +86,7 @@ function renderSubjects(){
 }
 function generatePlan(){
  const mins=Math.max(15,+state.settings.dailyMinutes||90),subjects=[...state.subjects].sort((a,b)=>b.weight-a.weight);if(!subjects.length)return;
+ state.tasks=state.tasks.filter(t=>!(t.source==='autoplan'&&t.due===today()));
  const urgent=state.deadlines.filter(d=>daysAway(d.date)<=3).map(d=>d.title);let remaining=mins;const plan=[];
  subjects.forEach((s,i)=>{if(remaining<=0)return;const slots=Math.max(15,Math.round((mins*(s.weight)/(subjects.reduce((a,x)=>a+x.weight,0)))/5)*5);const use=Math.min(remaining,slots);if(use>0){plan.push({id:uid(),subject:s.name,minutes:use,reason:i===0?'Priority block':urgent.length?'Deadline-aware':'Scheduled study'});remaining-=use}});
  state.lastPlan=plan;plan.forEach(p=>{state.tasks.push({id:uid(),title:p.subject+' · '+p.reason,category:'study',priority:'high',due:today(),done:false,source:'autoplan'})});logAutomation('Daily planner','Generated '+plan.length+' study blocks for '+mins+' minutes');save();toast('Today’s study plan generated')}
@@ -223,5 +224,7 @@ $('#openPreviewBtn').onclick=()=>window.open($('#previewFrame').srcdoc,'_blank')
 function renderAll(){renderHome();renderSubjects();renderStudy();renderTasks();renderDeadlines();renderAnalytics();renderNotes();renderProjects();renderMarketing();renderResources();renderAutomation();$('#profileName').textContent=state.profile.name;$('#displayNameSetting').value=state.profile.name;$('#dailyMinutesSetting').value=state.settings.dailyMinutes;$('#themeSetting').value=state.settings.theme;applyTheme()}
 setInterval(()=>{renderHome();renderDeadlines()},30000);
 renderAll();runLab();
+function scheduledAutomationTick(){const d=today();if(state.automations.planner&&state.automations.lastDailyRun!==d){generatePlan();state.automations.lastDailyRun=d;localStorage.setItem(KEY,JSON.stringify(state));toast('Daily automation prepared your study plan')}else if(state.automations.deadlines){const urgent=state.deadlines.filter(x=>daysAway(x.date)<=2);if(urgent.length&&state.automations.history[0]?.type!=='Deadline watch'){logAutomation('Deadline watch',urgent.length+' urgent deadline(s) found');localStorage.setItem(KEY,JSON.stringify(state))}}}
+scheduledAutomationTick();
 const hash=location.hash.slice(1);if(views[hash])go(hash);
 if('serviceWorker' in navigator){navigator.serviceWorker.register('./sw.js').catch(()=>{})}
