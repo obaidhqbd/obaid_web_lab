@@ -60,7 +60,7 @@ function logAutomation(type,detail){
  state.automations.history=state.automations.history.slice(0,60);
 }
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>t.classList.remove('show'),1800)}
-const views={home:'Command Center',study:'Study System',lab:'Web Lab',assignments:'Assignments & Tasks',analytics:'Analytics',notes:'Notes & Knowledge',projects:'Projects',marketing:'Marketing Console',resources:'Resources',automation:'Automation Center'};
+const views={home:'Command Center',study:'Study System',lab:'Web Lab',assignments:'Assignments & Tasks',analytics:'Analytics',notes:'Notes & Knowledge',classes:'Class Files',portfolio:'My Portfolio',projects:'Projects',marketing:'Marketing Console',resources:'Resources',automation:'Automation Center'};
 function go(id){$$('.view').forEach(v=>v.classList.toggle('active',v.id==='view-'+id));$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.view===id));$('#crumb').textContent=views[id]||'Command Center';history.replaceState(null,'','#'+id);window.scrollTo({top:0,behavior:'smooth'});closeSidebar();renderAll()}
 function closeSidebar(){$('#sidebar').classList.remove('open');$('#sidebarOverlay').classList.remove('show')}
 $$('.nav-item').forEach(b=>b.onclick=()=>go(b.dataset.view));$$('[data-view-jump]').forEach(b=>b.onclick=()=>go(b.dataset.viewJump));
@@ -221,7 +221,7 @@ $('#commandBtn').onclick=()=>{$('#commandModal').showModal();$('#commandSearch')
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#commandModal').showModal();renderCommand();$('#commandSearch').focus()}if((e.ctrlKey||e.metaKey)&&e.key==='Enter'&&$('#view-lab').classList.contains('active')){e.preventDefault();runLab()}});
 $('#openPreviewBtn').onclick=()=>window.open($('#previewFrame').srcdoc,'_blank');
 
-function renderAll(){renderHome();renderSubjects();renderStudy();renderTasks();renderDeadlines();renderAnalytics();renderNotes();renderProjects();renderMarketing();renderResources();renderAutomation();$('#profileName').textContent=state.profile.name;$('#displayNameSetting').value=state.profile.name;$('#dailyMinutesSetting').value=state.settings.dailyMinutes;$('#themeSetting').value=state.settings.theme;applyTheme()}
+function renderAll(){renderHome();renderSubjects();renderStudy();renderTasks();renderDeadlines();renderAnalytics();renderNotes();renderProjects();renderMarketing();renderResources();renderAutomation();if(window.renderClassVault)window.renderClassVault();if(window.renderPortfolio)window.renderPortfolio();$('#profileName').textContent=state.profile.name;$('#displayNameSetting').value=state.profile.name;$('#dailyMinutesSetting').value=state.settings.dailyMinutes;$('#themeSetting').value=state.settings.theme;applyTheme()}
 setInterval(()=>{renderHome();renderDeadlines()},30000);
 renderAll();runLab();
 function scheduledAutomationTick(){const d=today();if(state.automations.planner&&state.automations.lastDailyRun!==d){generatePlan();state.automations.lastDailyRun=d;localStorage.setItem(KEY,JSON.stringify(state));toast('Daily automation prepared your study plan')}else if(state.automations.deadlines){const urgent=state.deadlines.filter(x=>daysAway(x.date)<=2);if(urgent.length&&state.automations.history[0]?.type!=='Deadline watch'){logAutomation('Deadline watch',urgent.length+' urgent deadline(s) found');localStorage.setItem(KEY,JSON.stringify(state))}}}
