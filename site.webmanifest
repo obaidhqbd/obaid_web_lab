@@ -1,1 +1,16 @@
-{"name":"Obaidul Mentor Lab","short_name":"Obaidul Lab","start_url":"./","display":"standalone","background_color":"#070b14","theme_color":"#0b1220","icons":[{"src":"./assets/favicon.svg","sizes":"any","type":"image/svg+xml"}]}
+{
+  "name": "Obaidul Mentor Lab",
+  "short_name": "Obaidul Lab",
+  "description": "Student-first HTML and CSS learning lab.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#070b14",
+  "theme_color": "#0b1220",
+  "icons": [
+    {
+      "src": "./assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
