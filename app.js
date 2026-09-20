@@ -460,14 +460,16 @@
       const timeout = setTimeout(() => finish(null), 6500);
       window.MonacoEnvironment = {
         getWorkerUrl() {
-          const proxy = `self.MonacoEnvironment={baseUrl:'https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/'};importScripts('https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/vs/base/worker/workerMain.js');`;
+          const workerRoot = activeBase.replace(/\/vs$/, '');
+          const proxy = `self.MonacoEnvironment={baseUrl:'${workerRoot}/'};importScripts('${activeBase}/base/worker/workerMain.js');`;
           return `data:text/javascript;charset=utf-8,${encodeURIComponent(proxy)}`;
         }
       };
       const tryLoader = (i) => {
         if (i >= cdns.length) { finish(null); return; }
+        activeBase = cdns[i];
         const loader = document.createElement('script');
-        loader.src = `${cdns[i]}/loader.js`;
+        loader.src = `${activeBase}/loader.js`;
         loader.async = true;
         loader.onload = () => {
           try {
