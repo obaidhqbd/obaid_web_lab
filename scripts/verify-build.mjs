@@ -11,7 +11,7 @@ if (!password) throw new Error('CLASS_ACCESS_PASSWORD is required for build veri
 
 const mustExist = [
   'index.html', 'app.js', 'styles.css', 'sw.js', 'data/catalog.enc.json', 'data/site.json',
-  'data/build-info.json', 'sitemap.xml', 'assets/vendor/jszip.min.js', 'site.webmanifest'
+  'data/build-info.json', 'data/content-report.json', 'data/release-report.json', 'sitemap.xml', 'assets/vendor/jszip.min.js', 'site.webmanifest'
 ];
 for (const rel of mustExist) {
   if (!fs.existsSync(path.join(dist, rel))) throw new Error(`Missing build output: ${rel}`);
@@ -43,6 +43,13 @@ if (!Array.isArray(catalog.classes) || !Array.isArray(catalog.blogs)) throw new 
 
 const buildInfo = JSON.parse(fs.readFileSync(path.join(dist, 'data/build-info.json'), 'utf8'));
 if (buildInfo.classes !== catalog.classes.length || buildInfo.blogs !== catalog.blogs.length) throw new Error('build-info.json counts do not match catalog.');
+function countTopics(nodes){return (nodes||[]).reduce((sum,node)=>sum+1+countTopics(node.subclasses||[]),0);}
+const topicCount=catalog.classes.reduce((sum,item)=>sum+countTopics(item.subclasses||[]),0);
+if (Number(buildInfo.topics||0) !== topicCount) throw new Error('build-info.json topic count does not match catalog.');
+const contentReport=JSON.parse(fs.readFileSync(path.join(dist,'data/content-report.json'),'utf8'));
+const releaseReport=JSON.parse(fs.readFileSync(path.join(dist,'data/release-report.json'),'utf8'));
+if (contentReport.topicCount !== topicCount || contentReport.classes.length !== catalog.classes.length || contentReport.blogs.length !== catalog.blogs.length) throw new Error('content-report.json does not match catalog.');
+if (releaseReport.status !== 'ready-for-pages' || releaseReport.counts?.topics !== topicCount) throw new Error('release-report.json is incomplete.');
 
 function flattenTopics(nodes, out = []) { for (const node of nodes || []) { out.push(node); flattenTopics(node.subclasses || [], out); } return out; }
 function assertTopicTree(nodes, zipFiles, parentLabel='class') {
@@ -95,5 +102,7 @@ const site = JSON.parse(fs.readFileSync(path.join(dist, 'data/site.json'), 'utf8
 if (site.portfolioUrl && !/^https?:\/\//i.test(site.portfolioUrl)) throw new Error('site.json contains an invalid portfolio URL.');
 if (!fs.readFileSync(path.join(dist, 'assets/vendor/jszip.min.js'), 'utf8').includes('JSZip')) throw new Error('Local JSZip vendor file looks invalid.');
 if (/demo-only-change-me/.test(files.map(f => fs.readFileSync(path.join(dist, f), 'utf8')).filter(Boolean).join('\n'))) throw new Error('Demo password leaked into build.');
+const indexHtml=fs.readFileSync(path.join(dist,'index.html'),'utf8');
+if (indexHtml.includes('window.monacoReady') || /monaco-editor@0\.56\.0\/min\/vs\/loader\.js/.test(indexHtml)) throw new Error('Monaco should be lazy-loaded by app.js, not bootstrapped on the homepage.');
 
 console.log(`Build verification passed: ${catalog.classes.length} classes, ${catalog.blogs.length} blogs, all catalog resources exist and decrypt successfully.`);
