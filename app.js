@@ -24,7 +24,8 @@
     smartSuggestionVisible: false,
     monacoProvidersInstalled: false,
     memoryStore: new Map(),
-    previewFile: null
+    previewFile: null,
+    activeTopicId: null
   };
 
   const $ = (sel) => document.querySelector(sel);
@@ -32,7 +33,7 @@
   const els = {
     year: $('#year'), toast: $('#toast'), heroAccess: $('#hero-access'), lock: $('#lock-button'),
     classGrid: $('#class-grid'), blogGrid: $('#blog-grid'), classSearch: $('#class-search'), blogSearch: $('#blog-search'),
-    workspaceTitle: $('#workspace-title'), workspaceSubtitle: $('#workspace-subtitle'), fileList: $('#file-list'), fileCount: $('#file-count'),
+    workspaceTitle: $('#workspace-title'), workspaceSubtitle: $('#workspace-subtitle'), fileList: $('#file-list'), fileCount: $('#file-count'), topicNav: $('#topic-nav'), topicCount: $('#topic-count'),
     editor: $('#editor'), fallback: $('#fallback-editor'), fallbackSuggest: $('#fallback-suggest'), activeFile: $('#active-file'), saveState: $('#save-state'),
     preview: $('#preview-frame'), refreshPreview: $('#refresh-preview'), openPreview: $('#open-preview'), format: $('#format-code'),
     originalZip: $('#download-original'), editedZip: $('#download-edited'), taskList: $('#task-list'), taskProgress: $('#task-progress-label'),
@@ -259,7 +260,8 @@
     const tags = (item.tags || []).slice(0, 4).map(t => `<span class="badge">${escapeHtml(t)}</span>`).join('');
     const action = type === 'class' ? `open-class="${escapeAttr(item.id)}"` : `open-blog="${escapeAttr(item.id)}"`;
     const download = type === 'class' ? `<button class="tiny-btn card-download-btn" download-class="${escapeAttr(item.id)}" type="button" aria-label="Download ${escapeAttr(item.title)} as ZIP">Download ZIP ↓</button>` : '';
-    return `<article class="content-card"><div><div class="badge-row">${tags || `<span class="badge">${type}</span>`}</div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description || item.summary || '')}</p></div><div class="card-meta"><span>${escapeHtml(item.level || 'All levels')}</span><div class="card-actions">${download}<button class="tiny-btn" ${action} type="button">${type === 'class' ? 'Open class' : 'Read article'} →</button></div></div></article>`;
+    const parts = type === 'class' && Array.isArray(item.subclasses) && item.subclasses.length ? `<span class="badge badge-accent">${item.subclasses.length} learning parts</span>` : '';
+    return `<article class="content-card"><div><div class="badge-row">${parts}${tags || `<span class="badge">${type}</span>`}</div><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description || item.summary || '')}</p></div><div class="card-meta"><span>${escapeHtml(item.level || 'All levels')}</span><div class="card-actions">${download}<button class="tiny-btn" ${action} type="button">${type === 'class' ? 'Open class' : 'Read article'} →</button></div></div></article>`;
   }
   function renderClasses() {
     const q = els.classSearch.value.trim().toLowerCase();
@@ -339,6 +341,16 @@
     return null;
   }
 
+  function topicNodes(meta = state.current?.meta) { return Array.isArray(meta?.subclasses) ? meta.subclasses : []; }
+  function topicList(nodes = topicNodes()) { const out=[]; const walk=(items,depth=0)=>{ for(const n of items||[]){out.push({node:n,depth}); walk(n.subclasses||[],depth+1);} }; walk(nodes); return out; }
+  function findTopic(id,nodes=topicNodes()){for(const n of nodes){if(n.id===id)return n;const found=findTopic(id,n.subclasses||[]);if(found)return found;}return null;}
+  function activeTopic(){return findTopic(state.activeTopicId);}
+  function topicPath(node){return normalizePath(node?.path||'');}
+  function visibleFiles(){const topic=activeTopic();if(!topic)return [...state.files.keys()];const prefix=topicPath(topic);if(!prefix)return [...state.files.keys()];const full=`${prefix}/`;return [...state.files.keys()].filter(name=>name===prefix||name.startsWith(full));}
+  function topicTaskScope(){return state.activeTopicId?`${state.current?.meta?.id}:topic:${state.activeTopicId}`:`${state.current?.meta?.id}:overview`;}
+  function renderCurriculum(){if(!els.topicNav)return;const topics=topicList();if(!topics.length){els.topicNav.innerHTML='';els.topicNav.hidden=true;if(els.topicCount)els.topicCount.textContent='';return;}els.topicNav.hidden=false;if(els.topicCount)els.topicCount.textContent=`${topics.length} parts`;const all=`<button class="topic-item ${state.activeTopicId?'':'active'}" type="button" data-topic="__all"><span class="topic-index">•</span><span><strong>Class overview</strong><small>All materials & core tasks</small></span></button>`;const buttons=topics.map(({node,depth})=>`<button class="topic-item ${state.activeTopicId===node.id?'active':''}" style="--topic-depth:${depth}" type="button" data-topic="${escapeAttr(node.id)}"><span class="topic-index">${escapeHtml(String(node.rank??node.order??'•'))}</span><span><strong>${escapeHtml(node.title)}</strong><small>${escapeHtml(node.description||'Open this learning part')}</small></span></button>`).join('');els.topicNav.innerHTML=all+buttons;$$('[data-topic]').forEach(b=>b.addEventListener('click',()=>selectTopic(b.getAttribute('data-topic'))));}
+  async function selectTopic(id){state.activeTopicId=id==='__all'?null:id;renderCurriculum();renderFileExplorer();renderTasks();renderHints();const names=visibleFiles().sort((a,b)=>fileSort(a)-fileSort(b));const first=names.find(n=>/^index\.html?$/i.test(n))||names.find(n=>/\.html?$/i.test(n))||names[0];if(first)await selectFile(first);els.fileCount.textContent=`${names.length} / ${state.files.size} files`;toast(state.activeTopicId?`Opened: ${activeTopic()?.title||'Learning part'}`:'Class overview opened.');}
+  function renderFileExplorer(){if(!els.fileList)return;const names=visibleFiles().sort((a,b)=>fileSort(a)-fileSort(b));els.fileList.innerHTML='';names.forEach(name=>{const b=document.createElement('button');b.className='file-item';b.dataset.file=name;b.type='button';b.innerHTML=`<span>${fileIcon(name)}</span><span>${escapeHtml(name)}</span>`;b.addEventListener('click',()=>selectFile(name));els.fileList.appendChild(b);});els.fileCount.textContent=`${names.length}${names.length!==state.files.size?` / ${state.files.size}`:''} files`;}
   async function openClass(id) {
     if (!state.catalog) { rememberPending('classes', id); showView('login'); return; }
     const meta = state.catalog.classes.find(x => x.id === id);
@@ -374,17 +386,11 @@
     showView('workspace', false);
     els.workspaceTitle.textContent = state.current.meta.title;
     els.workspaceSubtitle.textContent = state.current.meta.description || '';
-    els.fileCount.textContent = `${state.files.size} files`;
-    els.fileList.innerHTML = '';
+    state.activeTopicId = null;
     destroyEditor();
-    const names = [...state.files.keys()].sort((a, b) => fileSort(a) - fileSort(b));
-    names.forEach(name => {
-      const b = document.createElement('button');
-      b.className = 'file-item'; b.dataset.file = name; b.type = 'button';
-      b.innerHTML = `<span>${fileIcon(name)}</span><span>${escapeHtml(name)}</span>`;
-      b.addEventListener('click', () => selectFile(name));
-      els.fileList.appendChild(b);
-    });
+    renderCurriculum();
+    renderFileExplorer();
+    const names = visibleFiles().sort((a, b) => fileSort(a) - fileSort(b));
     const first = names.find(n => /\.html?$/i.test(n) && /^index\.html$/i.test(n)) || names.find(n => /\.(html?|css)$/i.test(n)) || names[0];
     if (first) { state.previewFile = /\.html?$/i.test(first) ? first : (names.find(n => /^index\.html?$/i.test(n)) || first); await selectFile(first); }
     renderTasks();
@@ -607,23 +613,21 @@
     return { title:task?.title || `Task ${i + 1}`, description:task?.description || '', checks:Array.isArray(task?.checks) ? task.checks : [] };
   }
   function tasksForCurrent() {
-    const hw = state.current?.meta?.homework || {};
+    const hw = activeTopic()?.homework || state.current?.meta?.homework || {};
     const raw = Array.isArray(hw.tasks) ? hw.tasks : Array.isArray(hw.checks) ? hw.checks : [];
     return raw.map(normalizeTask);
   }
   function readDone(tasks) {
-    try {
-      const raw = JSON.parse(safeGet(`oml:tasks:${state.current.meta.id}`) || '[]');
-      return Array.from({length:tasks.length}, (_, i) => Boolean(raw[i]));
-    } catch { return tasks.map(() => false); }
+    try { const raw = JSON.parse(safeGet(`oml:tasks:${topicTaskScope()}`) || '[]'); return Array.from({length:tasks.length}, (_, i) => Boolean(raw[i])); } catch { return tasks.map(() => false); }
   }
-  function writeDone(done) { safeSet(`oml:tasks:${state.current.meta.id}`, JSON.stringify(done)); }
+  function writeDone(done) { safeSet(`oml:tasks:${topicTaskScope()}`, JSON.stringify(done)); }
   function updateProgress(done, tasks) {
     const total = tasks.length; const count = done.filter(Boolean).length; const pct = total ? Math.round((count / total) * 100) : 0;
     els.taskProgress.textContent = `${count} / ${total} tasks`;
     els.progressPercent.textContent = `${pct}%`;
     els.progressRing.style.setProperty('--progress', `${pct * 3.6}deg`);
-    els.progressStatus.textContent = total === 0 ? 'No homework yet' : pct === 100 ? 'Class complete 🎉' : `${total - count} task${total - count === 1 ? '' : 's'} remaining`;
+    const label = activeTopic()?.title || 'Class';
+    els.progressStatus.textContent = total === 0 ? 'No homework yet' : pct === 100 ? `${label} complete 🎉` : `${total - count} task${total - count === 1 ? '' : 's'} remaining`;
     if (pct === 100) els.progressRing.classList.add('complete'); else els.progressRing.classList.remove('complete');
   }
   function renderTasks() {
@@ -697,13 +701,13 @@
   els.checkAll.addEventListener('click', checkAllTasks);
 
   function renderHints() {
-    const hints = state.current?.meta?.homework?.hints || [];
+    const hints = activeTopic()?.homework?.hints || state.current?.meta?.homework?.hints || [];
     state.hintIndex = 0;
     els.hintBox.innerHTML = hints.length ? `<div class="hint">${escapeHtml(hints[0])}</div>` : '<p>Small hint: read the requirement first, then inspect the starter files before writing code.</p>';
   }
   els.nextHint.addEventListener('click', () => {
-    const hints = state.current?.meta?.homework?.hints || [];
-    if (!hints.length) return toast('No more hints have been added for this class.');
+    const hints = activeTopic()?.homework?.hints || state.current?.meta?.homework?.hints || [];
+    if (!hints.length) return toast('No more hints have been added for this section.');
     state.hintIndex = (state.hintIndex + 1) % hints.length;
     els.hintBox.innerHTML = `<div class="hint hint-pop">${escapeHtml(hints[state.hintIndex])}</div>`;
   });
