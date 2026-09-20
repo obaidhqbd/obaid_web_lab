@@ -1,4 +1,4 @@
-const CACHE = 'obaidul-mentor-lab-v4';
+const CACHE = 'obaidul-mentor-lab-v6';
 const SHELL = ['./','./index.html','./styles.css','./app.js','./site.webmanifest','./assets/favicon.svg','./assets/vendor/jszip.min.js'];
 
 self.addEventListener('install', event => event.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())));
