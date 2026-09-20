@@ -23,7 +23,8 @@
     smartSuggestionIndex: 0,
     smartSuggestionVisible: false,
     monacoProvidersInstalled: false,
-    memoryStore: new Map()
+    memoryStore: new Map(),
+    previewFile: null
   };
 
   const $ = (sel) => document.querySelector(sel);
@@ -147,7 +148,7 @@
   }));
 
   function requireUnlock(target) {
-    if (state.catalog) { showView(target); return; }
+    if (state.catalog) { location.hash = target; return; }
     rememberPending(target);
     showView('login');
     requestAnimationFrame(() => els.password.focus());
@@ -163,6 +164,7 @@
     destroyEditor();
     els.preview.srcdoc = '';
     els.lock.hidden = true;
+    location.hash = 'home';
     showView('home');
     safeRemove('oml:last-unlock');
     toast('Library locked on this browser.');
@@ -311,14 +313,30 @@
   function safeZipFileName(n) { return normalizePath(n).split('/').some(part => part === '..') ? null : normalizePath(n); }
   function resolveVirtualPath(baseFile, target) {
     const raw = String(target || '').trim();
-    if (!raw || /^(?:[a-z]+:|#|data:|blob:|\/\/)/i.test(raw)) return null;
-    const baseParts = normalizePath(baseFile).split('/'); baseParts.pop();
-    for (const part of raw.split('/')) {
+    if (!raw || /^(?:[a-z][a-z0-9+.-]*:|#|data:|blob:|\/\/)/i.test(raw)) return null;
+    let clean = raw.split('#')[0].split('?')[0].trim();
+    if (!clean) return null;
+    try { clean = decodeURIComponent(clean); } catch {}
+    const rootRelative = clean.startsWith('/');
+    const baseParts = rootRelative ? [] : normalizePath(baseFile).split('/').slice(0, -1);
+    for (const part of clean.replace(/^\/+/, '').split('/')) {
       if (!part || part === '.') continue;
-      if (part === '..') baseParts.pop(); else baseParts.push(part);
+      if (part === '..') {
+        if (!baseParts.length) return null;
+        baseParts.pop();
+      } else {
+        baseParts.push(part);
+      }
     }
     const out = normalizePath(baseParts.join('/'));
-    return out.startsWith('../') ? null : out;
+    return out && !out.startsWith('../') ? out : null;
+  }
+  function findVirtualFile(path) {
+    const normalized = normalizePath(path);
+    if (state.files.has(normalized)) return normalized;
+    const lower = normalized.toLowerCase();
+    for (const name of state.files.keys()) if (name.toLowerCase() === lower) return name;
+    return null;
   }
 
   async function openClass(id) {
@@ -343,6 +361,7 @@
       state.current = { meta, type:'class' };
       state.files = files;
       state.originalZip = zipBytes;
+      state.previewFile = null;
       await openWorkspace();
       history.replaceState(null, '', `${location.pathname}#workspace`);
     } catch (err) {
@@ -367,7 +386,7 @@
       els.fileList.appendChild(b);
     });
     const first = names.find(n => /\.html?$/i.test(n) && /^index\.html$/i.test(n)) || names.find(n => /\.(html?|css)$/i.test(n)) || names[0];
-    if (first) await selectFile(first);
+    if (first) { state.previewFile = /\.html?$/i.test(first) ? first : (names.find(n => /^index\.html?$/i.test(n)) || first); await selectFile(first); }
     renderTasks();
     renderHints();
     els.originalZip.disabled = false;
@@ -387,6 +406,7 @@
 
   async function selectFile(name) {
     const token = ++state.selectionToken;
+    if (/\.html?$/i.test(name)) state.previewFile = name;
     $$('.file-item').forEach(b => b.classList.toggle('active', b.dataset.file === name));
     els.activeFile.textContent = name;
     if (!textFile(name)) {
@@ -484,30 +504,55 @@
 
   function updatePreview() {
     if (!state.current) return;
-    const htmlName = [...state.files.keys()].find(n => /^index\.html$/i.test(n)) || [...state.files.keys()].find(n => /\.html?$/i.test(n));
+    const fallback = [...state.files.keys()].find(n => /^index\.html?$/i.test(n)) || [...state.files.keys()].find(n => /\.html?$/i.test(n));
+    const htmlName = findVirtualFile(state.previewFile || '') || fallback;
     if (!htmlName) return;
+    state.previewFile = htmlName;
     let html = getFileText(htmlName);
     try {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
-      // Inline local stylesheets so preview follows every CSS edit immediately.
       [...doc.querySelectorAll('link[rel~="stylesheet"][href]')].forEach(link => {
         const href = link.getAttribute('href');
-        const resolved = resolveVirtualPath(htmlName, href);
-        if (!resolved || !state.files.has(resolved)) return;
+        const resolved = findVirtualFile(resolveVirtualPath(htmlName, href) || '');
+        if (!resolved) return;
         const style = doc.createElement('style');
         style.setAttribute('data-oml-source', resolved);
         style.textContent = rewriteCssUrls(getFileText(resolved), resolved);
         link.replaceWith(style);
       });
-      // Inline common local assets; remote URLs remain untouched.
       for (const el of doc.querySelectorAll('[src], [poster], link[href]')) {
         const attr = el.hasAttribute('src') ? 'src' : el.hasAttribute('poster') ? 'poster' : 'href';
         if (el.tagName === 'LINK' && /stylesheet/i.test(el.getAttribute('rel') || '')) continue;
         const value = el.getAttribute(attr);
-        const resolved = resolveVirtualPath(htmlName, value);
+        const resolved = findVirtualFile(resolveVirtualPath(htmlName, value) || '');
         const data = resolved ? assetData(resolved) : null;
         if (data) el.setAttribute(attr, data);
+        else if (resolved) el.setAttribute(attr, '#');
+      }
+      for (const a of doc.querySelectorAll('a[href]')) {
+        const value = a.getAttribute('href') || '';
+        if (/^(?:https?:|mailto:|tel:|javascript:|#|data:|blob:|\/\/)/i.test(value)) continue;
+        const resolved = findVirtualFile(resolveVirtualPath(htmlName, value) || '');
+        if (!resolved) {
+          a.setAttribute('href', '#');
+          a.dataset.omlBroken = 'true';
+          a.title = 'This local link is not available in the current project';
+        } else if (/\.html?$/i.test(resolved)) {
+          a.setAttribute('href', '#');
+          a.dataset.omlLink = resolved;
+          a.title = `Open ${resolved} in live preview`;
+        } else {
+          a.setAttribute('href', '#');
+          a.dataset.omlFile = resolved;
+          a.title = `Open ${resolved} in the editor`;
+        }
+      }
+      const existing = doc.body || doc.documentElement;
+      if (existing) {
+        const bridge = doc.createElement('script');
+        bridge.textContent = `(function(){document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a[data-oml-link],a[data-oml-file],a[data-oml-broken]');if(!a)return;e.preventDefault();var target=window.parent!==window?window.parent:window.opener;if(!target)return;if(a.dataset.omlLink)target.postMessage({type:'oml-preview-link',path:a.dataset.omlLink},'*');else if(a.dataset.omlFile)target.postMessage({type:'oml-preview-file',path:a.dataset.omlFile},'*');});document.addEventListener('error',function(e){var el=e.target;if(el&&el.matches&&el.matches('img')){el.style.opacity='.35';el.title='Local preview asset not found';}},true);})();`;
+        existing.appendChild(bridge);
       }
       html = '<!doctype html>\n' + doc.documentElement.outerHTML;
     } catch (err) {
@@ -535,6 +580,15 @@
   }
 
   els.refreshPreview.addEventListener('click', () => { updatePreview(); toast('Preview refreshed.'); });
+  window.addEventListener('message', (event) => {
+    const fromPreviewFrame = event.source === els.preview.contentWindow;
+    let fromPreviewPopup = false;
+    try { fromPreviewPopup = !!(event.source && event.source.opener === window); } catch {}
+    if (event.source && !fromPreviewFrame && !fromPreviewPopup) return;
+    const data = event.data || {};
+    if (data.type === 'oml-preview-link') { const target = findVirtualFile(data.path || ''); if (target) { state.previewFile = target; updatePreview(); } }
+    if (data.type === 'oml-preview-file') { const target = findVirtualFile(data.path || ''); if (target) selectFile(target); }
+  });
   els.openPreview.addEventListener('click', () => {
     if (!els.preview.srcdoc) return;
     const w = window.open();
@@ -576,7 +630,7 @@
     const tasks = tasksForCurrent(); const done = readDone(tasks);
     els.taskList.innerHTML = tasks.length ? tasks.map((t,i) => `
       <div class="task-item ${done[i] ? 'is-done' : ''}">
-        <label class="task-main"><input class="task-check" type="checkbox" data-task="${i}" ${done[i] ? 'checked' : ''} aria-label="Mark ${escapeAttr(t.title)} complete"><span class="task-box" aria-hidden="true">✓</span><span class="task-copy"><strong>${escapeHtml(t.title)}</strong><p>${escapeHtml(t.description)}</p></span></label>
+        <label class="task-main"><input class="task-check" type="checkbox" data-task="${i}" ${done[i] ? 'checked' : ''} aria-label="Mark ${escapeAttr(t.title)} complete"><span class="task-copy"><strong>${escapeHtml(t.title)}</strong><p>${escapeHtml(t.description)}</p></span></label>
         <button class="check-btn" data-check="${i}" type="button">${t.checks.length ? 'Auto-check' : 'Mark done'}</button>
       </div>`).join('') : `<div class="hint-box"><p>No homework metadata yet. Add <code>homework.tasks</code> to the class metadata JSON.</p></div>`;
     updateProgress(done, tasks);
