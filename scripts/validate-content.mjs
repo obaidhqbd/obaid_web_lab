@@ -62,16 +62,17 @@ function validateMeta(file){
   return meta;
 }
 
-function walk(dir,kind,seenIds){
+function walk(dir,kind,collectionRoot,seenIds){
   if(!fs.existsSync(dir)) return;
   for(const ent of fs.readdirSync(dir,{withFileTypes:true})){
     const abs=path.join(dir,ent.name);
-    if(ent.isDirectory()) walk(abs,kind,seenIds);
-    else if(META_NAMES.has(ent.name.toLowerCase())){
+    if(ent.isDirectory()){
+      walk(abs,kind,collectionRoot,seenIds);
+    }else if(META_NAMES.has(ent.name.toLowerCase())){
       const meta=validateMeta(abs);
-      if(meta?.id){
+      if(meta?.id && path.dirname(abs)===collectionRoot){
         const id=String(meta.id).trim().toLowerCase();
-        if(seenIds.has(id)) fail(`Duplicate ${kind} id '${meta.id}' in ${path.relative(ROOT,abs)}; already used by ${seenIds.get(id)}.`);
+        if(seenIds.has(id)) fail(`Duplicate top-level ${kind} id '${meta.id}' in ${path.relative(ROOT,abs)}; already used by ${seenIds.get(id)}.`);
         else seenIds.set(id,path.relative(ROOT,abs).replaceAll(path.sep,'/'));
       }
     }
@@ -81,9 +82,9 @@ function walk(dir,kind,seenIds){
     }
   }
 }
-
 for(const [folder,kind] of COLLECTIONS){
-  walk(path.join(ROOT,folder),kind,new Map());
+  const collectionRoot=path.join(ROOT,folder);
+  walk(collectionRoot,kind,collectionRoot,new Map());
 }
 
 if(errors.length){
