@@ -23,23 +23,40 @@ function readSiteConfig(){const file=path.join(ROOT,'site-config.json');if(!fs.e
 function copy(src,dst){fs.cpSync(src,dst,{recursive:true});}
 function listFiles(dir,base=dir,out=[]){for(const ent of fs.readdirSync(dir,{withFileTypes:true})){if(['.git','node_modules','.DS_Store'].includes(ent.name))continue;const abs=path.join(dir,ent.name);if(ent.isDirectory())listFiles(abs,base,out);else out.push(path.relative(base,abs).replaceAll(path.sep,'/'));}return out;}
 function firstMarkdownParagraph(file){if(!fs.existsSync(file))return '';const lines=fs.readFileSync(file,'utf8').split(/\r?\n/);for(const line of lines){const s=line.trim();if(!s||s.startsWith('#')||s.startsWith('```')||s.startsWith('- ')||s.startsWith('* '))continue;return s.replace(/[*_`]/g,'').slice(0,280);}return '';}
+function normalizeRel(p){return String(p||'').replaceAll(path.sep,'/').replace(/^\.\//,'').replace(/^\/+/,'').replace(/\/+/g,'/');}
+function numericOrder(value,fallback=999){const n=Number(value);return Number.isFinite(n)?n:fallback;}
+function firstExistingMeta(dir){return ['metadata.json','meta.json'].map(n=>path.join(dir,n)).find(fs.existsSync)||null;}
+function childConfigList(meta){for(const key of ['subclasses','subtopics','modules','children']) if(Array.isArray(meta?.[key])) return meta[key]; return [];}
+function isTopicDirectory(dir){if(!fs.statSync(dir).isDirectory()) return false; const base=path.basename(dir).toLowerCase(); if(['assets','asset','images','image','img','media','public','static','src','dist','node_modules','.git'].includes(base)) return false; const entries=fs.readdirSync(dir,{withFileTypes:true}); return entries.some(e=>e.isFile() && /^(metadata|meta)\.json|README\.md|readme\.md|index\.html?$/i.test(e.name)) || entries.some(e=>e.isFile() && /\.(html?|css|md)$/i.test(e.name));}
+function normalizeCheckTree(check,basePath){if(!check||typeof check!=='object') return check; const out={...check}; if(out.file && typeof out.file==='string' && !out.file.startsWith('/') && !/^[a-z]+:/i.test(out.file)) out.file=normalizeRel(path.join(basePath,out.file)); if(Array.isArray(out.files)) out.files=out.files.map(f=>typeof f==='string' && !f.startsWith('/') ? normalizeRel(path.join(basePath,f)) : f); if(Array.isArray(out.checks)) out.checks=out.checks.map(c=>normalizeCheckTree(c,basePath)); return out;}
+function normalizeHomework(homework,defaults,basePath=''){const rawTasks=Array.isArray(homework?.tasks)?homework.tasks:(Array.isArray(homework?.checks)?homework.checks:[]); return {...(defaults||{}),...(homework||{}),tasks:rawTasks.map((t,i)=>{const task=typeof t==='string'?{title:t,description:'Complete this learning task.',checks:[]}:{title:t?.title||('Task '+(i+1)),description:t?.description||'',checks:Array.isArray(t?.checks)?t.checks:[]}; return {...task,checks:task.checks.map(c=>normalizeCheckTree(c,basePath))};})};}
 function parseMeta(dir,type,name){
-  const metaFile=['metadata.json','meta.json'].map(n=>path.join(dir,n)).find(fs.existsSync) || path.join(dir,'metadata.json'); let meta={};
-  if(fs.existsSync(metaFile)){try{meta=readJson(metaFile)}catch(err){console.warn(`Invalid metadata.json in ${name}: ${err.message}`)}}
+  const metaFile=firstExistingMeta(dir); let meta={};
+  if(metaFile){try{meta=readJson(metaFile)}catch(err){console.warn('Invalid metadata.json in '+name+': '+err.message)}}
   const readme=path.join(dir,'README.md');
   const blogMd=['article.md','index.md','README.md','readme.md'].map(n=>path.join(dir,n)).find(fs.existsSync);
   const title=meta.title || (()=>{if(fs.existsSync(readme)){const h=fs.readFileSync(readme,'utf8').match(/^#\s+(.+)$/m);if(h)return h[1].trim();}if(blogMd){const h=fs.readFileSync(blogMd,'utf8').match(/^#\s+(.+)$/m);if(h)return h[1].trim();}if(fs.existsSync(path.join(dir,'index.html'))){const html=fs.readFileSync(path.join(dir,'index.html'),'utf8');const t=html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);if(t)return t[1].replace(/\s+/g,' ').trim();const h=html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);if(h)return h[1].replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();}return titleFromName(name)})();
   const description=meta.description || meta.summary || firstMarkdownParagraph(blogMd || readme);
-  const defaults=type==='class'?{
-    level:'Beginner',duration:'Self-paced',tags:['HTML','CSS'],order:999,featured:false,
-    homework:{tasks:[],hints:['Read the task carefully before coding.','Change one thing at a time and use the live preview.']}
-  }:{level:'General',duration:'5 min read',tags:['Web design'],order:999,featured:false};
+  const defaults=type==='class'||type==='subclass'?{level:'Beginner',duration:'Self-paced',tags:['HTML','CSS'],order:999,featured:false,homework:{tasks:[],hints:['Read the task carefully before coding.','Change one thing at a time and use the live preview.']}}:{level:'General',duration:'5 min read',tags:['Web design'],order:999,featured:false};
   const merged={...defaults,...meta};
-  if(type==='class'){
-    const rawTasks=Array.isArray(merged.homework?.tasks)?merged.homework.tasks:(Array.isArray(merged.homework?.checks)?merged.homework.checks:[]);
-    merged.homework={...(defaults.homework||{}),...(merged.homework||{}),tasks:rawTasks.map((t,i)=>typeof t==='string'?{title:t,description:'Complete this learning task.',checks:[]}:{title:t?.title||`Task ${i+1}`,description:t?.description||'',checks:Array.isArray(t?.checks)?t.checks:[]})};
+  if(type==='class'||type==='subclass') merged.homework=normalizeHomework(merged.homework,defaults.homework,'');
+  return {...merged,id:safeId(meta.id || name),rank:numericOrder(meta.rank ?? meta.order,999),title,description,summary:meta.summary||description,type};
+}
+function decorateTopicTree(meta,dir,parentPath=''){
+  const explicit=childConfigList(meta);
+  const entries=explicit.length ? explicit.map((cfg,i)=>({cfg:cfg||{},name:String(cfg?.path||cfg?.folder||cfg?.directory||cfg?.id||('topic-'+(i+1))),explicit:true,index:i})) : fs.readdirSync(dir,{withFileTypes:true}).filter(e=>e.isDirectory() && !e.name.startsWith('.') && isTopicDirectory(path.join(dir,e.name))).map((e,i)=>({cfg:{},name:e.name,explicit:false,index:i}));
+  const seen=new Set(); const children=[];
+  for(const entry of entries){
+    const childDir=path.resolve(dir,entry.name);
+    if(!childDir.startsWith(path.resolve(dir)+path.sep)||!fs.existsSync(childDir)||!fs.statSync(childDir).isDirectory()) continue;
+    const parsed=parseMeta(childDir,'subclass',path.basename(childDir)); const cfg=entry.cfg||{}; const merged={...parsed,...cfg};
+    const pathInPackage=normalizeRel(path.relative(dir,childDir)); const childId=safeId(merged.id || ((parentPath?parentPath+'-':'')+path.basename(childDir)));
+    if(seen.has(childId)) continue; seen.add(childId); merged.id=childId; merged.path=pathInPackage; merged.rank=numericOrder(merged.rank ?? merged.order,entry.index+1); merged.order=merged.rank;
+    merged.homework=normalizeHomework(merged.homework,{tasks:[],hints:[]},pathInPackage); delete merged.internal;
+    const hasNested=childConfigList(merged).length || fs.readdirSync(childDir,{withFileTypes:true}).some(e=>e.isDirectory() && !e.name.startsWith('.') && isTopicDirectory(path.join(childDir,e.name)));
+    if(hasNested) decorateTopicTree(merged,childDir,childId); else delete merged.subclasses; children.push(merged);
   }
-  return {...merged,id:safeId(meta.id || name),title,description,summary:meta.summary||description,type};
+  children.sort((a,b)=>numericOrder(a.rank)-numericOrder(b.rank)||String(a.title).localeCompare(String(b.title))); if(children.length) meta.subclasses=children; else delete meta.subclasses; return meta;
 }
 function findSourceDir(input,extractTo){
   if(fs.statSync(input).isDirectory()) return input;
@@ -70,7 +87,7 @@ function processCollection(folderName,type,catalog,manifestEntries){
   for(const inputEnt of inputs){
     const input=path.join(sourceRoot,inputEnt.name); let tempExtract=path.join(WORK,'extract',safeId(inputEnt.name)); ensureDir(tempExtract);
     let src=findSourceDir(input,tempExtract); if(!fs.existsSync(src))continue;
-    const meta=parseMeta(src,type,inputEnt.name); let id=meta.id; let n=2; while(seen.has(id)||catalog.some(x=>x.id===id)){id=`${id}-${n++}`;} seen.add(id); meta.id=id;
+    const meta=decorateTopicTree(parseMeta(src,type,inputEnt.name),src); let id=meta.id; let n=2; while(seen.has(id)||catalog.some(x=>x.id===id)){id=`${id}-${n++}`;} seen.add(id); meta.id=id;
     const zipPath=path.join(workRoot,`${id}.zip`); const zipBuf=makeZip(src,zipPath); const envelope=aesEncrypt(zipBuf,PASSWORD,`${type}:${id}:package:v1`);
     const targetDir=path.join(DIST,'data',type==='class'?'classes':'blogs');ensureDir(targetDir); const resourceFolder=type==='class'?'classes':'blogs'; const resRel=`./data/${resourceFolder}/${id}.enc.json`; fs.writeFileSync(path.join(targetDir,`${id}.enc.json`),JSON.stringify(envelope));
     const packageMeta={...meta,resource:resRel,updatedAt:new Date().toISOString()}; delete packageMeta.internal;
@@ -84,7 +101,9 @@ const siteConfig=readSiteConfig();
 const catalog={site:{...siteConfig.brand,...siteConfig.site},classes:[],blogs:[],generatedAt:new Date().toISOString()};
 processCollection('Classes','class',catalog.classes,catalog.classes);
 processCollection('Blogs','blog',catalog.blogs,catalog.blogs);
-catalog.classes.sort((a,b)=>(Number(a.order)||999)-(Number(b.order)||999)||a.title.localeCompare(b.title));
+catalog.classes.sort((a,b)=>(Number(a.order??a.rank)||999)-(Number(b.order??b.rank)||999)||a.title.localeCompare(b.title));
+function sortTopicTree(nodes){(nodes||[]).sort((a,b)=>(Number(a.rank??a.order)||999)-(Number(b.rank??b.order)||999)||String(a.title).localeCompare(String(b.title)));for(const n of nodes||[])sortTopicTree(n.subclasses||[]);}
+for(const item of catalog.classes) sortTopicTree(item.subclasses||[]);
 catalog.blogs.sort((a,b)=>(Number(a.order)||999)-(Number(b.order)||999)||a.title.localeCompare(b.title));
 const catalogEnvelope=aesEncrypt(Buffer.from(JSON.stringify(catalog)),PASSWORD,'catalog:v1');
 fs.writeFileSync(path.join(DIST,'data/catalog.enc.json'),JSON.stringify(catalogEnvelope));
