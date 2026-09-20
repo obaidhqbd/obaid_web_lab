@@ -9,10 +9,11 @@ const DIST = path.join(ROOT, 'dist');
 const WORK = fs.mkdtempSync(path.join(os.tmpdir(), 'obaidul-lab-'));
 const ITERATIONS = 600_000;
 const PASSWORD = process.env.CLASS_ACCESS_PASSWORD || 'demo-only-change-me';
-const IS_PROD = Boolean(process.env.GITHUB_ACTIONS);
+const IS_ACTIONS = Boolean(process.env.GITHUB_ACTIONS);
+const REQUIRE_PRODUCTION_SECRET = String(process.env.REQUIRE_PRODUCTION_SECRET || '').toLowerCase() === 'true';
 
-if (IS_PROD && PASSWORD === 'demo-only-change-me') {
-  throw new Error('CLASS_ACCESS_PASSWORD GitHub Secret is required for production builds.');
+if (REQUIRE_PRODUCTION_SECRET && PASSWORD === 'demo-only-change-me') {
+  throw new Error('CLASS_ACCESS_PASSWORD is required for a production Pages build.');
 }
 
 function cleanDir(dir){ if(fs.existsSync(dir))fs.rmSync(dir,{recursive:true,force:true}); fs.mkdirSync(dir,{recursive:true}); }
@@ -26,10 +27,26 @@ function firstMarkdownParagraph(file){if(!fs.existsSync(file))return '';const li
 function normalizeRel(p){return String(p||'').replaceAll(path.sep,'/').replace(/^\.\//,'').replace(/^\/+/,'').replace(/\/+/g,'/');}
 function numericOrder(value,fallback=999){const n=Number(value);return Number.isFinite(n)?n:fallback;}
 function inferOrder(value,name,fallback=999){if(value!=null&&value!=='')return numericOrder(value,fallback);const m=String(name||'').match(/^(\d{1,4})(?:[-_. ]|$)/);return m?Number(m[1]):fallback;}
-function firstExistingMeta(dir){return ['metadata.json','meta.json'].map(n=>path.join(dir,n)).find(fs.existsSync)||null;}
+function firstExistingMeta(dir){return ['metadata.json','meta.json','class.json'].map(n=>path.join(dir,n)).find(fs.existsSync)||null;}
 function childConfigList(meta){for(const key of ['subclasses','subtopics','modules','children']) if(Array.isArray(meta?.[key])) return meta[key]; return [];}
 function isTopicDirectory(dir){if(!fs.statSync(dir).isDirectory()) return false; const base=path.basename(dir).toLowerCase(); if(['assets','asset','images','image','img','media','public','static','src','dist','node_modules','.git'].includes(base)) return false; const entries=fs.readdirSync(dir,{withFileTypes:true}); return entries.some(e=>e.isFile() && /^(metadata|meta)\.json|README\.md|readme\.md|index\.html?$/i.test(e.name)) || entries.some(e=>e.isFile() && /\.(html?|css|md)$/i.test(e.name));}
-function normalizeCheckTree(check,basePath){if(!check||typeof check!=='object') return check; const out={...check}; if(out.file && typeof out.file==='string' && !out.file.startsWith('/') && !/^[a-z]+:/i.test(out.file)) out.file=normalizeRel(path.join(basePath,out.file)); if(Array.isArray(out.files)) out.files=out.files.map(f=>typeof f==='string' && !f.startsWith('/') ? normalizeRel(path.join(basePath,f)) : f); if(Array.isArray(out.checks)) out.checks=out.checks.map(c=>normalizeCheckTree(c,basePath)); return out;}
+function scopePackagePath(basePath,target){
+  const raw=normalizeRel(target);
+  const base=normalizeRel(basePath);
+  if(!raw) return raw;
+  if(!base || raw===base || raw.startsWith(base+'/')) return raw;
+  const joined=normalizeRel(path.posix.join(base,raw));
+  if(joined==='..' || joined.startsWith('../') || joined.includes('/../')) throw new Error(`Unsafe homework file path: ${target}`);
+  return joined;
+}
+function normalizeCheckTree(check,basePath){
+  if(!check||typeof check!=='object') return check;
+  const out={...check};
+  if(out.file && typeof out.file==='string' && !out.file.startsWith('/') && !/^[a-z]+:/i.test(out.file)) out.file=scopePackagePath(basePath,out.file);
+  if(Array.isArray(out.files)) out.files=out.files.map(f=>typeof f==='string' && !f.startsWith('/') && !/^[a-z]+:/i.test(f) ? scopePackagePath(basePath,f) : f);
+  if(Array.isArray(out.checks)) out.checks=out.checks.map(c=>normalizeCheckTree(c,basePath));
+  return out;
+}
 function normalizeHomework(homework,defaults,basePath=''){const rawTasks=Array.isArray(homework?.tasks)?homework.tasks:(Array.isArray(homework?.checks)?homework.checks:[]); return {...(defaults||{}),...(homework||{}),tasks:rawTasks.map((t,i)=>{const task=typeof t==='string'?{title:t,description:'Complete this learning task.',checks:[]}:{title:t?.title||('Task '+(i+1)),description:t?.description||'',checks:Array.isArray(t?.checks)?t.checks:[]}; return {...task,checks:task.checks.map(c=>normalizeCheckTree(c,basePath))};})};}
 function parseMeta(dir,type,name){
   const metaFile=firstExistingMeta(dir); let meta={};
@@ -109,10 +126,35 @@ catalog.blogs.sort((a,b)=>(Number(a.order)||999)-(Number(b.order)||999)||a.title
 const catalogEnvelope=aesEncrypt(Buffer.from(JSON.stringify(catalog)),PASSWORD,'catalog:v1');
 fs.writeFileSync(path.join(DIST,'data/catalog.enc.json'),JSON.stringify(catalogEnvelope));
 fs.writeFileSync(path.join(DIST,'data/site.json'),JSON.stringify(catalog.site,null,2));
-const buildInfo={version:1,generatedAt:catalog.generatedAt,node:process.version,classes:catalog.classes.length,blogs:catalog.blogs.length,repository:process.env.GITHUB_REPOSITORY||null,commit:process.env.GITHUB_SHA||null};
+function countTopics(nodes){return (nodes||[]).reduce((sum,node)=>sum+1+countTopics(node.subclasses||[]),0);}
+const topicCount=catalog.classes.reduce((sum,item)=>sum+countTopics(item.subclasses||[]),0);
+const buildInfo={version:2,generatedAt:catalog.generatedAt,node:process.version,classes:catalog.classes.length,blogs:catalog.blogs.length,topics:topicCount,repository:process.env.GITHUB_REPOSITORY||null,commit:process.env.GITHUB_SHA||null,production:REQUIRE_PRODUCTION_SECRET};
 fs.writeFileSync(path.join(DIST,'data/build-info.json'),JSON.stringify(buildInfo,null,2));
 
-const siteOrigin=(process.env.SITE_URL||'https://example.github.io/mentor-lab').replace(/\/$/,'');
+const contentReport={
+  version:1,
+  generatedAt:catalog.generatedAt,
+  classes:catalog.classes.map(item=>({id:item.id,title:item.title,topics:countTopics(item.subclasses||[])})),
+  blogs:catalog.blogs.map(item=>({id:item.id,title:item.title})),
+  topicCount,
+  encryptedResources:true
+};
+const releaseReport={
+  version:1,
+  status:'ready-for-pages',
+  generatedAt:catalog.generatedAt,
+  production:REQUIRE_PRODUCTION_SECRET,
+  counts:{classes:catalog.classes.length,blogs:catalog.blogs.length,topics:topicCount},
+  repository:process.env.GITHUB_REPOSITORY||null,
+  commit:process.env.GITHUB_SHA||null
+};
+fs.writeFileSync(path.join(DIST,'data/content-report.json'),JSON.stringify(contentReport,null,2));
+fs.writeFileSync(path.join(DIST,'data/release-report.json'),JSON.stringify(releaseReport,null,2));
+
+const defaultSiteOrigin=process.env.GITHUB_REPOSITORY
+  ? `https://${process.env.GITHUB_REPOSITORY.split('/')[0]}.github.io/${process.env.GITHUB_REPOSITORY.split('/')[1]}`
+  : 'https://example.github.io/mentor-lab';
+const siteOrigin=(process.env.SITE_URL||defaultSiteOrigin).replace(/\/$/,'');
 const urls=[`${siteOrigin}/`,'']
   .concat(catalog.classes.map(x=>`${siteOrigin}/?class=${encodeURIComponent(x.id)}`))
   .concat(catalog.blogs.map(x=>`${siteOrigin}/?blog=${encodeURIComponent(x.id)}`));
@@ -122,4 +164,4 @@ fs.writeFileSync(path.join(DIST,'robots.txt'),`User-agent: *\nAllow: /\nSitemap:
 fs.writeFileSync(path.join(DIST,'.nojekyll'),'');
 
 console.log(`Built ${catalog.classes.length} classes and ${catalog.blogs.length} blogs.`);
-if(!IS_PROD)console.log('Development build used demo password. Set CLASS_ACCESS_PASSWORD for a real build.');
+if(!REQUIRE_PRODUCTION_SECRET)console.log(IS_ACTIONS ? 'Validation build used demo password; production deployments require CLASS_ACCESS_PASSWORD.' : 'Development build used demo password. Set CLASS_ACCESS_PASSWORD for a real build.');
