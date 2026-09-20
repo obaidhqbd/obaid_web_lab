@@ -51,7 +51,7 @@ try{
   if(!output.includes('Open student lab')) throw new Error('Home CTA is missing from rendered DOM.');
   console.log('Browser smoke passed: boot, theme toggle and login navigation responded in Chromium.');
 }catch(err){
-  if(allowSkip){ console.warn('Browser smoke skipped because Chromium could not complete the probe:', err.message); return; }
+  if(allowSkip){ console.warn('Browser smoke skipped because Chromium could not complete the probe:', err.message); process.exit(0); }
   throw err;
 }finally{
   server.close();
