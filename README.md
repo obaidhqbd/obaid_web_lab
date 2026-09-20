@@ -51,6 +51,23 @@ Supported homework checks include `contains`, `not_contains`, `regex`, `min_leng
 
 Use the same metadata fields where useful. Put the article in `article.md`. `README.md` also works.
 
+## Nested class / subtopic system
+
+A class can contain a ranked learning roadmap. The system supports automatic folder discovery and an explicit metadata manifest.
+
+Recommended structure:
+Classes / 02-css-layout / metadata.json, index.html, styles.css, then topic folders such as 01-foundations, 02-flexbox and 03-grid.
+
+Each topic folder is detected when it contains metadata.json, README.md, index.html, or HTML/CSS/Markdown files. Common asset folders such as assets, images, media, public, static and src are ignored as topics.
+
+Parent metadata accepts subclasses, subtopics, modules, or children arrays. Each entry can use id, path, title, description, rank or order, and its own homework.hints and homework.tasks.
+
+Example topic entry:
+subclasses: [{ id: flexbox, path: 02-flexbox, title: Flexbox, rank: 2 }]
+
+The build normalizes these entries into subclasses, sorts them by rank/order, supports nested topics, and automatically scopes a topic's homework file checks to that topic folder.
+
+The student workspace shows a Class roadmap above the file explorer. Students can switch between Class overview and ranked topics. Each topic can have its own files, tasks, hints and progress. The full class ZIP and edited ZIP continue to include the complete original package.
 ## GitHub setup
 
 1. Put this project in your repository.
