@@ -1,22 +1,23 @@
 {
-  "id": "003-css-grid",
-  "title": "Learn to use CSS Grid like a professional",
-  "description": "Build responsive layouts with CSS Grid. Unlock the two dimentional access.",
-  "category": "CSS",
-  "level": "advanced",
-  "duration": "45 min",
-  "tags": ["CSS", "Grid", "Responsive"],
-  "entry": "index.html",
-  "tasks": [
-    {
-      "id": "task-1",
-      "title": "Build the grid",
-      "description": "Create a responsive three-column layout."
-    },
-    {
-      "id": "task-2",
-      "title": "Build the grid that you learned from me",
-      "description": "Create a responsive three-column & three-row layout."
-    }
-  ]
+  "id": "CSS-Grid",
+  "title": "HTML Forms: Structure, Labels & Inputs",
+  "description": "Build a clean semantic CSS Grid",
+  "summary": "Optional short summary.",
+  "level": "Intermideate",
+  "duration": "45–60 min",
+  "tags": ["CSS", "Grid"],
+  "order": 1,
+  "featured": true,
+  "homework": {
+    "hints": ["Parent div will get Display='flex'", "Hint 2"],
+    "tasks": [
+      {
+        "title": "Add the Grid",
+        "description": "Create the main Grid.",
+        "checks": [
+          {"type": "contains", "file": "index.html", "value": "<form"}
+        ]
+      }
+    ]
+  }
 }
