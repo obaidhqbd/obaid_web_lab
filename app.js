@@ -25,7 +25,8 @@
     monacoProvidersInstalled: false,
     memoryStore: new Map(),
     previewFile: null,
-    activeTopicId: null
+    activeTopicId: null,
+    monacoPromise: null
   };
 
   const $ = (sel) => document.querySelector(sel);
@@ -101,6 +102,8 @@
   function setTheme() {
     document.body.classList.toggle('light', !state.dark);
     els.theme.textContent = state.dark ? '☼' : '☾';
+    els.theme.setAttribute('aria-label', state.dark ? 'Switch to light theme' : 'Switch to dark theme');
+    els.theme.setAttribute('title', state.dark ? 'Switch to light theme' : 'Switch to dark theme');
     safeSet('oml:theme', state.dark ? 'dark' : 'light');
     if (state.monaco) state.monaco.editor.setTheme(state.dark ? 'vs-dark' : 'vs');
   }
@@ -438,9 +441,55 @@
     if (!on) hideSmartSuggestions();
   }
 
+  function ensureMonaco() {
+    if (state.monaco) return Promise.resolve(state.monaco);
+    if (state.monacoPromise) return state.monacoPromise;
+    const cdns = [
+      'https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/vs',
+      'https://unpkg.com/monaco-editor@0.56.0/min/vs'
+    ];
+    state.monacoPromise = new Promise((resolve) => {
+      let settled = false;
+      const finish = (value) => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        resolve(value || null);
+      };
+      const timeout = setTimeout(() => finish(null), 6500);
+      window.MonacoEnvironment = {
+        getWorkerUrl() {
+          const proxy = `self.MonacoEnvironment={baseUrl:'https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/'};importScripts('https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/vs/base/worker/workerMain.js');`;
+          return `data:text/javascript;charset=utf-8,${encodeURIComponent(proxy)}`;
+        }
+      };
+      const tryLoader = (i) => {
+        if (i >= cdns.length) { finish(null); return; }
+        const loader = document.createElement('script');
+        loader.src = `${cdns[i]}/loader.js`;
+        loader.async = true;
+        loader.onload = () => {
+          try {
+            window.require.config({ paths: { vs: cdns[i] } });
+            window.require(['vs/editor/editor.main'], () => finish(window.monaco), () => tryLoader(i + 1));
+          } catch {
+            tryLoader(i + 1);
+          }
+        };
+        loader.onerror = () => tryLoader(i + 1);
+        document.head.appendChild(loader);
+      };
+      tryLoader(0);
+    }).then((monaco) => {
+      state.monaco = monaco;
+      return monaco;
+    });
+    return state.monacoPromise;
+  }
+
   async function setupEditor(name, text) {
     if (!state.monaco) {
-      try { state.monaco = await window.monacoReady; } catch { state.monaco = null; }
+      try { state.monaco = await ensureMonaco(); } catch { state.monaco = null; }
     }
     if (state.monaco) {
       installMonacoEnhancements(state.monaco);
@@ -597,8 +646,19 @@
   });
   els.openPreview.addEventListener('click', () => {
     if (!els.preview.srcdoc) return;
-    const w = window.open();
-    if (w) { w.document.open(); w.document.write(els.preview.srcdoc); w.document.close(); }
+    const w = window.open('', '_blank');
+    if (!w) { toast('Pop-out was blocked by the browser.'); return; }
+    w.document.open();
+    w.document.write(`<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Obaidul Mentor Lab — Preview</title>
+<style>html,body{margin:0;height:100%;background:#fff}iframe{display:block;width:100%;height:100%;border:0}</style>
+</head>
+<body><iframe title="Student project live preview" sandbox="allow-scripts allow-forms allow-modals allow-popups"></iframe></body>
+</html>`);
+    w.document.close();
+    const frame = w.document.querySelector('iframe');
+    if (frame) frame.srcdoc = els.preview.srcdoc;
   });
   els.format.addEventListener('click', async () => {
     if (!state.editor) { toast('Use the smart fallback editor or install a Monaco connection.'); return; }
@@ -842,8 +902,44 @@
   function escapeRegExp(s) { return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
   function safeFileName(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'student-project'; }
 
-  // Expose a small diagnostics hook for manual browser testing.
-  window.ObaidulMentorLab = { getState: () => ({ unlocked:!!state.catalog, current:state.current?.meta?.id || null, files:state.files.size, monaco:!!state.monaco }) };
+  function registerServiceWorker() {
+    if (!('serviceWorker' in navigator)) return;
+    navigator.serviceWorker.register('./sw.js', { scope: './' }).catch((err) => {
+      console.warn('Service worker registration failed', err);
+    });
+  }
 
-  loadSiteInfo().finally(route);
+  function runSmokeProbe() {
+    if (new URLSearchParams(location.search).get('smoke') !== '1') return;
+    window.setTimeout(() => {
+      const themeBefore = state.dark;
+      els.theme.click();
+      const themeChanged = state.dark !== themeBefore;
+      els.theme.click();
+
+      els.heroAccess.click();
+      const loginReady = document.querySelector('[data-view="login"]')?.classList.contains('active-view');
+      document.documentElement.dataset.smoke = themeChanged && loginReady ? 'pass' : 'fail';
+      location.hash = 'home';
+      showView('home', false);
+    }, 80);
+  }
+
+  // Expose a small diagnostics hook for manual browser testing.
+  window.ObaidulMentorLab = {
+    getState: () => ({
+      unlocked:!!state.catalog,
+      current:state.current?.meta?.id || null,
+      files:state.files.size,
+      monaco:!!state.monaco,
+      topic:state.activeTopicId || null
+    })
+  };
+
+  loadSiteInfo().finally(() => {
+    route();
+    document.documentElement.dataset.omlBoot = 'ready';
+    registerServiceWorker();
+    runSmokeProbe();
+  });
 })();
