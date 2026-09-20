@@ -21,25 +21,27 @@ A static, GitHub Pages-friendly premium support portal for HTML + CSS students.
 
 ```json
 {
-  "id": "html-forms",
-  "title": "HTML Forms: Structure, Labels & Inputs",
-  "description": "Build a clean semantic HTML form.",
-  "summary": "Optional short summary.",
-  "level": "Beginner",
-  "duration": "45–60 min",
-  "tags": ["HTML", "Forms"],
-  "order": 1,
-  "featured": true,
+  "title": "CSS grid - learn to use grid like a pro",
+  "description": "Practice CSS grid to control elements position as respect of both X and Y axis.",
+  "category": "CSS Grid",
+  "level": "Advanced",
+  "duration": "60+ minutes",
+  "tags": [
+    "HTML",
+    "Grid",
+    "CSS",
+    "Practice"
+  ],
+  "author": "Obaidul",
+  "type": "class",
   "homework": {
-    "hints": ["Hint 1", "Hint 2"],
-    "tasks": [
-      {
-        "title": "Add the form",
-        "description": "Create the main form.",
-        "checks": [
-          {"type": "contains", "file": "index.html", "value": "<form"}
-        ]
-      }
+    "title": "CSS grid layout Challenge",
+    "description": "Recreate the supplied grid, then improve its visual appearence",
+    "checks": [
+      "Use a parent div to use it as a grid.",
+      "Add propertys to access control.",
+      "Include text, Colors etc.",
+      "Create a responsive three-column layout that becomes one column on small screens."
     ]
   }
 }
