@@ -42,7 +42,7 @@ function parseMeta(dir,type,name){
   if(type==='class'||type==='subclass') merged.homework=normalizeHomework(merged.homework,defaults.homework,'');
   return {...merged,id:safeId(meta.id || name),rank:numericOrder(meta.rank ?? meta.order,999),title,description,summary:meta.summary||description,type};
 }
-function decorateTopicTree(meta,dir,parentPath=''){
+function decorateTopicTree(meta,dir,parentPath='',packageRoot=dir){
   const explicit=childConfigList(meta);
   const entries=explicit.length ? explicit.map((cfg,i)=>({cfg:cfg||{},name:String(cfg?.path||cfg?.folder||cfg?.directory||cfg?.id||('topic-'+(i+1))),explicit:true,index:i})) : fs.readdirSync(dir,{withFileTypes:true}).filter(e=>e.isDirectory() && !e.name.startsWith('.') && isTopicDirectory(path.join(dir,e.name))).map((e,i)=>({cfg:{},name:e.name,explicit:false,index:i}));
   const seen=new Set(); const children=[];
@@ -50,11 +50,11 @@ function decorateTopicTree(meta,dir,parentPath=''){
     const childDir=path.resolve(dir,entry.name);
     if(!childDir.startsWith(path.resolve(dir)+path.sep)||!fs.existsSync(childDir)||!fs.statSync(childDir).isDirectory()) continue;
     const parsed=parseMeta(childDir,'subclass',path.basename(childDir)); const cfg=entry.cfg||{}; const merged={...parsed,...cfg};
-    const pathInPackage=normalizeRel(path.relative(dir,childDir)); const childId=safeId(merged.id || ((parentPath?parentPath+'-':'')+path.basename(childDir)));
+    const pathInPackage=normalizeRel(path.relative(packageRoot,childDir)); const childId=safeId(merged.id || ((parentPath?parentPath+'-':'')+path.basename(childDir)));
     if(seen.has(childId)) continue; seen.add(childId); merged.id=childId; merged.path=pathInPackage; merged.rank=numericOrder(merged.rank ?? merged.order,entry.index+1); merged.order=merged.rank;
     merged.homework=normalizeHomework(merged.homework,{tasks:[],hints:[]},pathInPackage); delete merged.internal;
     const hasNested=childConfigList(merged).length || fs.readdirSync(childDir,{withFileTypes:true}).some(e=>e.isDirectory() && !e.name.startsWith('.') && isTopicDirectory(path.join(childDir,e.name)));
-    if(hasNested) decorateTopicTree(merged,childDir,childId); else delete merged.subclasses; children.push(merged);
+    if(hasNested) decorateTopicTree(merged,childDir,childId,packageRoot); else delete merged.subclasses; children.push(merged);
   }
   children.sort((a,b)=>numericOrder(a.rank)-numericOrder(b.rank)||String(a.title).localeCompare(String(b.title))); if(children.length) meta.subclasses=children; else delete meta.subclasses; return meta;
 }
