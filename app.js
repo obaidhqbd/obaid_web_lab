@@ -448,6 +448,7 @@
       'https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/vs',
       'https://unpkg.com/monaco-editor@0.56.0/min/vs'
     ];
+    let activeBase = cdns[0];
     state.monacoPromise = new Promise((resolve) => {
       let settled = false;
       const finish = (value) => {
