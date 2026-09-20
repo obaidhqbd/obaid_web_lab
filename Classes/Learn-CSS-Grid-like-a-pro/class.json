@@ -1,0 +1,22 @@
+{
+  "id": "003-css-grid",
+  "title": "Learn to use CSS Grid like a professional",
+  "description": "Build responsive layouts with CSS Grid. Unlock the two dimentional access.",
+  "category": "CSS",
+  "level": "advanced",
+  "duration": "45 min",
+  "tags": ["CSS", "Grid", "Responsive"],
+  "entry": "index.html",
+  "tasks": [
+    {
+      "id": "task-1",
+      "title": "Build the grid",
+      "description": "Create a responsive three-column layout."
+    },
+    {
+      "id": "task-2",
+      "title": "Build the grid that you learned from me",
+      "description": "Create a responsive three-column & three-row layout."
+    }
+  ]
+}
