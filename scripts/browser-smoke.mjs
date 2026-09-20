@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
-import {spawn,execFileSync} from 'node:child_process';
+import {spawn} from 'node:child_process';
 
 const dist=path.resolve('dist');
 if(!fs.existsSync(path.join(dist,'index.html'))) throw new Error('dist/index.html is required. Build the site before browser smoke testing.');
@@ -53,7 +53,35 @@ try{
 }catch(err){
   if(allowSkip){ console.warn('Browser smoke skipped because Chromium could not complete the probe:', err.message); process.exit(0); }
   throw err;
-}finally{
-  server.close();
+try{
+  const runBrowser=()=>new Promise((resolve,reject)=>{
+    const child=spawn(browser,args,{stdio:['ignore','pipe','pipe'],detached:process.platform!=='win32'});
+    let output='';
+    let errorOutput='';
+    const timer=setTimeout(()=>{
+      try{
+        if(process.platform==='win32') child.kill('SIGKILL');
+        else process.kill(-child.pid,'SIGKILL');
+      }catch{}
+      reject(new Error('Chromium did not finish the smoke probe within 8000ms.'));
+    },8000);
+    child.stdout.on('data',chunk=>{output+=chunk.toString();});
+    child.stderr.on('data',chunk=>{errorOutput+=chunk.toString();});
+    child.on('error',err=>{clearTimeout(timer);reject(err);});
+    child.on('close',(code,signal)=>{
+      clearTimeout(timer);
+      if(code!==0) reject(new Error(`Chromium exited with code ${code || 'null'}${signal ? ` (${signal})` : ''}. ${errorOutput.slice(-500)}`));
+      else resolve(output);
+    });
+  });
+  const output=await runBrowser();
+  if(!output.includes('data-oml-boot="ready"')) throw new Error('Browser smoke did not reach the application boot marker.');
+  if(!output.includes('data-smoke="pass"')) throw new Error('Browser smoke interaction probe failed.');
+  if(!output.includes('Open student lab')) throw new Error('Home CTA is missing from rendered DOM.');
+  console.log('Browser smoke passed: boot, theme toggle and login navigation responded in Chromium.');
+}catch(err){
+  if(allowSkip){ console.warn('Browser smoke skipped because Chromium could not complete the probe:', err.message); process.exit(0); }
+  throw err;
+
   fs.rmSync(profile,{recursive:true,force:true});
 }
