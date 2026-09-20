@@ -44,6 +44,32 @@ if (!Array.isArray(catalog.classes) || !Array.isArray(catalog.blogs)) throw new 
 const buildInfo = JSON.parse(fs.readFileSync(path.join(dist, 'data/build-info.json'), 'utf8'));
 if (buildInfo.classes !== catalog.classes.length || buildInfo.blogs !== catalog.blogs.length) throw new Error('build-info.json counts do not match catalog.');
 
+function flattenTopics(nodes, out = []) { for (const node of nodes || []) { out.push(node); flattenTopics(node.subclasses || [], out); } return out; }
+function assertTopicTree(nodes, zipFiles, parentLabel='class') {
+  let last = -Infinity;
+  for (const node of nodes || []) {
+    const rank = Number(node.rank ?? node.order ?? 999);
+    if (rank < last) throw new Error(`Topic ranking is not sorted in ${parentLabel}.`);
+    last = rank;
+    if (!node.path || node.path.startsWith('/') || node.path.includes('..')) throw new Error(`Invalid topic path in ${parentLabel}: ${node.path}`);
+    const prefix = node.path.replace(/\\/g,'/').replace(/\/+$/,'') + '/';
+    const topicFiles = [...zipFiles].filter(name => name === node.path || name.startsWith(prefix));
+    if (!topicFiles.length) throw new Error(`Topic path does not exist inside package: ${node.path}`);
+    for (const task of node.homework?.tasks || []) {
+      for (const check of task.checks || []) {
+        const stack = [check];
+        while (stack.length) {
+          const c = stack.pop();
+          if (c?.file && !zipFiles.has(String(c.file))) throw new Error(`Homework check points to missing file: ${c.file}`);
+          for (const f of c?.files || []) if (!zipFiles.has(String(f))) throw new Error(`Homework check points to missing file: ${f}`);
+          for (const child of c?.checks || []) stack.push(child);
+        }
+      }
+    }
+    assertTopicTree(node.subclasses || [], zipFiles, `${parentLabel} > ${node.title}`);
+  }
+}
+
 for (const [kind, items] of [['classes', catalog.classes], ['blogs', catalog.blogs]]) {
   for (const item of items) {
     if (!item.resource || !item.resource.startsWith(`./data/${kind}/`)) throw new Error(`Invalid ${kind} resource path: ${item.resource}`);
@@ -56,6 +82,11 @@ for (const [kind, items] of [['classes', catalog.classes], ['blogs', catalog.blo
     try {
       fs.writeFileSync(tmp, decrypt(env));
       execFileSync('unzip', ['-tq', tmp], { stdio: 'pipe' });
+      if (kind === 'classes') {
+        const listing = execFileSync('unzip', ['-Z1', tmp], { encoding: 'utf8' }).split(/\r?\n/).filter(Boolean);
+        const zipFiles = new Set(listing.filter(name => !name.endsWith('/')));
+        assertTopicTree(item.subclasses || [], zipFiles, item.title || 'class');
+      }
     } finally { try { fs.unlinkSync(tmp); } catch {} }
   }
 }
