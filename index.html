@@ -6,6 +6,8 @@
   <meta name="theme-color" content="#07111f" />
   <meta name="description" content="Obaidul Mentor Lab is a premium HTML and CSS learning workspace with protected classes, homework, live preview and a VS Code-style editor." />
   <meta name="robots" content="index,follow" />
+  <meta name="color-scheme" content="dark light" />
+  <meta name="referrer" content="strict-origin-when-cross-origin" />
   <link rel="manifest" href="./site.webmanifest" />
   <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml" />
   <link rel="stylesheet" href="./styles.css" />
@@ -71,7 +73,7 @@
     <section id="classes-view" class="view shell" data-view="classes">
       <div class="section-head">
         <div><div class="eyebrow">Student library</div><h2>Classes</h2><p>Protected lessons, source files and guided homework.</p></div>
-        <div class="section-tools"><input id="class-search" class="search-input" placeholder="Search classes…" autocomplete="off" /></div>
+        <div class="section-tools"><input id="class-search" class="search-input" placeholder="Search classes…" autocomplete="off" aria-label="Search classes" /></div>
       </div>
       <div id="class-grid" class="content-grid"></div>
       <div id="classes-empty" class="empty-state" hidden><div class="empty-orb">∅</div><h3>No classes found</h3><p>Your library is either empty or the filter is being dramatic.</p></div>
@@ -80,7 +82,7 @@
     <section id="blogs-view" class="view shell" data-view="blogs">
       <div class="section-head">
         <div><div class="eyebrow">From the mentor desk</div><h2>Blogs</h2><p>Short practical notes that help students connect concepts.</p></div>
-        <div class="section-tools"><input id="blog-search" class="search-input" placeholder="Search articles…" autocomplete="off" /></div>
+        <div class="section-tools"><input id="blog-search" class="search-input" placeholder="Search articles…" autocomplete="off" aria-label="Search articles" /></div>
       </div>
       <div id="blog-grid" class="content-grid"></div>
       <div id="blogs-empty" class="empty-state" hidden><div class="empty-orb">∅</div><h3>No posts found</h3><p>Add a folder or ZIP inside <code>Blogs/</code> and let Actions do the rest.</p></div>
@@ -151,40 +153,6 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <script src="./assets/vendor/jszip.min.js"></script>
-  <script>
-    window.MONACO_VERSION = '0.56.0';
-    window.monacoReady = new Promise((resolve) => {
-      const cdns = [
-        'https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/vs',
-        'https://unpkg.com/monaco-editor@0.56.0/min/vs'
-      ];
-      const finish = (value) => resolve(value || null);
-      const timeout = setTimeout(() => finish(null), 7000);
-      window.MonacoEnvironment = {
-        getWorkerUrl() {
-          const base = cdns[0];
-          const proxy = `self.MonacoEnvironment={baseUrl:'${'https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/'}'};importScripts('${'https://cdn.jsdelivr.net/npm/monaco-editor@0.56.0/min/vs/base/worker/workerMain.js'}');`;
-          return `data:text/javascript;charset=utf-8,${encodeURIComponent(proxy)}`;
-        }
-      };
-      const tryLoader = (i) => {
-        if (i >= cdns.length) { clearTimeout(timeout); finish(null); return; }
-        const loader = document.createElement('script');
-        loader.src = `${cdns[i]}/loader.js`;
-        loader.onload = () => {
-          try {
-            window.require.config({ paths: { vs: cdns[i] } });
-            window.require(['vs/editor/editor.main'], () => { clearTimeout(timeout); finish(window.monaco); }, () => tryLoader(i + 1));
-          } catch {
-            tryLoader(i + 1);
-          }
-        };
-        loader.onerror = () => tryLoader(i + 1);
-        document.head.appendChild(loader);
-      };
-      tryLoader(0);
-    });
-  </script>
   <script src="./app.js"></script>
 </body>
 </html>
