@@ -21,29 +21,270 @@ A static, GitHub Pages-friendly premium support portal for HTML + CSS students.
 
 ```json
 {
-  "title": "CSS grid - learn to use grid like a pro",
-  "description": "Practice CSS grid to control elements position as respect of both X and Y axis.",
-  "category": "CSS Grid",
-  "level": "Advanced",
-  "duration": "60+ minutes",
+  "id": "css-layout-masterclass",
+  "title": "CSS Layout Masterclass",
+  "description": "Learn how modern web layouts work using normal flow, Flexbox and CSS Grid.",
+  "summary": "A practical CSS layout course with guided projects and automated homework.",
+  "version": 1,
+
+  "order": 2,
+  "rank": 2,
+
+  "level": "Beginner",
+  "category": "CSS",
+  "difficulty": "Beginner",
+
+  "duration": "3 hours",
+
   "tags": [
-    "HTML",
-    "Grid",
     "CSS",
-    "Practice"
+    "Layout",
+    "Flexbox",
+    "Grid",
+    "Responsive Design"
   ],
+
   "author": "Obaidul",
   "type": "class",
+  "featured": true,
+
+  "objectives": [
+    "Understand normal document flow",
+    "Understand Flexbox",
+    "Understand CSS Grid",
+    "Build responsive layouts",
+    "Choose the correct layout system"
+  ],
+
+  "prerequisites": [
+    "Basic HTML",
+    "Basic CSS selectors",
+    "Basic CSS properties"
+  ],
+
+  "resources": [
+    {
+      "title": "MDN CSS Layout",
+      "type": "reference",
+      "url": "https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout"
+    }
+  ],
+
   "homework": {
-    "title": "CSS grid layout Challenge",
-    "description": "Recreate the supplied grid, then improve its visual appearence",
-    "checks": [
-      "Use a parent div to use it as a grid.",
-      "Add propertys to access control.",
-      "Include text, Colors etc.",
-      "Create a responsive three-column layout that becomes one column on small screens."
+    "title": "CSS Layout Practice",
+    "description": "Complete the exercises from the current class section.",
+    "hints": [
+      "Read the requirement before changing code.",
+      "Use the live preview after every major change.",
+      "Try solving the task before checking a hint."
+    ],
+
+    "tasks": [
+      {
+        "id": "layout-foundation",
+        "title": "Create the basic layout",
+        "description": "Create a semantic page structure using HTML.",
+
+        "status": "practice",
+
+        "checks": [
+          {
+            "type": "contains",
+            "file": "index.html",
+            "value": "<main"
+          },
+          {
+            "type": "contains",
+            "file": "index.html",
+            "value": "<section"
+          }
+        ]
+      },
+
+      {
+        "id": "responsive-layout",
+        "title": "Make the layout responsive",
+        "description": "Create a layout that changes appropriately on smaller screens.",
+
+        "status": "practice",
+
+        "checks": [
+          {
+            "type": "contains",
+            "file": "style.css",
+            "value": "@media"
+          }
+        ]
+      }
     ]
-  }
+  },
+
+  "subclasses": [
+    {
+      "id": "layout-foundations",
+      "path": "01-foundations",
+      "title": "Layout Foundations",
+      "description": "Understand normal flow and basic layout concepts.",
+      "summary": "Learn how elements naturally flow on a page.",
+
+      "rank": 1,
+      "order": 1,
+
+      "duration": "30 minutes",
+      "level": "Beginner",
+
+      "tags": [
+        "CSS",
+        "Layout",
+        "Flow"
+      ],
+
+      "objectives": [
+        "Understand normal flow",
+        "Understand block and inline elements",
+        "Understand box dimensions"
+      ],
+
+      "prerequisites": [
+        "Basic HTML"
+      ],
+
+      "resources": [],
+
+      "homework": {
+        "title": "Layout Foundations Challenge",
+        "description": "Build a simple page layout.",
+
+        "hints": [
+          "Start with semantic HTML.",
+          "Inspect the page in the live preview."
+        ],
+
+        "tasks": [
+          {
+            "id": "foundation-structure",
+            "title": "Build the page structure",
+            "description": "Create the required HTML structure.",
+
+            "checks": [
+              {
+                "type": "contains",
+                "file": "index.html",
+                "value": "<main"
+              }
+            ]
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "flexbox",
+      "path": "02-flexbox",
+      "title": "Flexbox",
+      "description": "Learn one-dimensional layout with Flexbox.",
+
+      "rank": 2,
+      "duration": "45 minutes",
+
+      "tags": [
+        "CSS",
+        "Flexbox"
+      ],
+
+      "objectives": [
+        "Create a flex container",
+        "Align items",
+        "Control spacing"
+      ],
+
+      "prerequisites": [
+        "layout-foundations"
+      ],
+
+      "homework": {
+        "title": "Flexbox Challenge",
+        "description": "Create a responsive Flexbox layout.",
+
+        "hints": [
+          "Start with display: flex.",
+          "Then experiment with justify-content.",
+          "Finally check align-items."
+        ],
+
+        "tasks": [
+          {
+            "id": "flex-container",
+            "title": "Create a flex container",
+            "description": "Use Flexbox on the parent element.",
+
+            "checks": [
+              {
+                "type": "css_property",
+                "file": "style.css",
+                "property": "display",
+                "value": "flex"
+              }
+            ]
+          }
+        ]
+      }
+    },
+
+    {
+      "id": "grid",
+      "path": "03-grid",
+      "title": "CSS Grid",
+      "description": "Build two-dimensional layouts using CSS Grid.",
+
+      "rank": 3,
+      "duration": "60 minutes",
+
+      "tags": [
+        "CSS",
+        "Grid",
+        "Responsive Design"
+      ],
+
+      "objectives": [
+        "Create a grid container",
+        "Define columns",
+        "Build responsive grids"
+      ],
+
+      "prerequisites": [
+        "flexbox"
+      ],
+
+      "homework": {
+        "title": "CSS Grid Challenge",
+        "description": "Create a responsive grid layout.",
+
+        "hints": [
+          "Start with display: grid.",
+          "Define the columns next.",
+          "Use a media query for small screens."
+        ],
+
+        "tasks": [
+          {
+            "id": "grid-container",
+            "title": "Create the grid",
+            "description": "Turn the parent element into a grid.",
+
+            "checks": [
+              {
+                "type": "css_property",
+                "file": "style.css",
+                "property": "display",
+                "value": "grid"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
 }
 ```
 
