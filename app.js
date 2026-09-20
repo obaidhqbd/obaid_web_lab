@@ -903,6 +903,7 @@
   function safeFileName(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'student-project'; }
 
   function registerServiceWorker() {
+    if (new URLSearchParams(location.search).get('smoke') === '1') return;
     if (!('serviceWorker' in navigator)) return;
     navigator.serviceWorker.register('./sw.js', { scope: './' }).catch((err) => {
       console.warn('Service worker registration failed', err);
