@@ -19,6 +19,8 @@ on:
       - 'robots.txt'
       - '.github/workflows/deploy.yaml'
   workflow_dispatch:
+  pull_request:
+    branches: [main, master]
 
 permissions:
   contents: read
@@ -45,11 +47,18 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: Validate content
+        run: npm run validate
+
+      - name: Source regression checks
+        run: npm test
+
       - name: Build encrypted catalog
         env:
           CLASS_ACCESS_PASSWORD: ${{ secrets.CLASS_ACCESS_PASSWORD }}
           SITE_URL: ${{ vars.SITE_URL || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
           GITHUB_ACTIONS: true
+          REQUIRE_PRODUCTION_SECRET: ${{ github.event_name == 'push' || github.event_name == 'workflow_dispatch' }}
         run: node scripts/build.mjs
 
       - name: Validate generated site
@@ -63,7 +72,13 @@ jobs:
           ! grep -R "demo-only-change-me" dist || (echo "Demo password leaked into build" && exit 1)
           node scripts/verify-build.mjs
 
+      - name: Browser smoke test
+        env:
+          BROWSER_SMOKE_ALLOW_SKIP: true
+        run: node scripts/browser-smoke.mjs
+
       - name: Configure Pages
+        if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
@@ -72,6 +87,7 @@ jobs:
           path: dist
 
   deploy:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
     environment:
