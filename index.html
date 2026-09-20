@@ -61,10 +61,11 @@
       </div>
 
       <div class="shell feature-grid">
-        <article class="feature-card"><span class="feature-icon">⌘</span><div><h3>Code-first classes</h3><p>Open the exact class files, inspect them, edit them and learn by doing.</p></div></article>
-        <article class="feature-card"><span class="feature-icon">✓</span><div><h3>Interactive homework</h3><p>Turn requirements into small checks so students know when their work is actually done.</p></div></article>
-        <article class="feature-card"><span class="feature-icon">↗</span><div><h3>Build → preview → export</h3><p>Preview the page immediately, keep work locally, then export the edited project as ZIP.</p></div></article>
-        <article class="feature-card"><span class="feature-icon">∞</span><div><h3>Works with automation</h3><p>Upload folders or ZIPs and let GitHub Actions create the catalog, encryption payloads and sitemap.</p></div></article>
+        <!-- সমস্যা সমাধান: এখানে h3 এর পরিবর্তে h2 ব্যবহার করা হয়েছে অথবা সঠিক হায়ারার্কি বজায় রাখা হয়েছে -->
+        <article class="feature-card"><span class="feature-icon">⌘</span><div><h2>Code-first classes</h2><p>Open the exact class files, inspect them, edit them and learn by doing.</p></div></article>
+        <article class="feature-card"><span class="feature-icon">✓</span><div><h2>Interactive homework</h2><p>Turn requirements into small checks so students know when their work is actually done.</p></div></article>
+        <article class="feature-card"><span class="feature-icon">↗</span><div><h2>Build → preview → export</h2><p>Preview the page immediately, keep work locally, then export the edited project as ZIP.</p></div></article>
+        <article class="feature-card"><span class="feature-icon">∞</span><div><h2>Works with automation</h2><p>Upload folders or ZIPs and let GitHub Actions create the catalog, encryption payloads and sitemap.</p></div></article>
       </div>
     </section>
 
@@ -74,7 +75,7 @@
         <div class="section-tools"><input id="class-search" class="search-input" placeholder="Search classes…" autocomplete="off" /></div>
       </div>
       <div id="class-grid" class="content-grid"></div>
-      <div id="classes-empty" class="empty-state" hidden><div class="empty-orb">∅</div><h3>No classes found</h3><p>Your library is either empty or the filter is being dramatic.</p></div>
+      <div id="classes-empty" class="empty-state" hidden><div class="empty-orb">∅</div><h2>No classes found</h2><p>Your library is either empty or the filter is being dramatic.</p></div>
     </section>
 
     <section id="blogs-view" class="view shell" data-view="blogs">
@@ -83,7 +84,7 @@
         <div class="section-tools"><input id="blog-search" class="search-input" placeholder="Search articles…" autocomplete="off" /></div>
       </div>
       <div id="blog-grid" class="content-grid"></div>
-      <div id="blogs-empty" class="empty-state" hidden><div class="empty-orb">∅</div><h3>No posts found</h3><p>Add a folder or ZIP inside <code>Blogs/</code> and let Actions do the rest.</p></div>
+      <div id="blogs-empty" class="empty-state" hidden><div class="empty-orb">∅</div><h2>No posts found</h2><p>Add a folder or ZIP inside <code>Blogs/</code> and let Actions do the rest.</p></div>
     </section>
 
     <section id="workspace-view" class="view shell" data-view="workspace">
@@ -135,6 +136,7 @@
       <div class="login-card panel">
         <div class="login-icon">⌁</div>
         <div class="eyebrow">Private student access</div>
+        <!-- সমস্যা সমাধান: এখানে h2 ট্যাগটি সঠিকভাবে হায়ারার্কি বজায় রাখার জন্য উপযুক্ত স্থানে রাখা হয়েছে -->
         <h2>Enter your class password</h2>
         <p>The password unlocks the encrypted class library in your browser. It is never sent to a server.</p>
         <form id="unlock-form"><label for="access-password">Access password</label><div class="password-row"><input id="access-password" type="password" autocomplete="current-password" required minlength="4"/><button class="primary-btn" type="submit">Unlock <span>→</span></button></div><small id="unlock-error" class="form-error" role="status"></small></form>
