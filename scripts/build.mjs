@@ -25,6 +25,7 @@ function listFiles(dir,base=dir,out=[]){for(const ent of fs.readdirSync(dir,{wit
 function firstMarkdownParagraph(file){if(!fs.existsSync(file))return '';const lines=fs.readFileSync(file,'utf8').split(/\r?\n/);for(const line of lines){const s=line.trim();if(!s||s.startsWith('#')||s.startsWith('```')||s.startsWith('- ')||s.startsWith('* '))continue;return s.replace(/[*_`]/g,'').slice(0,280);}return '';}
 function normalizeRel(p){return String(p||'').replaceAll(path.sep,'/').replace(/^\.\//,'').replace(/^\/+/,'').replace(/\/+/g,'/');}
 function numericOrder(value,fallback=999){const n=Number(value);return Number.isFinite(n)?n:fallback;}
+function inferOrder(value,name,fallback=999){if(value!=null&&value!=='')return numericOrder(value,fallback);const m=String(name||'').match(/^(\\d{1,4})(?:[-_. ]|$)/);return m?Number(m[1]):fallback;}
 function firstExistingMeta(dir){return ['metadata.json','meta.json'].map(n=>path.join(dir,n)).find(fs.existsSync)||null;}
 function childConfigList(meta){for(const key of ['subclasses','subtopics','modules','children']) if(Array.isArray(meta?.[key])) return meta[key]; return [];}
 function isTopicDirectory(dir){if(!fs.statSync(dir).isDirectory()) return false; const base=path.basename(dir).toLowerCase(); if(['assets','asset','images','image','img','media','public','static','src','dist','node_modules','.git'].includes(base)) return false; const entries=fs.readdirSync(dir,{withFileTypes:true}); return entries.some(e=>e.isFile() && /^(metadata|meta)\.json|README\.md|readme\.md|index\.html?$/i.test(e.name)) || entries.some(e=>e.isFile() && /\.(html?|css|md)$/i.test(e.name));}
@@ -40,7 +41,7 @@ function parseMeta(dir,type,name){
   const defaults=type==='class'||type==='subclass'?{level:'Beginner',duration:'Self-paced',tags:['HTML','CSS'],order:999,featured:false,homework:{tasks:[],hints:['Read the task carefully before coding.','Change one thing at a time and use the live preview.']}}:{level:'General',duration:'5 min read',tags:['Web design'],order:999,featured:false};
   const merged={...defaults,...meta};
   if(type==='class'||type==='subclass') merged.homework=normalizeHomework(merged.homework,defaults.homework,'');
-  return {...merged,id:safeId(meta.id || name),rank:numericOrder(meta.rank ?? meta.order,999),title,description,summary:meta.summary||description,type};
+  return {...merged,id:safeId(meta.id || name),rank:inferOrder(meta.rank ?? meta.order,name,999),title,description,summary:meta.summary||description,type};
 }
 function decorateTopicTree(meta,dir,parentPath='',packageRoot=dir){
   const explicit=childConfigList(meta);
@@ -51,7 +52,7 @@ function decorateTopicTree(meta,dir,parentPath='',packageRoot=dir){
     if(!childDir.startsWith(path.resolve(dir)+path.sep)||!fs.existsSync(childDir)||!fs.statSync(childDir).isDirectory()) continue;
     const parsed=parseMeta(childDir,'subclass',path.basename(childDir)); const cfg=entry.cfg||{}; const merged={...parsed,...cfg};
     const pathInPackage=normalizeRel(path.relative(packageRoot,childDir)); const childId=safeId(merged.id || ((parentPath?parentPath+'-':'')+path.basename(childDir)));
-    if(seen.has(childId)) continue; seen.add(childId); merged.id=childId; merged.path=pathInPackage; merged.rank=numericOrder(merged.rank ?? merged.order,entry.index+1); merged.order=merged.rank;
+    if(seen.has(childId)) continue; seen.add(childId); merged.id=childId; merged.path=pathInPackage; merged.rank=inferOrder(merged.rank ?? merged.order,path.basename(childDir),entry.index+1); merged.order=merged.rank;
     merged.homework=normalizeHomework(merged.homework,{tasks:[],hints:[]},pathInPackage); delete merged.internal;
     const hasNested=childConfigList(merged).length || fs.readdirSync(childDir,{withFileTypes:true}).some(e=>e.isDirectory() && !e.name.startsWith('.') && isTopicDirectory(path.join(childDir,e.name)));
     if(hasNested) decorateTopicTree(merged,childDir,childId,packageRoot); else delete merged.subclasses; children.push(merged);
