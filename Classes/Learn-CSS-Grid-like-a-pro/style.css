@@ -1,6 +1,7 @@
 * {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
 }
 body{
   height: 100vh;
@@ -14,6 +15,11 @@ body{
 
 .child {
   /* width: 100px; */
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 900;
+  font-size: 21px;
   width: 100%;
   background-color: brown;
   border: 3px solid aqua;
