@@ -2,7 +2,7 @@ name: Build & Deploy Obaidul Mentor Lab
 
 on:
   push:
-    branches: [main, master]
+    branches: [test]
     paths:
       - 'Classes/**'
       - 'Blogs/**'
