@@ -1,8 +1,8 @@
-name: Build, Verify & Deploy OWL
+name: Validate OWL Test Branch
 
 on:
   push:
-    branches: [test, main]
+    branches: [test]
     paths:
       - 'Classes/**'
       - 'Blogs/**'
@@ -19,74 +19,46 @@ on:
       - '404.html'
       - 'robots.txt'
       - '.github/workflows/deploy.yaml'
+      - '.github/workflows/validate-test.yml'
   workflow_dispatch:
 
 permissions:
   contents: read
-  actions: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: owl-pages
-  cancel-in-progress: true
 
 env:
   NODE_VERSION: '24'
 
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout test branch
         uses: actions/checkout@v7.0.1
+        with:
+          ref: test
 
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Build encrypted catalog
+      - name: Build test candidate
         env:
-          CLASS_ACCESS_PASSWORD: ${{ secrets.CLASS_ACCESS_PASSWORD || 'demo-only-change-me' }}
-          SITE_URL: ${{ vars.SITE_URL || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
-          GITHUB_ACTIONS: ${{ github.ref == 'refs/heads/main' && 'true' || '' }}
+          CLASS_ACCESS_PASSWORD: ${{ secrets.CLASS_ACCESS_PASSWORD }}
+          SITE_URL: ${{ vars.SITE_URL || format('https://{0}.github.io/{1}/test', github.repository_owner, github.event.repository.name) }}
+          GITHUB_ACTIONS: true
         run: node scripts/build.mjs
 
-      - name: Add Power Workspace to Pages bundle
+      - name: Add Power Workspace and syntax-check it
         run: |
+          test -f workspace-plus.js
           cp workspace-plus.js dist/workspace-plus.js
-          printf '\n<script src="./workspace-plus.js"></script>\n' >> dist/index.html
           node --check workspace-plus.js
+          node -e "const fs=require('fs');const p='dist/index.html';let s=fs.readFileSync(p,'utf8');const t='<script src="./workspace-plus.js"></script>';if(!s.includes(t))s=s.replace(/<\/body>/i,t+'\n</body>');fs.writeFileSync(p,s)"
 
-      - name: Validate build
+      - name: Verify test candidate
         env:
-          CLASS_ACCESS_PASSWORD: ${{ secrets.CLASS_ACCESS_PASSWORD || 'demo-only-change-me' }}
+          CLASS_ACCESS_PASSWORD: ${{ secrets.CLASS_ACCESS_PASSWORD }}
         run: |
           node scripts/verify-build.mjs
-          test -f dist/index.html
-          test -f dist/data/catalog.enc.json
-          test -f dist/sitemap.xml
-          test -f dist/assets/vendor/jszip.min.js
           test -f dist/workspace-plus.js
-          ! grep -R "demo-only-change-me" dist || (echo "Password leaked into build" && exit 1)
-
-      - name: Upload Pages artifact
-        if: github.ref == 'refs/heads/main'
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: dist
-
-  deploy:
-    if: github.ref == 'refs/heads/main'
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
