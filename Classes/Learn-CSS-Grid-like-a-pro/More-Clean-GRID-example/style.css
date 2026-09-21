@@ -1,21 +1,29 @@
-body{
+*{
   padding: 0;
   margin: 0;
+  box-sizing: border-box;
+  border-radius: 3px;
 }
 .grid{
   display: grid;
-  /* grid-template-columns: auto auto auto; */
   grid-template-areas: 'nav nav nav' 'main main aside' 'footer footer footer';
   height: 100vh;
+  gap: 5px;
+  background-color: rgb(34, 204, 251);
+  padding: 5px;
   /* padding: 11px; */
   /* border: 3px solid gray; */
-  gap: 11px;
   /* place-items: center; */
-  background-color: rgb(34, 204, 251);
+  /* grid-template-columns: auto auto auto; */
 }
 .child{
   height: 1fr;
   width: 100%;
+  color: #fff;
+  font-weight: 900;
+  font-size: 31px;
+  display: grid;
+  place-items: center;
 }
 .c1{
   grid-area: nav;
