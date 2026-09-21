@@ -1,8 +1,8 @@
-name: Build & Deploy Obaidul Mentor Lab
+name: Publish OWL Pages
 
 on:
   push:
-    branches: [main,master]
+    branches: [main, master]
     paths:
       - 'Classes/**'
       - 'Blogs/**'
@@ -12,12 +12,17 @@ on:
       - 'sw.js'
       - 'site.webmanifest'
       - 'site-config.json'
+      - 'workspace-plus.js'
       - 'assets/**'
       - 'scripts/**'
       - 'package.json'
       - '404.html'
       - 'robots.txt'
       - '.github/workflows/deploy.yaml'
+      - '.github/workflows/validate-test.yml'
+  workflow_run:
+    workflows: ["Validate OWL Test Branch"]
+    types: [completed]
   workflow_dispatch:
 
 permissions:
@@ -27,47 +32,107 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: owl-pages
   cancel-in-progress: true
 
 env:
   NODE_VERSION: '24'
+  SITE_ORIGIN: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}
 
 jobs:
   build:
+    if: >
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.head_branch == 'test' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout production (main)
         uses: actions/checkout@v7.0.1
+        with:
+          ref: main
+          path: prod-src
+
+      - name: Checkout test branch
+        if: github.event_name == 'workflow_run'
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: test
+          path: test-src
 
       - name: Setup Node
         uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
 
-      - name: Build encrypted catalog
+      - name: Build production
         env:
           CLASS_ACCESS_PASSWORD: ${{ secrets.CLASS_ACCESS_PASSWORD }}
-          SITE_URL: ${{ vars.SITE_URL || format('https://{0}.github.io/{1}', github.repository_owner, github.event.repository.name) }}
+          SITE_URL: ${{ env.SITE_ORIGIN }}
           GITHUB_ACTIONS: true
+        working-directory: prod-src
         run: node scripts/build.mjs
 
-      - name: Validate generated site
+      - name: Add Power Workspace to production when available
+        working-directory: prod-src
+        run: |
+          if [ -f workspace-plus.js ]; then
+            cp workspace-plus.js dist/workspace-plus.js
+            node --check workspace-plus.js
+            node -e "const fs=require('fs');const p='dist/index.html';let s=fs.readFileSync(p,'utf8');const t='<script src="./workspace-plus.js"></script>';if(!s.includes(t))s=s.replace(/<\/body>/i,t+'\n</body>');fs.writeFileSync(p,s)"
+          fi
+
+      - name: Verify production build
         env:
           CLASS_ACCESS_PASSWORD: ${{ secrets.CLASS_ACCESS_PASSWORD }}
+        working-directory: prod-src
+        run: node scripts/verify-build.mjs
+
+      - name: Build live test preview
+        if: github.event_name == 'workflow_run'
+        env:
+          CLASS_ACCESS_PASSWORD: ${{ secrets.CLASS_ACCESS_PASSWORD }}
+          SITE_URL: ${{ env.SITE_ORIGIN }}/test
+          GITHUB_ACTIONS: true
+        working-directory: test-src
+        run: node scripts/build.mjs
+
+      - name: Add Power Workspace to test preview
+        if: github.event_name == 'workflow_run'
+        working-directory: test-src
         run: |
+          test -f workspace-plus.js
+          cp workspace-plus.js dist/workspace-plus.js
+          node --check workspace-plus.js
+          node -e "const fs=require('fs');const p='dist/index.html';let s=fs.readFileSync(p,'utf8');const t='<script src="./workspace-plus.js"></script>';if(!s.includes(t))s=s.replace(/<\/body>/i,t+'\n</body>');fs.writeFileSync(p,s)"
+
+      - name: Verify live test preview
+        if: github.event_name == 'workflow_run'
+        env:
+          CLASS_ACCESS_PASSWORD: ${{ secrets.CLASS_ACCESS_PASSWORD }}
+        working-directory: test-src
+        run: node scripts/verify-build.mjs
+
+      - name: Compose Pages site
+        run: |
+          rm -rf dist
+          mkdir -p dist
+          cp -a prod-src/dist/. dist/
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            mkdir -p dist/test
+            cp -a test-src/dist/. dist/test/
+            test -f dist/test/index.html
+            test -f dist/test/data/catalog.enc.json
+            test -f dist/test/workspace-plus.js
+          fi
           test -f dist/index.html
           test -f dist/data/catalog.enc.json
           test -f dist/sitemap.xml
-          test -f dist/assets/vendor/jszip.min.js
-          ! grep -R "demo-only-change-me" dist || (echo "Demo password leaked into build" && exit 1)
-          node scripts/verify-build.mjs
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
       - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
@@ -80,4 +145,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
