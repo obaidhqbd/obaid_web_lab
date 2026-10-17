@@ -43,7 +43,7 @@ jobs:
           git add data/catalog.json data/catalog.backup.json
           if ! git diff --cached --quiet; then
             git commit -m "chore: refresh generated learning catalogue"
-            git push origin "HEAD:\${GITHUB_REF_NAME}"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
           else
             echo "Catalogue snapshot unchanged; no repository commit needed."
           fi
