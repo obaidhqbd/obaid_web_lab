@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Build a resilient searchable catalogue from content folders. Standard library only."""
 from __future__ import annotations
-import argparse, html, json, re, shutil, sys, zipfile
+import argparse, html, json, os, re, shutil, sys, zipfile
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 from typing import Any
 
 ROOT=Path(__file__).resolve().parents[1]
-DATA=ROOT/"data"; CLASSES=ROOT/"content"/"classes"; BLOGS=ROOT/"content"/"blogs"; GENERATED=ROOT/"generated-content"
+DATA=ROOT/"data"; CLASSES=ROOT/"content"/"classes"; BLOGS=ROOT/"content"/"blogs"; GENERATED=ROOT/"generated-content"; DOWNLOADS=ROOT/"downloads"
 SCHEMA=1
 META={"metadata.json","class.json","course.json","blog.json","_meta.json","manifest.json"}
 OVERVIEWS=("README.md","readme.md","index.md","about.md","index.html","main.html","build.html")
@@ -207,6 +207,49 @@ def scan_blogs(errors,used):
                 item["sourcePath"]=rel(z); out.append(item)
         except Exception as exc: errors.append(f"{rel(z)}: archive skipped ({type(exc).__name__})")
     return out
+def create_class_archives(classes,errors):
+    archive_dir=DOWNLOADS/"classes"
+    archive_dir.mkdir(parents=True,exist_ok=True)
+    for old in archive_dir.glob("*.zip"):
+        try: old.unlink()
+        except OSError: pass
+    root_resolved=ROOT.resolve()
+    for item in classes:
+        paths=[]
+        for record in item.get("files",[]):
+            value=record.get("path","")
+            if not value or Path(value).is_absolute() or ".." in Path(value).parts: continue
+            try:
+                path=(ROOT/value).resolve()
+                if path.is_file() and not path.is_symlink() and (path==root_resolved or root_resolved in path.parents):
+                    paths.append(path)
+            except OSError: continue
+        # Keep each class download independent so extracting it never mixes files with another class.
+        unique={p.as_posix():p for p in paths}
+        paths=sorted(unique.values(),key=lambda p:p.as_posix().casefold())
+        if not paths:
+            errors.append(f"{item.get('sourcePath',item.get('id','class'))}: no ZIP download could be built")
+            continue
+        try:
+            common=Path(os.path.commonpath([str(path.parent) for path in paths]))
+            archive_name=slug(item.get("id") or item.get("title") or "class")+".zip"
+            destination=archive_dir/archive_name
+            prefix=slug(item.get("title") or item.get("id") or "class")
+            with zipfile.ZipFile(destination,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=6) as archive:
+                for path in paths:
+                    try: relative=path.relative_to(common)
+                    except ValueError: relative=Path(path.name)
+                    member=PurePosixPath(prefix,*relative.parts).as_posix()
+                    archive.write(path,arcname=member)
+            item["downloadUrl"]="downloads/classes/"+archive_name
+            item["downloadSize"]=destination.stat().st_size
+        except Exception as exc:
+            errors.append(f"{item.get('sourcePath',item.get('id','class'))}: ZIP download failed ({type(exc).__name__})")
+            print(f"WARNING: ZIP creation failed for {item.get('title','class')}: {exc}",file=sys.stderr)
+            try:
+                if 'destination' in locals() and destination.exists(): destination.unlink()
+            except OSError: pass
+
 def valid_catalog(path):
     try:
         value=json.loads(path.read_text(encoding="utf-8"))
@@ -222,19 +265,36 @@ def main():
         if GENERATED.exists(): shutil.rmtree(GENERATED)
         GENERATED.mkdir(parents=True,exist_ok=True)
     except OSError as exc: print(f"WARNING: generated archive cleanup failed: {exc}",file=sys.stderr)
-    previous=valid_catalog(DATA/"catalog.json") or valid_catalog(DATA/"catalog.backup.json") or valid_catalog(DATA/"catalog.seed.json")
+    current=valid_catalog(DATA/"catalog.json")
+    existing_backup=valid_catalog(DATA/"catalog.backup.json")
+    previous=current or existing_backup or valid_catalog(DATA/"catalog.seed.json")
     errors=[]; used=set()
     try: classes=scan_classes(errors,used)
     except Exception as exc: classes=[]; errors.append(f"class scan recovered ({type(exc).__name__})")
     try: blogs=scan_blogs(errors,used)
     except Exception as exc: blogs=[]; errors.append(f"blog scan recovered ({type(exc).__name__})")
-    data={"schemaVersion":SCHEMA,"generatedAt":now(),"classes":sorted(classes,key=lambda x:x["title"].casefold()),
+    create_class_archives(classes,errors)
+    generated_at=now()
+    # Retain timestamps when content has not changed; this keeps automation commits quiet.
+    if current and current.get("classes")==classes and current.get("blogs")==blogs:
+        generated_at=current.get("generatedAt") or generated_at
+    data={"schemaVersion":SCHEMA,"generatedAt":generated_at,"classes":sorted(classes,key=lambda x:x["title"].casefold()),
           "blogs":sorted(blogs,key=lambda x:x["title"].casefold()),
           "meta":{"totalFiles":sum(len(x.get("files",[])) for x in classes+blogs),"errors":errors[:100]}}
-    if previous: write_json(DATA/"catalog.backup.json",previous)
-    else: write_json(DATA/"catalog.backup.json",data)
+    if current and (current.get("classes")!=data["classes"] or current.get("blogs")!=data["blogs"]):
+        write_json(DATA/"catalog.backup.json",current)
+    elif existing_backup:
+        # Keep the last-known-good published snapshot until there is a new content revision.
+        write_json(DATA/"catalog.backup.json",existing_backup)
+    elif previous:
+        write_json(DATA/"catalog.backup.json",previous)
+    else:
+        write_json(DATA/"catalog.backup.json",data)
     write_json(DATA/"catalog.json",data)
     if not valid_catalog(DATA/"catalog.json"): print("ERROR: catalogue validation failed",file=sys.stderr); return 1
+    missing=[item.get("title","class") for item in classes if not item.get("downloadUrl") or not (ROOT/item["downloadUrl"]).is_file()]
+    if missing:
+        print("ERROR: ZIP downloads are missing: "+", ".join(missing),file=sys.stderr); return 1
     print(f"Catalogue built: {len(classes)} classes, {len(blogs)} notes, {data['meta']['totalFiles']} files, {len(errors)} warnings.")
     return 0
 if __name__=="__main__": raise SystemExit(main())
