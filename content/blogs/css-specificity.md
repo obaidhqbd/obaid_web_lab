@@ -6,40 +6,79 @@ tags: CSS, Beginner, Study Notes
 date: 2026-10-17
 ---
 
-# CSS Specificity, Made Simple
+# CSS Specificity — কোন CSS Rule আগে কাজ করবে?
 
-When more than one CSS rule targets the same element, the browser compares **specificity** to decide which declaration wins. Specificity is not simply based on which rule appears last.
+একই HTML Element-এর জন্য যদি একাধিক CSS Rule প্রযোজ্য হয়, তখন **কোন Rule-টি বেশি প্রাধান্য পাবে?**
 
-## The usual order
+এই প্রাধান্য নির্ধারণের ব্যবস্থাকেই বলা হয় **CSS Specificity**।
 
-For normal author CSS, compare the selector's specificity in this order:
+---
 
-1. **ID selectors** — such as #header.
-2. **Class, attribute and pseudo-class selectors** — such as .card, [disabled] and :hover.
-3. **Element and pseudo-element selectors** — such as h1 and ::before.
+## 🎯 সহজে মনে রাখো
 
-A selector can be thought of as a three-part score: IDs, classes/attributes/pseudo-classes, then elements/pseudo-elements. Compare from left to right; a larger number in an earlier column takes priority. For example, #page .card is more specific than .card h2 because the first selector contains an ID.
+শেখার সুবিধার জন্য আমরা এভাবে মনে রাখতে পারি:
 
-## Example
+```text
+INLINE      = 1000
+#ID         = 100
+.CLASS      = 10
+ELEMENT     = 1
+```
 
-    p { color: #555; }
-    .notice { color: #176b44; }
-    #welcome { color: #275ac7; }
+অর্থাৎ,
 
-If one paragraph has both class notice and ID welcome, the ID selector wins among these normal rules.
+> **সংখ্যা যত বেশি → Priority তত বেশি।**
 
-## Important reminders
+### উদাহরণ
 
-- The universal selector (*) and combinators do not add specificity by themselves.
-- A comma-separated selector list calculates specificity separately for each selector.
-- Inline styles generally outrank normal selector rules; important declarations have their own cascade priority.
-- !important is not an infinite specificity score. It changes cascade priority, and should be used sparingly.
-- When specificity is equal, the rule that wins later in the cascade is applied, with source order being a common tie-breaker.
+```css
+#box .title p
+```
 
-## Quick practice
+এখানে আছে:
 
-Which selector is more specific: .note strong or #main strong?
+```text
+#ID      = 100
+.CLASS   = 10
+ELEMENT  = 1
 
-The second one wins because it contains an ID selector. Count the selector components, compare the ID column first, and only then compare the other columns.
+Total = 111
+```
 
-Keep practising by changing the selectors in your own class files and observing which declaration takes effect.
+তাই `#box .title p`-এর Specificity হলো **111** — আমাদের সহজ Teaching Model অনুযায়ী।
+
+---
+
+## ⚠️ তবে একটি বিষয় মনে রাখবে
+
+`1000 / 100 / 10 / 1` হলো **বোঝার সুবিধার জন্য একটি Teaching Model**।
+
+CSS-এর অফিসিয়াল Specificity-কে এভাবে লেখা হয়:
+
+```text
+(Inline, ID, CLASS, ELEMENT)
+```
+
+তাই,
+
+```css
+#box .title p
+```
+
+এর Specificity:
+
+```text
+(0, 1, 1, 1)
+```
+
+এখানে আগে **Inline**, তারপর **ID**, তারপর **Class**, তারপর **Element** তুলনা করা হয়।
+
+---
+
+## 🧠 এক লাইনে মনে রাখো
+
+```text
+INLINE > ID > CLASS > ELEMENT
+```
+
+**Specificity বেশি → Priority বেশি → সেই Rule প্রাধান্য পাবে।** 
