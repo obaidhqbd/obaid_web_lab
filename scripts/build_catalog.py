@@ -217,6 +217,7 @@ def create_class_archives(classes,errors):
         except OSError: pass
     root_resolved=ROOT.resolve()
     for item in classes:
+        destination=None
         paths=[]
         for record in item.get("files",[]):
             value=record.get("path","")
@@ -249,7 +250,7 @@ def create_class_archives(classes,errors):
             errors.append(f"{item.get('sourcePath',item.get('id','class'))}: ZIP download failed ({type(exc).__name__})")
             print(f"WARNING: ZIP creation failed for {item.get('title','class')}: {exc}",file=sys.stderr)
             try:
-                if 'destination' in locals() and destination.exists(): destination.unlink()
+                if destination is not None and destination.exists(): destination.unlink()
             except OSError: pass
 
 def valid_catalog(path):
