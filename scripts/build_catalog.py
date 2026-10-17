@@ -274,6 +274,8 @@ def main():
     try: blogs=scan_blogs(errors,used)
     except Exception as exc: blogs=[]; errors.append(f"blog scan recovered ({type(exc).__name__})")
     create_class_archives(classes,errors)
+    classes=sorted(classes,key=lambda x:x["title"].casefold())
+    blogs=sorted(blogs,key=lambda x:x["title"].casefold())
     generated_at=now()
     # Retain timestamps when content has not changed; this keeps automation commits quiet.
     if current and current.get("classes")==classes and current.get("blogs")==blogs:
