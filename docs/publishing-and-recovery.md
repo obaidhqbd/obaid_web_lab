@@ -30,7 +30,7 @@ A ZIP placed anywhere under content/classes/ or content/blogs/ is extracted in t
 1. Confirm the files were committed to the main branch and are under content/classes/ or content/blogs/.
 2. Give folders at least one real file. Git does not track empty folders, and the catalogue skips empty collections.
 3. Open the latest Build and deploy student library workflow in Actions. A bad individual item is logged as a warning; a failed site check prevents the new artifact from deploying.
-4. If the primary generated catalogue is unavailable, the site tries the backup catalogue, the visitor's last saved catalogue and the bundled starter catalogue. The fallback keeps the interface usable, though a stale fallback may not contain your newest upload.
+4. If the primary generated catalogue is unavailable, the site tries the visitor's last saved catalogue, the backup catalogue and the bundled starter catalogue. The fallback keeps the interface usable, though a stale fallback may not contain your newest upload.
 
 ## First Pages setup
 
