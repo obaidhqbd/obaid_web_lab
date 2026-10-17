@@ -8,7 +8,7 @@ A lightweight student-support library for class folders, practical files and stu
 2. Add a Markdown note, HTML article, or a folder of blog assets under content/blogs/.
 3. Commit or upload to the main branch. GitHub Actions scans the new content, generates a searchable catalogue, checks the build and deploys the site.
 
-The website uses a progressive fallback chain: generated catalogue, backup catalogue, the last valid catalogue saved in the visitor's browser, then the bundled starter catalogue. A single malformed item is logged and skipped rather than stopping the catalogue build. A broken build cannot replace the last deployed Pages version.
+The website uses a progressive fallback chain: generated catalogue, the last valid catalogue saved in the visitor's browser, the backup catalogue, then the bundled starter catalogue. A single malformed item is logged and skipped rather than stopping the catalogue build. A broken build cannot replace the last deployed Pages version.
 
 ## Content examples
 
@@ -54,6 +54,8 @@ Markdown notes may also start with simple front matter:
 The workflow at .github/workflows/pages.yml deploys from main using GitHub Pages' Actions deployment. It runs checks for pushes and pull requests, and supports manual runs through the Actions tab.
 
 On the first deployment, confirm that Settings → Pages → Build and deployment → Source is set to GitHub Actions if GitHub requests it. The workflow needs Pages write and OIDC permissions.
+
+See docs/publishing-and-recovery.md for a fuller publishing and troubleshooting guide.
 
 ## Interface features
 
