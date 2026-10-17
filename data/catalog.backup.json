@@ -1,56 +1,53 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-17T00:00:00Z",
+  "generatedAt": "2026-10-17T15:20:59Z",
   "classes": [
     {
-      "id": "html-css-starter",
+      "id": "content-classes-html-css-starter",
       "title": "HTML & CSS Starter Class",
-      "description": "A small starting collection with an overview, a working HTML example and a separate stylesheet. Replace or extend these files with your own lessons.",
+      "description": "HTML & CSS Starter Class",
       "category": "Web Development",
-      "tags": [
-        "HTML",
-        "CSS",
-        "Beginner"
-      ],
-      "date": "2026-10-17",
+      "tags": [],
+      "date": "",
       "files": [
-        {
-          "title": "README",
-          "path": "content/classes/html-css-starter/README.md",
-          "ext": "md",
-          "kind": "markdown",
-          "size": 600,
-          "sizeLabel": "600 B",
-          "primary": true
-        },
         {
           "title": "Index",
           "path": "content/classes/html-css-starter/index.html",
           "ext": "html",
           "kind": "html",
-          "size": 900,
-          "sizeLabel": "900 B",
+          "size": 745,
+          "sizeLabel": "745 B",
           "primary": false
+        },
+        {
+          "title": "README",
+          "path": "content/classes/html-css-starter/README.md",
+          "ext": "md",
+          "kind": "markdown",
+          "size": 854,
+          "sizeLabel": "854 B",
+          "primary": true
         },
         {
           "title": "Style",
           "path": "content/classes/html-css-starter/style.css",
           "ext": "css",
           "kind": "code",
-          "size": 400,
-          "sizeLabel": "400 B",
+          "size": 757,
+          "sizeLabel": "757 B",
           "primary": false
         }
       ],
       "fileCount": 3,
       "sourcePath": "content/classes/html-css-starter",
       "subtopics": [],
-      "downloadUrl": "downloads/classes/content-classes-html-css-starter.zip"
+      "downloadUrl": "downloads/classes/content-classes-html-css-starter.zip",
+      "downloadSize": 1812
     }
   ],
   "blogs": [
     {
-      "id": "css-specificity",
+      "id": "content-blogs-css-specificity",
       "title": "CSS Specificity, Made Simple",
       "description": "Learn how the browser chooses which CSS rule wins, with student-friendly examples.",
       "category": "Web Development",
@@ -62,19 +59,19 @@
       "date": "2026-10-17",
       "files": [
         {
-          "title": "CSS Specificity",
+          "title": "Css specificity",
           "path": "content/blogs/css-specificity.md",
           "ext": "md",
           "kind": "markdown",
-          "size": 1000,
-          "sizeLabel": "1 KB",
+          "size": 2142,
+          "sizeLabel": "2142 B",
           "primary": true
         }
       ],
       "fileCount": 1,
       "sourcePath": "content/blogs/css-specificity.md",
       "bodyPath": "content/blogs/css-specificity.md",
-      "readingMinutes": 3
+      "readingMinutes": 1
     }
   ],
   "meta": {
