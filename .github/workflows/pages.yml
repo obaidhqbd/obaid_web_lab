@@ -32,7 +32,9 @@ jobs:
       - name: Rebuild class and blog catalogue
         run: python scripts/build_catalog.py --check
       - name: Validate JavaScript syntax
-        run: node --check app.js
+        run: |
+          node --check app.js
+          node --check class-editor.js
       - name: Validate site and indexed files
         run: python scripts/check_site.py
       - name: Persist the latest valid catalogue snapshots
