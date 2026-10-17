@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-17T15:30:13Z",
+  "generatedAt": "2026-10-17T15:31:30Z",
   "classes": [
     {
       "id": "content-classes-css-grid-learn-to-use-grid-like-a-pro-provided",
@@ -136,8 +136,8 @@
           "path": "content/blogs/css-specificity.md",
           "ext": "md",
           "kind": "markdown",
-          "size": 2142,
-          "sizeLabel": "2142 B",
+          "size": 2094,
+          "sizeLabel": "2094 B",
           "primary": true
         }
       ],
