@@ -144,8 +144,10 @@ def make_item(folder,source_path,default,kind,used,errors,files_override=None,su
     try:
         primary=overview(folder); meta,body=metadata(folder,primary); title,desc=title_desc(meta,folder.name,primary,body)
         files=files_override if files_override is not None else file_records(folder)
-        if not files: errors.append(f"{source_path}: no readable files were found")
-        primary_path=rel(primary) if primary else (files[0]["path"] if files else "")
+        if not files:
+            errors.append(f"{source_path}: ignored because no readable files were found")
+            return None
+        primary_path=rel(primary) if primary else files[0]["path"]
         entry={"id":unique_id(source_path,used),"title":title,"description":desc,"category":str(meta.get("category") or meta.get("subject") or default)[:80],
                "tags":tags(meta.get("tags") or meta.get("keywords")),"date":str(meta.get("date") or meta.get("updated") or "")[:30],
                "files":files,"fileCount":len(files),"sourcePath":source_path}
