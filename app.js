@@ -10,7 +10,21 @@ function read(k,d){try{const v=JSON.parse(localStorage.getItem(k)||"null");retur
 function write(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(_){}}
 function valid(d){return !!d&&Number(d.schemaVersion)===1&&Array.isArray(d.classes)&&Array.isArray(d.blogs)&&d.classes.every(x=>x&&typeof x.id==="string"&&typeof x.title==="string"&&Array.isArray(x.files))&&d.blogs.every(x=>x&&typeof x.id==="string"&&typeof x.title==="string");}
 async function getCatalog(path){const c=typeof AbortController==="function"?new AbortController():null,t=setTimeout(()=>{if(c)c.abort();},4200);try{const r=await fetch(path+"?v="+Date.now(),{cache:"no-store",signal:c?c.signal:undefined});if(!r.ok)throw Error(path+" "+r.status);const d=await r.json();if(!valid(d))throw Error("Invalid schema");return d;}finally{clearTimeout(t);}}
-async function load(){for(const [p,label] of [["data/catalog.json","live"],["data/catalog.backup.json","backup"]]){try{S.catalog=await getCatalog(p);S.source=label;const badItems=Number(S.catalog.meta&&Array.isArray(S.catalog.meta.errors)?S.catalog.meta.errors.length:0);S.warning=label==="live"?(badItems?"The catalogue loaded, but "+badItems+" item(s) could not be indexed. Check the latest GitHub Actions build log for details.":""):"The main catalogue was unavailable, so a backup catalogue is being shown.";write(KEY.catalog,S.catalog);return;}catch(e){console.warn("Catalogue fallback",p,e.message);}}const cache=read(KEY.catalog,null);if(valid(cache)){S.catalog=cache;S.source="device";S.warning="Showing the last working library saved on this device. New uploads may not appear until the connection returns.";return;}try{S.catalog=await getCatalog("data/catalog.seed.json");S.source="seed";S.warning="The live catalogue is unavailable. The starter library is shown instead.";return;}catch(e){console.warn("Seed catalogue",e.message);}S.catalog=EMPTY;S.source="offline";S.warning="The catalogue could not load. The site remains available; reconnect and select Try again.";}
+async function load(){
+ try{
+  S.catalog=await getCatalog("data/catalog.json");S.source="live";
+  const badItems=Number(S.catalog.meta&&Array.isArray(S.catalog.meta.errors)?S.catalog.meta.errors.length:0);
+  S.warning=badItems?"The catalogue loaded, but "+badItems+" item(s) could not be indexed. Check the latest GitHub Actions build log for details.":"";
+  write(KEY.catalog,S.catalog);return;
+ }catch(e){console.warn("Primary catalogue unavailable:",e.message);}
+ const cache=read(KEY.catalog,null);
+ if(valid(cache)){S.catalog=cache;S.source="device";S.warning="The live catalogue could not be reached. Showing the last working catalogue saved on this device.";return;}
+ try{S.catalog=await getCatalog("data/catalog.backup.json");S.source="backup";S.warning="The live catalogue is unavailable. A backup catalogue is being shown.";return;}
+ catch(e){console.warn("Backup catalogue unavailable:",e.message);}
+ try{S.catalog=await getCatalog("data/catalog.seed.json");S.source="seed";S.warning="The live catalogue and backup are unavailable. The starter library is shown instead.";return;}
+ catch(e){console.warn("Seed catalogue unavailable:",e.message);}
+ S.catalog=EMPTY;S.source="offline";S.warning="The catalogue could not load. The site remains available; reconnect and select Try again.";
+}
 function all(){return S.catalog.classes.map(x=>Object.assign({kind:"class"},x)).concat(S.catalog.blogs.map(x=>Object.assign({kind:"blog"},x)));}
 function fileCount(){return S.catalog.classes.reduce((n,x)=>n+(x.files||[]).length,0)+S.catalog.blogs.reduce((n,x)=>n+(x.files||[]).length,0);}
 function categories(){const out=new Set();all().forEach(x=>{if(x.category)out.add(String(x.category));(x.tags||[]).forEach(t=>{if(String(t).trim())out.add(String(t));});});return [...out].sort((a,b)=>a.localeCompare(b));}
