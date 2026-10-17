@@ -29,6 +29,11 @@ try:
                 if not (ROOT/path).is_file(): errors.append("Indexed file does not exist: "+path)
             body=resource.get("bodyPath")
             if body and not (ROOT/body).is_file(): errors.append("Article file does not exist: "+str(body))
+            download=resource.get("downloadUrl")
+            if download:
+                if download.startswith("/") or ".." in Path(download).parts: errors.append("Unsafe download path: "+str(download))
+                elif not (ROOT/download).is_file(): errors.append("Download artifact is missing: "+str(download))
+            elif group=="classes": errors.append("Class ZIP download URL is missing: "+str(identity))
 except (OSError,ValueError,AttributeError) as exc:
     errors.append("Could not validate generated catalogue: "+str(exc))
 if errors:
