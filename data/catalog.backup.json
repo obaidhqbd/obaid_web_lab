@@ -1,7 +1,80 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-10-17T15:20:59Z",
+  "generatedAt": "2026-10-17T15:30:13Z",
   "classes": [
+    {
+      "id": "content-classes-css-grid-learn-to-use-grid-like-a-pro-provided",
+      "title": "CSS grid - learn to use grid like a pro",
+      "description": "Practice CSS grid to control elements position as respect of both X and Y axis.",
+      "category": "CSS Grid",
+      "tags": [
+        "HTML",
+        "Grid",
+        "CSS",
+        "Practice"
+      ],
+      "date": "",
+      "files": [
+        {
+          "title": "Index",
+          "path": "generated-content/classes/css-grid-learn-to-use-grid-like-a-pro-provided/index.html",
+          "ext": "html",
+          "kind": "html",
+          "size": 486,
+          "sizeLabel": "486 B",
+          "primary": true
+        },
+        {
+          "title": "Index",
+          "path": "generated-content/classes/css-grid-learn-to-use-grid-like-a-pro-provided/More-Clean-GRID-example/index.html",
+          "ext": "html",
+          "kind": "html",
+          "size": 435,
+          "sizeLabel": "435 B",
+          "primary": false
+        },
+        {
+          "title": "Style",
+          "path": "generated-content/classes/css-grid-learn-to-use-grid-like-a-pro-provided/More-Clean-GRID-example/style.css",
+          "ext": "css",
+          "kind": "code",
+          "size": 810,
+          "sizeLabel": "810 B",
+          "primary": false
+        },
+        {
+          "title": "Specificity",
+          "path": "generated-content/classes/css-grid-learn-to-use-grid-like-a-pro-provided/specificity.MD",
+          "ext": "md",
+          "kind": "markdown",
+          "size": 1107,
+          "sizeLabel": "1 KB",
+          "primary": false
+        },
+        {
+          "title": "Style",
+          "path": "generated-content/classes/css-grid-learn-to-use-grid-like-a-pro-provided/style.css",
+          "ext": "css",
+          "kind": "code",
+          "size": 850,
+          "sizeLabel": "850 B",
+          "primary": false
+        }
+      ],
+      "fileCount": 5,
+      "sourcePath": "content/classes/css-grid-learn-to-use-grid-like-a-pro-provided.zip",
+      "subtopics": [
+        {
+          "title": "More Clean GRID example",
+          "path": "generated-content/classes/css-grid-learn-to-use-grid-like-a-pro-provided/More-Clean-GRID-example",
+          "overviewPath": "generated-content/classes/css-grid-learn-to-use-grid-like-a-pro-provided/More-Clean-GRID-example/index.html",
+          "firstFile": "generated-content/classes/css-grid-learn-to-use-grid-like-a-pro-provided/More-Clean-GRID-example/index.html",
+          "fileCount": 2
+        }
+      ],
+      "downloadUrl": "downloads/classes/content-classes-css-grid-learn-to-use-grid-like-a-pro-provided.zip",
+      "downloadSize": 2698
+    },
     {
       "id": "content-classes-html-css-starter",
       "title": "HTML & CSS Starter Class",
@@ -75,7 +148,7 @@
     }
   ],
   "meta": {
-    "totalFiles": 4,
+    "totalFiles": 9,
     "errors": []
   }
 }
