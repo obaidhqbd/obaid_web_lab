@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-17T00:00:00Z",
+  "classes": [
+    {
+      "id": "html-css-starter",
+      "title": "HTML & CSS Starter Class",
+      "description": "A small starting collection with an overview, a working HTML example and a separate stylesheet. Replace or extend these files with your own lessons.",
+      "category": "Web Development",
+      "tags": [
+        "HTML",
+        "CSS",
+        "Beginner"
+      ],
+      "date": "2026-10-17",
+      "files": [
+        {
+          "title": "README",
+          "path": "content/classes/html-css-starter/README.md",
+          "ext": "md",
+          "kind": "markdown",
+          "size": 600,
+          "sizeLabel": "600 B",
+          "primary": true
+        },
+        {
+          "title": "Index",
+          "path": "content/classes/html-css-starter/index.html",
+          "ext": "html",
+          "kind": "html",
+          "size": 900,
+          "sizeLabel": "900 B",
+          "primary": false
+        },
+        {
+          "title": "Style",
+          "path": "content/classes/html-css-starter/style.css",
+          "ext": "css",
+          "kind": "code",
+          "size": 400,
+          "sizeLabel": "400 B",
+          "primary": false
+        }
+      ],
+      "fileCount": 3,
+      "sourcePath": "content/classes/html-css-starter",
+      "subtopics": []
+    }
+  ],
+  "blogs": [
+    {
+      "id": "css-specificity",
+      "title": "CSS Specificity, Made Simple",
+      "description": "Learn how the browser chooses which CSS rule wins, with student-friendly examples.",
+      "category": "Web Development",
+      "tags": [
+        "CSS",
+        "Beginner",
+        "Study Notes"
+      ],
+      "date": "2026-10-17",
+      "files": [
+        {
+          "title": "CSS Specificity",
+          "path": "content/blogs/css-specificity.md",
+          "ext": "md",
+          "kind": "markdown",
+          "size": 1000,
+          "sizeLabel": "1 KB",
+          "primary": true
+        }
+      ],
+      "fileCount": 1,
+      "sourcePath": "content/blogs/css-specificity.md",
+      "bodyPath": "content/blogs/css-specificity.md",
+      "readingMinutes": 3
+    }
+  ],
+  "meta": {
+    "totalFiles": 4,
+    "errors": []
+  }
+}
