@@ -1,0 +1,10 @@
+*{box-sizing:border-box}
+body{margin:0;background:#f4f6fb;color:#182033;font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif}
+.lesson{width:min(720px,calc(100% - 36px));margin:9vh auto;padding:clamp(24px,6vw,54px);background:#fff;border:1px solid #e1e6ef;border-radius:24px;box-shadow:0 20px 60px #17284d12}
+.eyebrow{font-size:11px;font-weight:800;letter-spacing:1.8px;color:#4266d5}
+h1{font-size:clamp(38px,8vw,64px);letter-spacing:-2.4px;line-height:1.05;margin:10px 0 20px}
+p{color:#5a6477}
+a{color:#275ac7;font-weight:650;text-underline-offset:4px}
+.lesson-card{padding:18px 20px;margin-top:30px;background:#f2f5ff;border:1px solid #e2e9ff;border-radius:16px}
+.lesson-card h2{font-size:19px;margin:0 0 6px}
+.lesson-card p{margin:0}
