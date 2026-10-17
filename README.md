@@ -24,7 +24,7 @@ Study note:
 
     content/blogs/css-specificity.md
 
-Folder names and Markdown headings are used as fallback titles. The builder also reads HTML title tags, Markdown front matter and optional metadata files. Individual Markdown, HTML, text and PDF documents can be uploaded directly. ZIP archives inside either content area are extracted safely during the build and included in the published artifact; the ZIP itself stays unchanged in the repository.
+Folder names and Markdown headings are used as fallback titles. The builder also reads HTML title tags, Markdown front matter and optional metadata files. Individual Markdown, HTML, text and PDF documents can be uploaded directly. ZIP archives inside either content area are extracted safely during the build and included in the published artifact; the ZIP itself stays unchanged in the repository. Every indexed class also gets its own downloadable ZIP, automatically regenerated on each build.
 
 ## Optional metadata
 
@@ -62,6 +62,8 @@ See docs/publishing-and-recovery.md for a fuller publishing and troubleshooting 
 - Responsive Apple-inspired layout, light/dark theme, accessible navigation and reduced-motion support.
 - Search across titles, descriptions, categories, tags and file names.
 - Filter and sort resources, save favourites and remember recently opened materials on the current device.
+- VS Code-inspired class editor with an Explorer, tabs, syntax highlighting when its optional editor library loads, local draft autosave, reset/download controls and sandboxed live HTML preview. Browser edits are not pushed to GitHub.
+- Each class card and class workspace offers a prebuilt ZIP download; ZIPs include the discovered files and preserve their relative folder structure.
 - Class workspace with downloadable files and in-page previews for HTML, PDF, images, Markdown, text and code.
 - Static-file hosting: no database, server, secrets, build package or third-party CDN is needed.
 
