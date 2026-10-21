@@ -200,7 +200,7 @@
       hideBanner();
       return;
     }
-    if (target.id === "analytics-settings-open") {
+    if (target.id === "analytics-settings-open" || target.hasAttribute("data-analytics-settings")) {
       event.preventDefault();
       showBanner();
       return;
