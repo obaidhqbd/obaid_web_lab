@@ -33,6 +33,7 @@ jobs:
         run: python scripts/build_catalog.py --check
       - name: Validate JavaScript syntax
         run: |
+          node --check analytics.js
           node --check app.js
           node --check class-editor.js
       - name: Validate site and indexed files
@@ -56,7 +57,7 @@ jobs:
         run: |
           rm -rf _site
           mkdir -p _site
-          cp index.html styles.css app.js class-editor.js _site/
+          cp index.html privacy.html styles.css analytics.js app.js class-editor.js _site/
           cp -R data content downloads _site/
           if [ -d generated-content ]; then cp -R generated-content _site/; fi
       - name: Upload Pages artifact

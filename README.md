@@ -67,6 +67,12 @@ See docs/publishing-and-recovery.md for a fuller publishing and troubleshooting 
 - Class workspace with downloadable files and in-page previews for HTML, PDF, images, Markdown, text and code.
 - Static-file hosting: no database, server, secrets, build package or third-party CDN is needed.
 
+## Privacy-first Google Analytics
+
+The optional GA4 integration uses measurement ID `G-430L3RWFVF` and loads Google Analytics only after a visitor selects **Allow analytics**. Visitors can decline and keep using the site, or change their choice from the footer settings link. See [Privacy & Analytics](privacy.html) and [the owner setup/reporting guide](docs/google-analytics.md).
+
+Tracked interactions include section/page views, class and note opens, search usage and result counts (never the search words), selected file types, downloads, editor actions, and coarse 50%/90% scroll milestones. Search terms, filenames, form values, editor contents, and typed code are not sent. Google Signals and advertising personalization are disabled. This is aggregate/pseudonymous usage measurement, not a reliable identity list.
+
 ## Important boundary
 
 GitHub Pages is a static host. Catalogue creation and deployment are automated, but files still need to be committed to the repository. Browser-side saved items and recent history are per-device, not shared accounts or cross-device progress tracking.
