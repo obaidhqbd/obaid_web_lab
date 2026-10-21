@@ -8,6 +8,7 @@
 <title>Obaid Web Lab — Learn, practise, grow</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%231d1d1f'/%3E%3Cpath d='M17 25 32 15 47 25v20H17z' fill='none' stroke='white' stroke-width='3' stroke-linejoin='round'/%3E%3Ccircle cx='26' cy='31' r='2.5' fill='white'/%3E%3Ccircle cx='38' cy='31' r='2.5' fill='white'/%3E%3Cpath d='M26 39q6 6 12 0' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css">
+<script src="analytics.js" defer></script>
 <script src="app.js" defer></script>
 <script src="class-editor.js" defer></script>
 </head>
@@ -94,8 +95,20 @@
 <footer class="site-footer">
   <a class="footer-brand" href="#/home"><span class="brand-mark small" aria-hidden="true"><span></span><span></span></span><strong>Obaid Web Lab</strong></a>
   <span class="footer-note">Made for curious minds. <span aria-hidden="true">✳</span></span>
-  <div class="footer-links"><a href="https://github.com/obaidhqbd/obaid_web_lab" target="_blank" rel="noopener noreferrer">Source on GitHub ↗</a><a href="#/home">Back to top ↑</a></div>
+  <div class="footer-links"><a href="https://github.com/obaidhqbd/obaid_web_lab" target="_blank" rel="noopener noreferrer">Source on GitHub ↗</a><a href="privacy.html">Privacy</a><button class="footer-privacy" id="analytics-settings-open" type="button">Privacy &amp; analytics settings</button><a href="#/home">Back to top ↑</a></div>
 </footer>
-<noscript><div class="noscript-message">This learning library needs JavaScript enabled to load the automatically generated class and note catalogue.</div></noscript>
+<section class="analytics-consent" id="analytics-consent" role="dialog" aria-labelledby="analytics-consent-title" aria-describedby="analytics-consent-copy" hidden>
+  <div class="analytics-consent-copy">
+    <p class="privacy-kicker">YOUR CHOICE</p>
+    <h2 id="analytics-consent-title">Help us improve the learning library</h2>
+    <p id="analytics-consent-copy">Optional Google Analytics measures broad site usage. We never send your search words or editor code. You can decline and still use the full website.</p>
+    <a class="privacy-note-link" href="privacy.html">Read the privacy note</a>
+  </div>
+  <div class="analytics-consent-actions">
+    <button class="button-secondary" id="analytics-reject" type="button">Decline analytics</button>
+    <button class="button-dark" id="analytics-accept" type="button">Allow analytics</button>
+  </div>
+</section>
+<noscript><div class="noscript-message">This learning library needs JavaScript enabled to load the automatically generated class and note catalogue. Analytics remains disabled.</div></noscript>
 </body>
 </html>
