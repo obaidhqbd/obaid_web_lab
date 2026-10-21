@@ -4,11 +4,11 @@ import json, sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 errors=[]
-for name in ("index.html","styles.css","app.js","class-editor.js","data/catalog.seed.json"):
+for name in ("index.html","privacy.html","styles.css","analytics.js","app.js","class-editor.js","data/catalog.seed.json"):
     if not (ROOT/name).is_file(): errors.append("Required file missing: "+name)
 try: page=(ROOT/"index.html").read_text(encoding="utf-8")
 except OSError: page=""
-for needle in ('href="styles.css"','src="app.js"','src="class-editor.js"','id="resource-grid"','id="search-input"','id="detail-main"'):
+for needle in ('href="styles.css"','src="analytics.js"','src="app.js"','src="class-editor.js"','href="privacy.html"','id="analytics-consent"','id="resource-grid"','id="search-input"','id="detail-main'):
     if needle not in page: errors.append("index.html is missing "+needle)
 try:
     catalog=json.loads((ROOT/"data/catalog.json").read_text(encoding="utf-8"))
