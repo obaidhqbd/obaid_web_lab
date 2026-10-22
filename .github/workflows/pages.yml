@@ -31,6 +31,8 @@ jobs:
         uses: actions/configure-pages@v5
       - name: Rebuild class and blog catalogue
         run: python scripts/build_catalog.py --check
+      - name: Generate crawlable SEO pages and XML sitemap
+        run: python scripts/build_seo.py
       - name: Validate JavaScript syntax
         run: |
           node --check analytics.js
@@ -58,7 +60,11 @@ jobs:
           rm -rf _site
           mkdir -p _site
           cp index.html privacy.html styles.css analytics.js app.js class-editor.js _site/
+          cp robots.txt 8694552d4956458c8f3406bf83871799.txt _site/
           cp -R data content downloads _site/
+          cp sitemap.xml _site/sitemap.xml
+          mkdir -p _site/resources
+          cp -R generated-seo/pages/resources/. _site/resources/
           if [ -d generated-content ]; then cp -R generated-content _site/; fi
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
@@ -76,3 +82,13 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  notify-indexnow:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Notify Bing and other IndexNow search engines
+        run: python scripts/submit_indexnow.py

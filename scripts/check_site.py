@@ -4,11 +4,11 @@ import json, sys
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 errors=[]
-for name in ("index.html","privacy.html","styles.css","analytics.js","app.js","class-editor.js","data/catalog.seed.json"):
+for name in ("index.html","privacy.html","styles.css","analytics.js","app.js","class-editor.js","data/catalog.seed.json","scripts/build_seo.py","sitemap.xml"):
     if not (ROOT/name).is_file(): errors.append("Required file missing: "+name)
 try: page=(ROOT/"index.html").read_text(encoding="utf-8")
 except OSError: page=""
-for needle in ('href="styles.css"','src="analytics.js"','src="app.js"','src="class-editor.js"','href="privacy.html"','id="analytics-consent"','id="resource-grid"','id="search-input"','id="detail-main"'):
+for needle in ('href="styles.css"','src="analytics.js"','src="app.js"','src="class-editor.js"','href="privacy.html"','id="analytics-consent"','id="resource-grid"','id="search-input"','id="detail-main"','rel="canonical"','name="robots"','application/ld+json'):
     if needle not in page: errors.append("index.html is missing "+needle)
 try:
     catalog=json.loads((ROOT/"data/catalog.json").read_text(encoding="utf-8"))
@@ -34,6 +34,23 @@ try:
                 if download.startswith("/") or ".." in Path(download).parts: errors.append("Unsafe download path: "+str(download))
                 elif not (ROOT/download).is_file(): errors.append("Download artifact is missing: "+str(download))
             elif group=="classes": errors.append("Class ZIP download URL is missing: "+str(identity))
+    try:
+        sitemap=(ROOT/"sitemap.xml").read_text(encoding="utf-8")
+        if "<urlset" not in sitemap or "https://obaidhqbd.github.io/obaid_web_lab/" not in sitemap:
+            errors.append("Sitemap is missing its URL set or homepage")
+        for group, folder in (("classes","classes"),("blogs","notes")):
+            for resource in catalog.get(group,[]):
+                identity=resource.get("id","")
+                if not identity:
+                    continue
+                page=ROOT/"generated-seo"/"pages"/"resources"/folder/identity/"index.html"
+                if not page.is_file():
+                    errors.append("Generated SEO page is missing: "+str(identity))
+                expected="https://obaidhqbd.github.io/obaid_web_lab/resources/"+folder+"/"+identity+"/"
+                if expected not in sitemap:
+                    errors.append("Sitemap URL is missing: "+expected)
+    except OSError as exc:
+        errors.append("Could not validate sitemap or generated SEO pages: "+str(exc))
 except (OSError,ValueError,AttributeError) as exc:
     errors.append("Could not validate generated catalogue: "+str(exc))
 if errors:
