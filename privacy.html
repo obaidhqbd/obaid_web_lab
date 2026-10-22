@@ -3,61 +3,82 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5f5f7">
+  <meta name="theme-color" content="#f6f6fa">
   <meta name="description" content="How Obaid Web Lab uses privacy-first Google Analytics to understand aggregate learning-library usage.">
   <title>Privacy & Analytics — Obaid Web Lab</title>
   <link rel="stylesheet" href="styles.css">
   <script src="analytics.js" defer></script>
 </head>
-<body class="privacy-page">
-  <header class="site-header">
-    <a class="brand" href="./" aria-label="Obaid Web Lab home">
-      <span class="brand-mark" aria-hidden="true"><span></span><span></span></span>
-      <span class="brand-copy"><strong>Obaid Web Lab</strong><small>Student learning space</small></span>
-    </a>
-    <nav class="main-nav" aria-label="Privacy navigation">
-      <a class="nav-link" href="./">Back to learning library</a>
-    </nav>
-  </header>
-  <main class="privacy-content">
-    <p class="eyebrow">YOUR PRIVACY MATTERS</p>
-    <h1>Privacy & analytics<span class="heading-period">.</span></h1>
-    <p class="privacy-lead">Obaid Web Lab can use Google Analytics to understand which parts of the learning library help visitors. Analytics is optional and starts only after you choose <strong>Allow analytics</strong>.</p>
-
-    <section class="privacy-card">
-      <h2>What we measure</h2>
-      <p>After permission, we record page and section views, class or study-note opens, file type selections, ZIP/file downloads, editor actions such as running a preview or saving a local draft, search usage without the words searched, coarse scroll-depth milestones, and the number of search results. This helps us improve learning materials and the site experience.</p>
-    </section>
-
-    <section class="privacy-card">
-      <h2>What we do not send</h2>
-      <p>We do not send the text typed into the library search, code typed into the browser editor, editor contents, file names, or form values to Google Analytics. We do not add names, email addresses, or personal identifiers to analytics events. The editor saves drafts in the visitor's own browser; those drafts are not uploaded to this website or GitHub.</p>
-    </section>
-
-    <section class="privacy-card">
-      <h2>What Google Analytics may receive</h2>
-      <p>Google Analytics may process standard technical and usage information such as browser/device details, approximate location, visit and interaction metadata, and analytics identifiers when analytics is enabled. The Google tag is not loaded when analytics is declined. Advertising personalization and Google Signals are disabled in this site's tag configuration.</p>
-      <p>See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google's Privacy Policy ↗</a> for information about Google's processing.</p>
-    </section>
-
-    <section class="privacy-card">
-      <h2>Your choice</h2>
-      <p>Your choice is stored in local storage on this device. Select decline to stop future analytics events and remove accessible Google Analytics cookies for this site. This cannot recall information already sent to Google. You can revisit your preference using the settings control below; clearing browser site data also resets the choice.</p>
-      <div class="privacy-actions">
-        <button class="button-secondary" data-analytics-settings type="button">Privacy & analytics settings</button>
-        <a class="button-dark" href="./">Return to Obaid Web Lab</a>
+<body class="app-site privacy-page">
+  <a class="skip-link" href="#privacy-content">Skip to privacy information</a>
+  <div class="app-frame">
+    <aside class="app-sidebar" aria-label="Workspace navigation">
+      <a class="brand" href="./#/home" aria-label="Obaid Web Lab home">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span></span>
+        <span class="brand-copy"><strong>Obaid Web Lab</strong><small>Your learning space</small></span>
+      </a>
+      <div class="sidebar-section-label">WORKSPACE</div>
+      <nav class="sidebar-nav" aria-label="Main navigation">
+        <a class="nav-link" href="./#/home"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="2"></rect></svg><span>Overview</span><span class="nav-arrow" aria-hidden="true">›</span></a>
+        <a class="nav-link" href="./#/classes"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"></path><path d="M4 5.5v16M8 7h8M8 11h8"></path></svg><span>Classes</span></a>
+        <a class="nav-link" href="./#/blogs"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h8l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 20V5a1.5 1.5 0 0 1 2-1.5Z"></path><path d="M14 3.5V8h4M8 12h7M8 16h7"></path></svg><span>Study notes</span></a>
+      </nav>
+      <div class="sidebar-lower">
+        <div class="sidebar-note"><span class="sidebar-note-icon" aria-hidden="true">✦</span><strong>Your privacy matters.</strong><p>Choose how optional analytics works on this device.</p></div>
+        <div class="sidebar-profile"><span class="sidebar-avatar" aria-hidden="true">OW</span><span><strong>Obaid Web Lab</strong><small>Privacy & analytics</small></span><span class="profile-more" aria-hidden="true">···</span></div>
       </div>
-    </section>
+    </aside>
+    <div class="app-main-column">
+      <header class="app-topbar">
+        <div class="topbar-copy"><p class="topbar-eyebrow">OBAID WEB LAB</p><div class="topbar-status"><span class="sync-status"><span class="status-dot"></span><span>Privacy & analytics</span></span></div></div>
+        <a class="button-secondary" href="./">Return to your library <span aria-hidden="true">↗</span></a>
+      </header>
+      <div class="app-content">
+        <main class="privacy-content" id="privacy-content">
+          <p class="eyebrow">YOUR PRIVACY MATTERS</p>
+          <h1>Privacy & analytics<span class="heading-period">.</span></h1>
+          <p class="privacy-lead">Obaid Web Lab can use Google Analytics to understand which parts of the learning library help visitors. Analytics is optional and starts only after you choose <strong>Allow analytics</strong>.</p>
 
-    <p class="privacy-updated">This notice describes the analytics behavior implemented by Obaid Web Lab. It is not legal advice.</p>
-  </main>
+          <section class="privacy-card">
+            <h2>What we measure</h2>
+            <p>After permission, we record page and section views, class or study-note opens, file type selections, ZIP/file downloads, editor actions such as running a preview or saving a local draft, search usage without the words searched, coarse scroll-depth milestones, and the number of search results. This helps us improve learning materials and the site experience.</p>
+          </section>
 
-  <footer class="site-footer">
-    <a class="footer-brand" href="./"><span class="brand-mark small" aria-hidden="true"><span></span><span></span></span><strong>Obaid Web Lab</strong></a>
-    <span class="footer-note">Learn with confidence.</span>
-    <div class="footer-links"><a href="./">Learning library</a><button class="footer-privacy" data-analytics-settings type="button">Privacy & analytics settings</button></div>
-  </footer>
+          <section class="privacy-card">
+            <h2>What we do not send</h2>
+            <p>We do not send the text typed into the library search, code typed into the browser editor, editor contents, file names, or form values to Google Analytics. We do not add names, email addresses, or personal identifiers to analytics events. The editor saves drafts in the visitor's own browser; those drafts are not uploaded to this website or GitHub.</p>
+          </section>
 
+          <section class="privacy-card">
+            <h2>What Google Analytics may receive</h2>
+            <p>Google Analytics may process standard technical and usage information such as browser/device details, approximate location, visit and interaction metadata, and analytics identifiers when analytics is enabled. The Google tag is not loaded when analytics is declined. Advertising personalization and Google Signals are disabled in this site's tag configuration.</p>
+            <p>See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google's Privacy Policy ↗</a> for information about Google's processing.</p>
+          </section>
+
+          <section class="privacy-card">
+            <h2>Your choice</h2>
+            <p>Your choice is stored in local storage on this device. Select decline to stop future analytics events and remove accessible Google Analytics cookies for this site. This cannot recall information already sent to Google. You can revisit your preference using the settings control below; clearing browser site data also resets the choice.</p>
+            <div class="privacy-actions">
+              <button class="button-secondary" data-analytics-settings type="button">Privacy & analytics settings</button>
+              <a class="button-dark" href="./">Return to Obaid Web Lab</a>
+            </div>
+          </section>
+
+          <p class="privacy-updated">This notice describes the analytics behavior implemented by Obaid Web Lab. It is not legal advice.</p>
+        </main>
+        <footer class="site-footer">
+          <a class="footer-brand" href="./"><span class="brand-mark small" aria-hidden="true"><span></span><span></span></span><strong>Obaid Web Lab</strong></a>
+          <span class="footer-note">Learn with confidence.</span>
+          <div class="footer-links"><a href="./">Learning library</a><button class="footer-privacy" data-analytics-settings type="button">Privacy &amp; analytics settings</button></div>
+        </footer>
+      </div>
+    </div>
+  </div>
+  <nav class="mobile-nav" aria-label="Main navigation">
+    <a class="nav-link" href="./#/home"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="2"></rect></svg><span>Home</span></a>
+    <a class="nav-link" href="./#/classes"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"></path><path d="M4 5.5v16M8 7h8M8 11h8"></path></svg><span>Classes</span></a>
+    <a class="nav-link" href="./#/blogs"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h8l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 20V5a1.5 1.5 0 0 1 2-1.5Z"></path><path d="M14 3.5V8h4M8 12h7M8 16h7"></path></svg><span>Notes</span></a>
+  </nav>
   <section class="analytics-consent" id="analytics-consent" role="dialog" aria-labelledby="analytics-consent-title" aria-describedby="analytics-consent-copy" hidden>
     <div class="analytics-consent-copy">
       <p class="privacy-kicker">YOUR CHOICE</p>
@@ -73,3 +94,4 @@
   <noscript><p class="noscript-message">Analytics is disabled unless you choose to enable it with JavaScript.</p></noscript>
 </body>
 </html>
+

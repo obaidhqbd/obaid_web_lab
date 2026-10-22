@@ -3,100 +3,151 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="theme-color" content="#f5f5f7">
+<meta name="theme-color" content="#f6f6fa">
 <meta name="description" content="Class materials, practical examples and study notes by Obaid Web Lab.">
-<title>Obaid Web Lab — Learn, practise, grow</title>
+<title>Obaid Web Lab — Your learning space</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%231d1d1f'/%3E%3Cpath d='M17 25 32 15 47 25v20H17z' fill='none' stroke='white' stroke-width='3' stroke-linejoin='round'/%3E%3Ccircle cx='26' cy='31' r='2.5' fill='white'/%3E%3Ccircle cx='38' cy='31' r='2.5' fill='white'/%3E%3Cpath d='M26 39q6 6 12 0' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="stylesheet" href="styles.css">
 <script src="analytics.js" defer></script>
 <script src="app.js" defer></script>
 <script src="class-editor.js" defer></script>
 </head>
-<body>
+<body class="app-site">
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site-header">
-  <a class="brand" href="#/home" aria-label="Obaid Web Lab home">
-    <span class="brand-mark" aria-hidden="true"><span></span><span></span></span>
-    <span class="brand-copy"><strong>Obaid Web Lab</strong><small>Student learning space</small></span>
-  </a>
-  <nav class="main-nav" aria-label="Main navigation">
-    <button class="nav-link is-active" type="button" data-nav="home">Overview</button>
-    <button class="nav-link" type="button" data-nav="classes">Classes</button>
-    <button class="nav-link" type="button" data-nav="blogs">Study notes</button>
-  </nav>
-  <div class="header-actions">
-    <span class="sync-status" id="sync-status"><span class="status-dot"></span><span id="sync-label">Preparing library</span></span>
-    <button class="icon-button" id="theme-toggle" type="button" aria-label="Switch colour theme" title="Switch colour theme"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path></svg></button>
-  </div>
-</header>
-<main id="main">
-  <section class="hero" id="hero">
-    <div class="hero-copy">
-      <p class="eyebrow"><span class="eyebrow-dot"></span> YOUR LEARNING, IN ONE PLACE</p>
-      <h1>Make room for<br><span>what you’ll learn next.</span></h1>
-      <p class="hero-description">Class materials, practical examples and clear study notes — thoughtfully organised so you can focus on learning, not looking.</p>
-      <form class="search-bar" id="search-form" role="search">
+<div class="app-frame">
+  <aside class="app-sidebar" aria-label="Workspace navigation">
+    <a class="brand" href="#/home" aria-label="Obaid Web Lab home">
+      <span class="brand-mark" aria-hidden="true"><span></span><span></span></span>
+      <span class="brand-copy"><strong>Obaid Web Lab</strong><small>Your learning space</small></span>
+    </a>
+    <div class="sidebar-section-label">WORKSPACE</div>
+    <nav class="sidebar-nav" aria-label="Main navigation">
+      <button class="nav-link is-active" type="button" data-nav="home" aria-current="page">
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="2"></rect></svg>
+        <span>Overview</span><span class="nav-arrow" aria-hidden="true">›</span>
+      </button>
+      <button class="nav-link" type="button" data-nav="classes">
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"></path><path d="M4 5.5v16M8 7h8M8 11h8"></path></svg>
+        <span>Classes</span><span class="nav-count" id="sidebar-classes-count">0</span>
+      </button>
+      <button class="nav-link" type="button" data-nav="blogs">
+        <svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h8l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 20V5a1.5 1.5 0 0 1 2-1.5Z"></path><path d="M14 3.5V8h4M8 12h7M8 16h7"></path></svg>
+        <span>Study notes</span><span class="nav-count" id="sidebar-blogs-count">0</span>
+      </button>
+    </nav>
+    <div class="sidebar-lower">
+      <div class="sidebar-note">
+        <span class="sidebar-note-icon" aria-hidden="true">✦</span>
+        <strong>Make learning feel simple.</strong>
+        <p>Classes, examples and notes, together in one calm space.</p>
+      </div>
+      <div class="sidebar-profile">
+        <span class="sidebar-avatar" aria-hidden="true">OW</span>
+        <span><strong>Obaid Web Lab</strong><small>Learning workspace</small></span>
+        <span class="profile-more" aria-hidden="true">···</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="app-main-column">
+    <header class="app-topbar">
+      <div class="topbar-copy">
+        <p class="topbar-eyebrow">YOUR LEARNING LIBRARY</p>
+        <div class="topbar-status">
+          <span class="sync-status" id="sync-status"><span class="status-dot"></span><span id="sync-label">Preparing library</span></span>
+        </div>
+      </div>
+      <form class="search-bar app-search" id="search-form" role="search">
         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.8"></circle><path d="m16 16 5 5"></path></svg>
         <label class="visually-hidden" for="search-input">Search classes and study notes</label>
-        <input id="search-input" type="search" placeholder="Search classes, topics, notes…" autocomplete="off">
-        <kbd>Enter</kbd><button type="submit">Search</button>
+        <input id="search-input" type="search" placeholder="Search your library…" autocomplete="off">
+        <kbd>Ctrl/⌘ K</kbd><button type="submit" aria-label="Search"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
       </form>
-      <div class="hero-footnote"><span class="mini-check" aria-hidden="true">✓</span> New materials appear automatically when published.</div>
-    </div>
-    <aside class="hero-side" aria-label="Learning library overview">
-      <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
-      <div class="hero-art">
-        <div class="art-window">
-          <div class="window-top"><span></span><span></span><span></span><i>learning.space</i></div>
-          <div class="art-lines"><b></b><b></b><b></b></div>
-          <div class="art-note"><span class="art-note-icon">✳</span><span><strong>One step at a time.</strong><small>Learn it. Try it. Make it yours.</small></span></div>
-        </div>
-        <div class="floating-chip chip-top"><span class="chip-icon purple">↗</span><span><b id="hero-class-count">0</b><small>Class collections</small></span></div>
-        <div class="floating-chip chip-bottom"><span class="chip-icon green">✓</span><span><b id="hero-blog-count">0</b><small>Notes & guides</small></span></div>
+      <div class="header-actions">
+        <button class="icon-button" id="theme-toggle" type="button" aria-label="Switch colour theme" title="Switch colour theme"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"></path></svg></button>
       </div>
-      <div class="hero-side-caption"><span class="sparkle">✦</span> A little progress, every day.</div>
-    </aside>
-  </section>
-  <section class="library-section" id="library">
-    <div class="section-heading">
-      <div><p class="eyebrow" id="section-eyebrow">THE LEARNING LIBRARY</p><h2 id="section-title">Explore your learning space<span class="heading-period">.</span></h2><p class="section-description" id="section-description">Everything is sorted, searchable and ready when you are.</p></div>
-      <div class="library-tools">
-        <label class="select-wrap"><span class="visually-hidden">Filter by topic</span><select id="category-filter" aria-label="Filter by topic"><option value="all">All topics</option></select><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"></path></svg></label>
-        <label class="select-wrap"><span class="visually-hidden">Sort resources</span><select id="sort-filter" aria-label="Sort resources"><option value="recent">Recently added</option><option value="title">Title A–Z</option></select><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"></path></svg></label>
-      </div>
+    </header>
+
+    <div class="app-content">
+      <main id="main">
+        <section class="hero" id="hero">
+          <div class="hero-copy">
+            <p class="eyebrow"><span class="eyebrow-dot"></span> A LITTLE PROGRESS, EVERY DAY</p>
+            <h1>Learning,<br><span>all in one place.</span></h1>
+            <p class="hero-description">Classes, practical projects and clear study notes—thoughtfully organised so you can focus on learning, not looking.</p>
+            <div class="hero-actions">
+              <button type="button" class="button-primary" data-nav="classes">Explore classes <span aria-hidden="true">↗</span></button>
+              <span class="hero-footnote"><span class="mini-check" aria-hidden="true">✓</span> New materials appear as they are published.</span>
+            </div>
+          </div>
+          <aside class="hero-side" aria-label="Learning library overview">
+            <div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+            <div class="hero-art">
+              <div class="art-window">
+                <div class="window-top"><span></span><span></span><span></span><i>your study desk</i></div>
+                <div class="art-dashboard">
+                  <span class="art-kicker">YOUR LIBRARY</span>
+                  <strong>Ready when you are.</strong>
+                  <div class="art-lines"><b></b><b></b><b></b></div>
+                  <div class="art-note"><span class="art-note-icon">✳</span><span><strong>One step at a time.</strong><small>Learn it. Try it. Make it yours.</small></span></div>
+                </div>
+              </div>
+              <div class="floating-chip chip-top"><span class="chip-icon purple">↗</span><span><b id="hero-class-count">0</b><small>Class collections</small></span></div>
+              <div class="floating-chip chip-bottom"><span class="chip-icon green">✓</span><span><b id="hero-blog-count">0</b><small>Study notes</small></span></div>
+            </div>
+            <div class="hero-side-caption"><span class="sparkle">✦</span> Your next idea starts here.</div>
+          </aside>
+        </section>
+
+        <section class="library-section" id="library">
+          <div class="section-heading">
+            <div><p class="eyebrow" id="section-eyebrow">THE LEARNING LIBRARY</p><h2 id="section-title">Explore your learning space<span class="heading-period">.</span></h2><p class="section-description" id="section-description">Everything is sorted, searchable and ready when you are.</p></div>
+            <div class="library-tools">
+              <label class="select-wrap"><span class="visually-hidden">Filter by topic</span><select id="category-filter" aria-label="Filter by topic"><option value="all">All topics</option></select><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"></path></svg></label>
+              <label class="select-wrap"><span class="visually-hidden">Sort resources</span><select id="sort-filter" aria-label="Sort resources"><option value="recent">Recently added</option><option value="title">Title A–Z</option></select><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m7 10 5 5 5-5"></path></svg></label>
+            </div>
+          </div>
+          <div class="view-tabs" role="group" aria-label="Resource type">
+            <button type="button" data-filter="all" class="view-tab is-active">All resources <span id="all-count">0</span></button>
+            <button type="button" data-filter="class" class="view-tab">Classes <span id="classes-count">0</span></button>
+            <button type="button" data-filter="blog" class="view-tab">Study notes <span id="blogs-count">0</span></button>
+          </div>
+          <div class="notice-bar" id="notice-bar" hidden role="status"><span class="notice-symbol">i</span><p id="notice-message"></p><button id="retry-load" type="button">Try again</button></div>
+          <div class="resource-grid" id="resource-grid" aria-live="polite" aria-busy="true">
+            <article class="skeleton-card"><div class="skeleton skeleton-icon"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-foot"></div></article>
+            <article class="skeleton-card"><div class="skeleton skeleton-icon"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-foot"></div></article>
+            <article class="skeleton-card"><div class="skeleton skeleton-icon"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-foot"></div></article>
+          </div>
+          <div class="results-footer" id="results-footer" hidden><span id="results-label"></span><button type="button" id="clear-filters" class="text-button">Clear filters</button></div>
+        </section>
+
+        <section class="quick-start" id="quick-start">
+          <div class="quick-copy"><span class="quick-spark">✦</span><p class="eyebrow">A GOOD PLACE TO BEGIN</p><h2>Small steps add up<br>to real progress.</h2><p>Open a class to explore its files and subtopics, or choose a note for a quick review. Your recent items stay close by on this device.</p><button type="button" class="button-primary" data-nav="classes">Browse classes <span aria-hidden="true">↗</span></button></div>
+          <div class="quick-stat-list">
+            <div class="quick-stat"><span class="stat-number" id="stat-classes">0</span><span class="stat-copy"><strong>Class collections</strong><small>Lessons, projects and resources</small></span><span class="stat-arrow">↗</span></div>
+            <div class="quick-stat"><span class="stat-number" id="stat-blogs">0</span><span class="stat-copy"><strong>Study notes</strong><small>Guides to revisit anytime</small></span><span class="stat-arrow">↗</span></div>
+            <div class="quick-stat"><span class="stat-number" id="stat-files">0</span><span class="stat-copy"><strong>Learning files</strong><small>Examples, documents and more</small></span><span class="stat-arrow">↗</span></div>
+          </div>
+        </section>
+        <section class="recent-section" id="recent-section" hidden>
+          <div class="recent-heading"><div><p class="eyebrow">PICK UP WHERE YOU LEFT OFF</p><h2>Recently opened<span class="heading-period">.</span></h2></div><button type="button" id="clear-recent" class="text-button">Clear history</button></div>
+          <div class="recent-list" id="recent-list"></div>
+        </section>
+      </main>
+      <main id="detail-main" class="detail-main" hidden></main>
+      <footer class="site-footer">
+        <a class="footer-brand" href="#/home"><span class="brand-mark small" aria-hidden="true"><span></span><span></span></span><strong>Obaid Web Lab</strong></a>
+        <span class="footer-note">Made for curious minds. <span aria-hidden="true">✳</span></span>
+        <div class="footer-links"><a href="https://github.com/obaidhqbd/obaid_web_lab" target="_blank" rel="noopener noreferrer">Source on GitHub ↗</a><a href="privacy.html">Privacy</a><button class="footer-privacy" id="analytics-settings-open" type="button">Privacy &amp; analytics settings</button><a href="#/home">Back to top ↑</a></div>
+      </footer>
     </div>
-    <div class="view-tabs" role="group" aria-label="Resource type">
-      <button type="button" data-filter="all" class="view-tab is-active">All resources <span id="all-count">0</span></button>
-      <button type="button" data-filter="class" class="view-tab">Classes <span id="classes-count">0</span></button>
-      <button type="button" data-filter="blog" class="view-tab">Study notes <span id="blogs-count">0</span></button>
-    </div>
-    <div class="notice-bar" id="notice-bar" hidden role="status"><span class="notice-symbol">i</span><p id="notice-message"></p><button id="retry-load" type="button">Try again</button></div>
-    <div class="resource-grid" id="resource-grid" aria-live="polite" aria-busy="true">
-      <article class="skeleton-card"><div class="skeleton skeleton-icon"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-foot"></div></article>
-      <article class="skeleton-card"><div class="skeleton skeleton-icon"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-foot"></div></article>
-      <article class="skeleton-card"><div class="skeleton skeleton-icon"></div><div class="skeleton skeleton-line"></div><div class="skeleton skeleton-line short"></div><div class="skeleton skeleton-foot"></div></article>
-    </div>
-    <div class="results-footer" id="results-footer" hidden><span id="results-label"></span><button type="button" id="clear-filters" class="text-button">Clear filters</button></div>
-  </section>
-  <section class="quick-start" id="quick-start">
-    <div class="quick-copy"><span class="quick-spark">✦</span><p class="eyebrow">A GOOD PLACE TO BEGIN</p><h2>Small steps add up<br>to real progress.</h2><p>Choose a class to explore its files and subtopics, or open a note for a quick review. Your recent items stay close by on this device.</p><button type="button" class="button-primary" data-nav="classes">Browse classes <span aria-hidden="true">↗</span></button></div>
-    <div class="quick-stat-list">
-      <div class="quick-stat"><span class="stat-number" id="stat-classes">0</span><span class="stat-copy"><strong>Class collections</strong><small>Lessons, projects and resources</small></span><span class="stat-arrow">↗</span></div>
-      <div class="quick-stat"><span class="stat-number" id="stat-blogs">0</span><span class="stat-copy"><strong>Study notes</strong><small>Guides to revisit anytime</small></span><span class="stat-arrow">↗</span></div>
-      <div class="quick-stat"><span class="stat-number" id="stat-files">0</span><span class="stat-copy"><strong>Learning files</strong><small>Examples, documents and more</small></span><span class="stat-arrow">↗</span></div>
-    </div>
-  </section>
-  <section class="recent-section" id="recent-section" hidden>
-    <div class="recent-heading"><div><p class="eyebrow">PICK UP WHERE YOU LEFT OFF</p><h2>Recently opened<span class="heading-period">.</span></h2></div><button type="button" id="clear-recent" class="text-button">Clear history</button></div>
-    <div class="recent-list" id="recent-list"></div>
-  </section>
-</main>
-<main id="detail-main" class="detail-main" hidden></main>
-<footer class="site-footer">
-  <a class="footer-brand" href="#/home"><span class="brand-mark small" aria-hidden="true"><span></span><span></span></span><strong>Obaid Web Lab</strong></a>
-  <span class="footer-note">Made for curious minds. <span aria-hidden="true">✳</span></span>
-  <div class="footer-links"><a href="https://github.com/obaidhqbd/obaid_web_lab" target="_blank" rel="noopener noreferrer">Source on GitHub ↗</a><a href="privacy.html">Privacy</a><button class="footer-privacy" id="analytics-settings-open" type="button">Privacy &amp; analytics settings</button><a href="#/home">Back to top ↑</a></div>
-</footer>
+  </div>
+</div>
+<nav class="mobile-nav" aria-label="Main navigation">
+  <button class="nav-link is-active" type="button" data-nav="home" aria-current="page"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="2"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="2"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="2"></rect></svg><span>Home</span></button>
+  <button class="nav-link" type="button" data-nav="classes"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v16H6.5A2.5 2.5 0 0 0 4 21.5z"></path><path d="M4 5.5v16M8 7h8M8 11h8"></path></svg><span>Classes</span></button>
+  <button class="nav-link" type="button" data-nav="blogs"><svg class="nav-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3.5h8l4 4V20a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 4 20V5a1.5 1.5 0 0 1 2-1.5Z"></path><path d="M14 3.5V8h4M8 12h7M8 16h7"></path></svg><span>Notes</span></button>
+</nav>
 <section class="analytics-consent" id="analytics-consent" role="dialog" aria-labelledby="analytics-consent-title" aria-describedby="analytics-consent-copy" hidden>
   <div class="analytics-consent-copy">
     <p class="privacy-kicker">YOUR CHOICE</p>
@@ -112,3 +163,4 @@
 <noscript><div class="noscript-message">This learning library needs JavaScript enabled to load the automatically generated class and note catalogue. Analytics remains disabled.</div></noscript>
 </body>
 </html>
+
