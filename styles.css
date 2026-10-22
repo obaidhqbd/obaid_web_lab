@@ -344,3 +344,20 @@ main#main,.detail-main{width:100%;margin:0}
   .privacy-lead{font-size:15px}
 }
 
+
+
+/* Professional profile section */
+.profile-section{margin:0 0 35px;padding:30px 32px;border:1px solid var(--line);border-radius:22px;background:var(--surface)}
+.profile-intro{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:24px;margin-bottom:22px}
+.profile-intro .eyebrow{margin-bottom:8px}
+.profile-intro h2{margin:0;font-size:clamp(26px,3vw,36px);line-height:1.12;letter-spacing:-1.35px}
+.profile-intro h2 span{color:var(--muted);font-weight:600}
+.profile-intro p:not(.eyebrow){max-width:690px;margin:12px 0 0;color:var(--muted);font-size:12px;line-height:1.75}
+.profile-link{flex-shrink:0}
+.profile-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.profile-card{min-width:0;padding:17px 18px;border:1px solid var(--line);border-radius:15px;background:var(--surface-soft)}
+.profile-card-label{display:block;margin-bottom:16px;color:var(--accent);font-size:9px;font-weight:800;letter-spacing:1.1px}
+.profile-card h3{margin:0 0 7px;font-size:13px;letter-spacing:-.2px}
+.profile-card p{margin:0;color:var(--muted);font-size:10px;line-height:1.7}
+@media(max-width:860px){.profile-section{padding:25px 23px}.profile-intro{grid-template-columns:minmax(0,1fr);align-items:start;gap:16px}}
+@media(max-width:680px){.profile-section{margin-bottom:27px;padding:21px 19px;border-radius:18px}.profile-intro{gap:14px;margin-bottom:16px}.profile-intro h2{font-size:27px}.profile-intro p:not(.eyebrow){font-size:11px}.profile-link{justify-self:start}.profile-grid{grid-template-columns:1fr;gap:8px}.profile-card{padding:15px 16px}.profile-card-label{margin-bottom:10px}}
