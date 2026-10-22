@@ -157,7 +157,7 @@ def make_page(item: dict, kind: str, rid: str, today: str) -> tuple[str, str]:
     keywords = list(dict.fromkeys([category] + [text_value(tag, 60) for tag in tags if text_value(tag, 60)]))
     date = str(item.get("date") or "")
     date = date if re.fullmatch(r"\d{4}-\d{2}-\d{2}", date) else today
-    resource_type = "class" if kind == "class" else "notes"
+    resource_type = "classes" if kind == "class" else "notes"
     page_path = f"resources/{resource_type}/{rid}/"
     canonical = absolute(page_path)
     heading = title + (" | Class | " if kind == "class" else " | Study Note | ") + SITE_NAME
